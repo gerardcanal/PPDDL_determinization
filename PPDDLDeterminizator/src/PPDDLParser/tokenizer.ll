@@ -124,7 +124,7 @@ maximize                        return make_string(yytext, MAXIMIZE);
 static int make_string(const char* s, int token) {
   std::string* result = new std::string();
   for (const char* p = s; *p != '\0'; p++) {
-    *result += tolower(*p);
+    *result += *p;//tolower(*p); // FIXME Note: added to avoid lowercasing everything... 
   }
   yylval.str = result;
   return token;
