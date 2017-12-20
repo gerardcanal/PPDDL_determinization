@@ -68,6 +68,7 @@ struct StateFormula : public RCObject {
                                             const ValueMap& values,
                                             bool state) const = 0;
 
+  virtual const StateFormula& clone() const=0;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const = 0;
@@ -127,6 +128,8 @@ struct Atom : public StateFormula {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -187,6 +190,9 @@ struct Equality : public StateFormula {
                                             const ValueMap& values,
                                             bool state) const;
 
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
+
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -218,6 +224,9 @@ struct Comparison : public StateFormula {
 
   /* Returns the second expression of this comparison. */
   const Expression& expr2() const { return *expr2_; }
+
+  /* Clones this state formula. */
+  virtual const StateFormula& clone() const =0;
 
  protected:
   /* Constructs a comparison. */
@@ -252,6 +261,8 @@ struct LessThan : public Comparison {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -285,6 +296,8 @@ struct LessThanOrEqualTo : public Comparison {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -318,6 +331,8 @@ struct EqualTo : public Comparison {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -352,6 +367,9 @@ struct GreaterThanOrEqualTo : public Comparison {
                                             const ValueMap& values,
                                             bool state) const;
 
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
+
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -385,7 +403,10 @@ struct GreaterThan : public Comparison {
                                             const ValueMap& values,
                                             bool state) const;
 
- protected:
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
+
+protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
 
@@ -423,7 +444,10 @@ struct Negation : public StateFormula {
                                             const ValueMap& values,
                                             bool state) const;
 
- protected:
+    /* Clones this state formula. */
+  const StateFormula& clone() const override;
+
+protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
 
@@ -443,6 +467,9 @@ struct Negation : public StateFormula {
  * A conjunction of state formulas.
  */
 struct Conjunction : public StateFormula {
+  /* Returns the conjunction of the given conjuncts */
+  static const StateFormula& make(const FormulaList& conjuncts);
+
   /* Deletes this conjunction. */
   virtual ~Conjunction();
 
@@ -459,6 +486,8 @@ struct Conjunction : public StateFormula {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+    /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -486,6 +515,9 @@ struct Conjunction : public StateFormula {
  * A disjunction of state formulas.
  */
 struct Disjunction : public StateFormula {
+  /* Returns the conjunction of the given conjuncts */
+  static const StateFormula& make(const FormulaList& disjuncts);
+
   /* Deletes this disjunction. */
   virtual ~Disjunction();
 
@@ -502,6 +534,8 @@ struct Disjunction : public StateFormula {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -538,6 +572,9 @@ struct Quantification : public StateFormula {
   /* Returns the quantified formula. */
   const StateFormula& body() const { return *body_; }
 
+  /* Clones this state formula. */
+  virtual const StateFormula& clone() const=0;
+
  protected:
   /* Constructs a quantification. */
   Quantification(const VariableList& parameters, const StateFormula& body);
@@ -571,6 +608,8 @@ struct Exists : public Quantification {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+  /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */
@@ -604,6 +643,8 @@ struct Forall : public Quantification {
                                             const AtomSet& atoms,
                                             const ValueMap& values,
                                             bool state) const;
+    /* Clones this state formula. */
+  const StateFormula& clone() const override;
 
  protected:
   /* Prints this object on the given stream. */

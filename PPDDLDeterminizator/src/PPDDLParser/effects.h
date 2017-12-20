@@ -54,6 +54,8 @@ struct Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const = 0;
 
+  virtual const Update& clone() const = 0;
+
  protected:
   /* Constructs an update. */
   Update(const Fluent& fluent, const Expression& expr);
@@ -101,7 +103,7 @@ struct Assign : public Update {
   /* Returns an instantiaion of this update. */
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
-
+  virtual  const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -126,6 +128,7 @@ struct ScaleUp : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
+    virtual  const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -150,6 +153,7 @@ struct ScaleDown : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
+    virtual  const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -174,6 +178,7 @@ struct Increase : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
+    virtual  const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -198,6 +203,7 @@ struct Decrease : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
+    virtual  const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -230,6 +236,8 @@ struct Effect : public RCObject {
                                       const TermTable& terms,
                                       const AtomSet& atoms,
                                       const ValueMap& values) const = 0;
+
+  virtual const Effect& clone() const = 0;
 
  protected:
   /* Prints this object on the given stream. */
@@ -268,6 +276,7 @@ struct SimpleEffect : public Effect {
   /* Returns the atom associated with this simple effect. */
   const Atom& atom() const { return *atom_; }
 
+    virtual const Effect& clone() const =0;
  protected:
   /* Constructs a simple effect. */
   explicit SimpleEffect(const Atom& atom);
@@ -302,6 +311,7 @@ struct AddEffect : public SimpleEffect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
+    virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -332,6 +342,7 @@ struct DeleteEffect : public SimpleEffect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
+    virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -367,7 +378,7 @@ struct UpdateEffect : public Effect {
                                       const TermTable& terms,
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
-
+    virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -394,6 +405,9 @@ struct ConjunctiveEffect : public Effect {
   /* Returns the conjuncts of this conjunctive effect. */
   const EffectList& conjuncts() const { return conjuncts_; }
 
+  /* Sets the conjuncts of this conjunctive effect. */
+  void set_conjuncts(const EffectList& new_cj) { conjuncts_= new_cj; }
+
   /* Fills the provided lists with a sampled state change for this
      effect in the given state. */
   virtual void state_change(AtomList& adds, AtomList& deletes,
@@ -408,6 +422,7 @@ struct ConjunctiveEffect : public Effect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
+  virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -459,7 +474,7 @@ struct ConditionalEffect : public Effect {
                                       const TermTable& terms,
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
-
+  virtual  const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -514,6 +529,7 @@ struct ProbabilisticEffect : public Effect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
+  virtual  const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -568,6 +584,7 @@ struct QuantifiedEffect : public Effect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
+    virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;

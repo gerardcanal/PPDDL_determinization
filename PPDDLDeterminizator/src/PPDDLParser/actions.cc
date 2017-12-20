@@ -45,6 +45,12 @@ void ActionSchema::set_precondition(const StateFormula& precondition) {
   }
 }
 
+/* Sets the parameter of this action schema. */
+void ActionSchema::set_parameters(const VariableList& parameters) {
+  if (parameters != parameters_) {
+    parameters_ = parameters;
+  }
+}
 
 /* Sets the effect of this action schema. */
 void ActionSchema::set_effect(const Effect& effect) {

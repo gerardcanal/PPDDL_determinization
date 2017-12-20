@@ -41,6 +41,10 @@ struct Constant : public StateFormula {
     return *this;
   }
 
+  virtual const StateFormula& clone() const {
+        return *new Constant(value_);
+  }
+
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const {
@@ -326,6 +330,10 @@ void Atom::print(std::ostream& os) const {
   os << ')';
 }
 
+const StateFormula &Atom::clone() const {
+   return Atom::make(this->predicate(), this->terms()); // It makes a copy!
+}
+
 
 /* ====================================================================== */
 /* Equality */
@@ -382,6 +390,10 @@ const StateFormula& Equality::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void Equality::print(std::ostream& os) const {
   os << "(= " << term1() << ' ' << term2() << ")";
+}
+
+const StateFormula &Equality::clone() const {
+  return Equality::make(this->term1(), this->term2()); // It makes a copy
 }
 
 
@@ -453,6 +465,10 @@ void LessThan::print(std::ostream& os) const {
   os << "(< " << expr1() << ' ' << expr2() << ")";
 }
 
+const StateFormula &LessThan::clone() const {
+  return LessThan::make(this->expr1(), this->expr2());
+}
+
 
 /* ====================================================================== */
 /* LessThanOrEqualTo */
@@ -506,6 +522,10 @@ void LessThanOrEqualTo::print(std::ostream& os) const {
   os << "(<= " << expr1() << ' ' << expr2() << ")";
 }
 
+const StateFormula &LessThanOrEqualTo::clone() const {
+  return LessThanOrEqualTo::make(this->expr1(), this->expr2());
+}
+
 
 /* ====================================================================== */
 /* EqualTo */
@@ -555,6 +575,10 @@ const StateFormula& EqualTo::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void EqualTo::print(std::ostream& os) const {
   os << "(= " << expr1() << ' ' << expr2() << ")";
+}
+
+const StateFormula &EqualTo::clone() const {
+  return EqualTo::make(this->expr1(), this->expr2());
 }
 
 
@@ -610,6 +634,10 @@ void GreaterThanOrEqualTo::print(std::ostream& os) const {
   os << "(>= " << expr1() << ' ' << expr2() << ")";
 }
 
+const StateFormula &GreaterThanOrEqualTo::clone() const {
+  return GreaterThanOrEqualTo::make(this->expr1(), this->expr2());
+}
+
 
 /* ====================================================================== */
 /* GreaterThan */
@@ -659,6 +687,10 @@ const StateFormula& GreaterThan::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void GreaterThan::print(std::ostream& os) const {
   os << "(> " << expr1() << ' ' << expr2() << ")";
+}
+
+const StateFormula &GreaterThan::clone() const {
+  return GreaterThan::make(this->expr1(), this->expr2());
 }
 
 
@@ -718,9 +750,21 @@ void Negation::print(std::ostream& os) const {
   os << "(not " << negand() << ")";
 }
 
+const StateFormula &Negation::clone() const {
+  return Negation::make(negand_->clone());
+}
+
 
 /* ====================================================================== */
 /* Conjunction. */
+
+const StateFormula& Conjunction::make(const FormulaList& conjuncts) {
+  Conjunction *cj = new Conjunction();
+  for (FormulaList::const_iterator fi = conjuncts.begin(); fi != conjuncts.end(); fi++) {
+    cj->add_conjunct(**fi);
+  }
+  return *cj;
+}
 
 /* Deletes this conjunction. */
 Conjunction::~Conjunction() {
@@ -777,9 +821,26 @@ void Conjunction::print(std::ostream& os) const {
   os << ")";
 }
 
+const StateFormula &Conjunction::clone() const {
+  Conjunction *cj = new Conjunction();
+  // Copy Conjuncts
+  for (FormulaList::const_iterator fi = this->conjuncts_.begin(); fi != this->conjuncts_.end(); fi++) {
+    cj->add_conjunct((**fi).clone());
+  }
+  return *cj;
+}
+
 
 /* ====================================================================== */
 /* Disjunction. */
+
+const StateFormula& Disjunction::make(const FormulaList& disjuncts) {
+  Disjunction *dj = new Disjunction();
+  for (FormulaList::const_iterator fi = disjuncts.begin(); fi != disjuncts.end(); fi++) {
+    dj->add_disjunct(**fi);
+  }
+  return *dj;
+}
 
 /* Deletes this disjunction. */
 Disjunction::~Disjunction() {
@@ -834,6 +895,15 @@ void Disjunction::print(std::ostream& os) const {
     os << ' ' << **fi;
   }
   os << ")";
+}
+
+const StateFormula &Disjunction::clone() const {
+  Disjunction *dj = new Disjunction();
+  // Copy Conjuncts
+  for (FormulaList::const_iterator fi = this->disjuncts_.begin(); fi != this->disjuncts_.end(); fi++) {
+    dj->add_disjunct((**fi).clone());
+  }
+  return *dj;
 }
 
 
@@ -955,6 +1025,10 @@ void Exists::print(std::ostream& os) const {
   os << ") " << body() << ")";
 }
 
+const StateFormula &Exists::clone() const {
+  return Exists::make(this->parameters(), this->body().clone());
+}
+
 
 /* ====================================================================== */
 /* Forall */
@@ -1055,4 +1129,9 @@ void Forall::print(std::ostream& os) const {
     os << ' ' << *vi;
   }
   os << ") " << body() << ")";
+}
+
+const StateFormula &Forall::clone() const {
+  return Forall::make(this->parameters(), this->body().clone());
+
 }

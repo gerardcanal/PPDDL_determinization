@@ -16,4 +16,4 @@ include_directories(${PPDDL_PARSER_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src
 add_executable(parser2 ${PPDDL_PARSER_ALL}
         MLODeterminizator.cpp
         MLODeterminizator.h
-        PPDDLDeterminizator.h)
+        PPDDLDeterminizator.h PPDDLParserInterface.cpp PPDDLParserInterface.h)

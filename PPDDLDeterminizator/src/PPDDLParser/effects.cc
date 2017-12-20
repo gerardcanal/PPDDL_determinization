@@ -38,12 +38,12 @@ Update::~Update() {
   RCObject::destructive_deref(expr_);
 }
 
-
 /* Output operator for updates. */
 std::ostream& operator<<(std::ostream& os, const Update& u) {
   u.print(os);
   return os;
 }
+
 
 
 /* ====================================================================== */
@@ -66,6 +66,10 @@ const Update& Assign::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void Assign::print(std::ostream& os) const {
   os << "(assign " << fluent() << ' ' << expression() << ")";
+}
+
+const Update &Assign::clone() const {
+    return *new Assign(fluent(), expression());
 }
 
 
@@ -93,6 +97,10 @@ const Update& ScaleUp::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void ScaleUp::print(std::ostream& os) const {
   os << "(scale-up " << fluent() << ' ' << expression() << ")";
+}
+
+const Update &ScaleUp::clone() const {
+    return *new ScaleUp(fluent(), expression());
 }
 
 
@@ -123,6 +131,10 @@ void ScaleDown::print(std::ostream& os) const {
   os << "(scale-down " << fluent() << ' ' << expression() << ")";
 }
 
+const Update &ScaleDown::clone() const {
+    return *new ScaleDown(fluent(), expression());
+}
+
 
 /* ====================================================================== */
 /* Increase */
@@ -149,6 +161,10 @@ const Update& Increase::instantiation(const SubstitutionMap& subst,
 /* Prints this object on the given stream. */
 void Increase::print(std::ostream& os) const {
   os << "(increase " << fluent() << ' ' << expression() << ")";
+}
+
+const Update &Increase::clone() const {
+    return *new Increase(fluent(), expression());
 }
 
 
@@ -179,6 +195,10 @@ void Decrease::print(std::ostream& os) const {
   os << "(decrease " << fluent() << ' ' << expression() << ")";
 }
 
+const Update &Decrease::clone() const {
+    return *new Decrease(fluent(), expression());
+}
+
 
 /* ====================================================================== */
 /* EmptyEffect */
@@ -200,6 +220,10 @@ struct EmptyEffect : public Effect {
                                       const TermTable& terms,
                                       const AtomSet& atoms,
                                       const ValueMap& values) const {
+    return *this;
+  }
+
+  virtual const Effect& clone() const {
     return *this;
   }
 
@@ -279,7 +303,6 @@ SimpleEffect::SimpleEffect(const Atom& atom)
   ref(atom_);
 }
 
-
 /* Deletes this simple effect. */
 SimpleEffect::~SimpleEffect() {
   destructive_deref(atom_);
@@ -299,6 +322,9 @@ void AddEffect::state_change(AtomList& adds, AtomList& deletes,
   adds.push_back(&atom());
 }
 
+const Effect& AddEffect::clone() const {
+  return *new AddEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+}
 
 /* Returns an instantiation of this effect. */
 const Effect& AddEffect::instantiation(const SubstitutionMap& subst,
@@ -347,6 +373,9 @@ const Effect& DeleteEffect::instantiation(const SubstitutionMap& subst,
   }
 }
 
+const Effect& DeleteEffect::clone() const {
+  return *new DeleteEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+}
 
 /* Prints this object on the given stream. */
 void DeleteEffect::print(std::ostream& os) const {
@@ -401,6 +430,9 @@ const Effect& UpdateEffect::instantiation(const SubstitutionMap& subst,
   return *new UpdateEffect(update().instantiation(subst, values));
 }
 
+const Effect& UpdateEffect::clone() const {
+  return make(this->update_->clone());
+}
 
 /* Prints this object on the given stream. */
 void UpdateEffect::print(std::ostream& os) const {
@@ -419,6 +451,14 @@ ConjunctiveEffect::~ConjunctiveEffect() {
   }
 }
 
+const Effect& ConjunctiveEffect::clone() const {
+  ConjunctiveEffect *cpy = new ConjunctiveEffect();
+  cpy->conjuncts_.resize(conjuncts_.size());
+  for (size_t i = 0; i < conjuncts_.size(); ++i) {
+    cpy->conjuncts_[i] = &this->conjuncts_[i]->clone();
+  }
+  return *cpy;
+}
 
 /* Adds a conjunct to this conjunctive effect. */
 void ConjunctiveEffect::add_conjunct(const Effect& conjunct) {
@@ -524,6 +564,9 @@ void ConditionalEffect::state_change(AtomList& adds, AtomList& deletes,
   }
 }
 
+ const Effect& ConditionalEffect::clone() const {
+   return *new ConditionalEffect(condition_->clone(), effect_->clone());
+ }
 
 /* Returns an instantiation of this effect. */
 const Effect& ConditionalEffect::instantiation(const SubstitutionMap& subst,
@@ -648,6 +691,16 @@ ProbabilisticEffect::instantiation(const SubstitutionMap& subst,
   return inst_effect;
 }
 
+const  Effect& ProbabilisticEffect::clone() const {
+  ProbabilisticEffect* cpy = new ProbabilisticEffect();
+  cpy->weights_ = this->weights_;
+  cpy->weight_sum_= this->weight_sum_;
+  cpy->effects_.resize(this->effects_.size());
+  for (size_t i = 0; i < this->effects_.size(); ++i) {
+    cpy->effects_[i] = &this->effects_[i]->clone();
+  }
+  return *cpy;
+}
 
 /* Prints this object on the given stream. */
 void ProbabilisticEffect::print(std::ostream& os) const {
@@ -704,6 +757,9 @@ void QuantifiedEffect::state_change(AtomList& adds, AtomList& deletes,
   throw std::logic_error("Quantified::state_change not implemented");
 }
 
+const Effect& QuantifiedEffect::clone() const {
+  return *new QuantifiedEffect(parameters_, effect_->clone());
+}
 
 /* Returns an instantiation of this effect. */
 const Effect& QuantifiedEffect::instantiation(const SubstitutionMap& subst,

@@ -53,6 +53,9 @@ struct ActionSchema {
     parameters_.push_back(parameter);
   }
 
+  /* Sets the parameter of this action schema. */
+  void set_parameters(const VariableList& paramters);
+
   /* Sets the precondition of this action schema. */
   void set_precondition(const StateFormula& precondition);
 

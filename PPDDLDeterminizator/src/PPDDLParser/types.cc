@@ -1,6 +1,6 @@
 /*
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ void TypeTable::components(TypeSet& components, const Type& type) {
 const Type& TypeTable::add_type(const std::string& name) {
   names_.push_back(name);
   std::pair<std::map<std::string, Type>::const_iterator, bool> ti =
-    types_.insert(std::make_pair(name, names_.size()));
+    types_.insert(std::make_pair(name, Type(names_.size()))); // FIXME Note: modified line as original value didn't have the Type(), and it was not compiling in cxx11
   const Type& type = (*ti.first).second;
   if (type.index_ > 1) {
     subtype_.push_back(std::vector<bool>(2*(type.index_ - 1), false));

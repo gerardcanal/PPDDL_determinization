@@ -8,8 +8,6 @@
 #include <cstdlib>
 
 #include "problems.h"
-#include "domains.h"
-#include "actions.h"
 
 
 /* The parse function. */
