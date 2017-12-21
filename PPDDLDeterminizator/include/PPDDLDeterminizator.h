@@ -25,13 +25,15 @@
 #ifndef ROSPLAN_PLANNING_SYSTEM_PPDDLDETERMINIZATOR_H
 #define ROSPLAN_PLANNING_SYSTEM_PPDDLDETERMINIZATOR_H
 
-#include "PPDDLParser/domains.h"
+#include "PPDDLParserInterface.h"
 
 
 
 class PPDDLDeterminizator {
 public:
-    virtual Domain determinize(const Domain& ) =0;
+    //virtual void determinize(Domain& ) =0; // FIXME non pure virt
+    //virtual void determinize(ActionSchema&) =0;// FIXME non pure virt
+    //virtual ProbabilisticEffect determinize(const ProbabilisticEffect&) =0;
 };
 
 

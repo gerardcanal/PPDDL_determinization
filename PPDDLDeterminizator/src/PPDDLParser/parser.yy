@@ -17,6 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+%name-prefix "ppddl_" // To avoid conflicts with ROSPlan pddl parser, it changes the default "yy" prefix in parser methods
 %{
 //#include <config.h>
 #include "problems.h"

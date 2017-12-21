@@ -15,23 +15,22 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// IMPORTANT NOTE: This code has been generated through a script from the
-// iri_ros_scripts. Please do NOT delete any comments to guarantee the correctness
-// of the scripts. ROS topics can be easly add by using those scripts. Please
-// refer to the IRI wiki page for more information:
-// http://wikiri.upc.es/index.php/Robotics_Lab
 
 
 #ifndef ROSPLAN_PLANNING_SYSTEM_MLODETERMINIZATOR_H
 #define ROSPLAN_PLANNING_SYSTEM_MLODETERMINIZATOR_H
 
 #include "PPDDLDeterminizator.h"
+#include <memory>
 
 // Most-Likely-Outcome Determinization
 class MLODeterminizator : public PPDDLDeterminizator {
 public:
     Domain determinize(const Domain& d);
+    ActionSchema determinize(const ActionSchema& as);
+    const Effect& determinize(const Effect&);
+    const Effect& determinize(const ConjunctiveEffect&);
+    void determinize(ProbabilisticEffect&);
 };
 
 

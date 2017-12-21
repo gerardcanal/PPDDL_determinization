@@ -30,7 +30,7 @@
 #include <cctype>
 #include <string>
 
-#define YY_DECL extern "C" int yylex()
+#define YY_DECL extern "C" int ppddl_lex()
 
 #include "parser.tab.hh"
 
@@ -124,15 +124,15 @@ maximize                        return make_string(yytext, MAXIMIZE);
 static int make_string(const char* s, int token) {
   std::string* result = new std::string();
   for (const char* p = s; *p != '\0'; p++) {
-    *result += *p;//tolower(*p); // FIXME Note: added to avoid lowercasing everything... 
+    *result += *p;//tolower(*p); // FIXME Note: added to avoid lowercasing everything...
   }
-  yylval.str = result;
+  ppddl_lval.str = result;
   return token;
 }
 
 
 /* Makes a number of the given string, and return the NUMBER token. */
 static int make_number(const char* s) {
-  yylval.num = new Rational(s);
+  ppddl_lval.num = new Rational(s);
   return NUMBER;
 }
