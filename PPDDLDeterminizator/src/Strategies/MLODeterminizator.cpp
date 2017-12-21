@@ -109,11 +109,11 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
 /* File to parse. */
     extern FILE* yyin;
 /* Name of current file. */
-    std::string current_file;
+    extern std::string current_file;
 /* Level of warnings. */
-    int warning_level;
+//    extern int warning_level;
 /* Verbosity level. */
-    int verbosity;
+    //extern int verbosity;
 
 /* Parses the given file, and returns true on success. */
     static bool read_file(const char* name) {

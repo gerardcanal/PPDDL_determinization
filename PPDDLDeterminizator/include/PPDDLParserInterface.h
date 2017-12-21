@@ -18,7 +18,6 @@
 extern int ppddl_parse(); // FIXME namespace this variables!?
 /* File to parse. */
 extern FILE* yyin;
-extern std::map<std::string, Domain*> domains;
 
 // Domain class
 namespace PPDDLInterface {

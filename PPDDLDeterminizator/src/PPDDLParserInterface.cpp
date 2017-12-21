@@ -5,6 +5,11 @@
 #include "PPDDLParserInterface.h"
 #include <cstring>
 
+/* Name of current file. */
+std::string current_file;
+/* Level of warnings. */
+int warning_level;
+
 PPDDLInterface::Domain::Domain(const std::string &path) {
     if (readDomain(path)) {
         std::cout << "Domain file " << path << " parsed correctly." << std::endl;
@@ -74,13 +79,12 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
     }
 }
 
-bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int verbosity, int warning_level) {
-    /* Name of current file. */
-    std::string current_file;
+bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_verbosity, int new_warning_level) {
+    warning_level = new_warning_level;
 
     /* Parses the given file, and returns true on success. */
     yyin = fopen(domain_path.c_str(), "r");
-    if (yyin == 0) {
+    if (yyin == nullptr) {
         std::cerr << "mdpclient:" << domain_path << ": " << strerror(errno)
                   << std::endl;
         return false;
