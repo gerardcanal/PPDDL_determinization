@@ -5,6 +5,10 @@
 #include "PPDDLParserInterface.h"
 #include <cstring>
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////// DOMAIN //////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Name of current file. */
 std::string current_file;
 /* Level of warnings. */
@@ -97,9 +101,58 @@ bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_
 }
 
 
-namespace PPDDLInterface {
-    std::ostream &operator<<(std::ostream &output, const PPDDLInterface::Domain &D) {
-        output << *D._dom;
-        return output;
+PPDDLInterface::Action PPDDLInterface::Domain::getAction(const std::string &name) {
+    const p_actionSchema* as = _dom->find_action(name);
+    if (as == nullptr) std::runtime_error("ERROR: Unknown action name " + name + ".");
+    return PPDDLInterface::Action(as);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Actions /////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+PPDDLInterface::Action::Action(const ActionSchema *as) : _as(as) {
+    const p_Effect* e = &as->effect();
+
+    const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect*>(e);
+    if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+        _action_effect = new PPDDLInterface::ConjunctiveEffect(ce);
     }
-};
+    else {
+        const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(e);
+        if (pe != nullptr) {
+            _action_effect = new PPDDLInterface::ProbabilisticEffect(pe);
+        }
+        else {
+            // it is another effect
+            _action_effect = new PPDDLInterface::Effect(e);
+        }
+    }
+}
+
+
+PPDDLInterface::Action::~Action() {
+    delete _action_effect; //FIXME think if should be done here! Can this be called other times? Should be shared_ptr?
+}
+
+
+
+PPDDLInterface::Effect PPDDLInterface::Action::getEffect() {
+    return *_action_effect; // Make use of polymorfism
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////// Effects ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PPDDLInterface::ProbabilisticEffect::ProbabilisticEffect(const PPDDLInterface::p_ProbabilisticEffect *e) : Effect(e) {
+    _pe = e;
+}
+
+PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::p_ConjunctiveEffect *e): Effect(e) {
+    _ce = e;
+}
+
+PPDDLInterface::Effect::Effect(const PPDDLInterface::p_Effect *e) {
+    _eff = e;
+}
