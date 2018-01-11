@@ -23,6 +23,21 @@
 
 //using namespace PPDDLInterface;
 
+
+
+PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
+    PPDDLInterface::Domain d_det(d); // Copy the domain
+
+    std::vector<PPDDLInterface::Action> actions = d_det.getActions();
+    for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
+        PPDDLInterface::Action det_action = determinize(*it);
+        d_det.setAction(det_action);
+    }
+
+    return d_det;
+}
+
+
 Domain MLODeterminizator::determinize(const Domain& d) { //FIXME move upper
     Domain det_dom(d.name() + "_det"); // Copy the domain name
 
@@ -41,6 +56,15 @@ Domain MLODeterminizator::determinize(const Domain& d) { //FIXME move upper
     std::cout << det_dom << std::endl;
 
     return det_dom;
+}
+
+
+PPDDLInterface::Action MLODeterminizator::determinize(const PPDDLInterface::Action &as) {
+    PPDDLInterface::Action ret(as); // We copy all the action
+
+    ret.setEffect(determinize(*as.getEffect()));
+
+    return ret;
 }
 
 
@@ -72,6 +96,33 @@ const Effect& MLODeterminizator::determinize(const Effect& e) {
     return e;
 }
 
+
+
+
+/*
+ * MLO
+ */
+
+
+const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::Effect &e) {
+    // Check effect type
+    const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
+    if (pe != nullptr) { // Then it's probabilistic
+        return determinize(*pe);
+    }
+
+    const PPDDLInterface::ConjunctiveEffect* ce = dynamic_cast<const PPDDLInterface::ConjunctiveEffect*>(&e);
+    if (ce != nullptr) { // It's a conjunctive effect which may have a probabilistic effect in the conjunction
+        return determinize(*ce);
+    }
+    return e;
+}
+
+const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
+    //TODO
+    return ce;
+}
+
 const Effect& MLODeterminizator::determinize(const ConjunctiveEffect& e) { // FIXME somehow please
     EffectList el = e.conjuncts();
     for (size_t i = 0 ; i < el.size(); ++i) el[i] = &determinize(*el[i]);
@@ -82,10 +133,20 @@ const Effect& MLODeterminizator::determinize(const ConjunctiveEffect& e) { // FI
     return ec;
 }
 
+const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
+    size_t n = pe.size();
+    double max_pr = pe.getProbability(0);
+    size_t max_i = 0;
+    // Find the
+    for (size_t o = 1; o < n; ++o) {
+        if (pe.getProbability(o) > max_pr) {
+            max_pr = pe.getProbability(o);
+            max_i = o;
+        }
+    }
+    return pe.getEffect(max_i);
+}
 
-/*
- * MLO
- */
 void MLODeterminizator::determinize(ProbabilisticEffect& e) {
     size_t n = e.size();
     double max_pr = e.probability(0).double_value();
@@ -100,6 +161,7 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
 
     //return e.effect(max_i);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +194,8 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
 
     int main(int argc, char **argv) {
         if (argc < 2) {
-            std::cout << "Error: Wrong arguments. You must provide an argument with the path to the PPDDL file." << std::endl;
+            std::cout << "Error: Wrong arguments. You must provide an argument with the path to the PPDDL file."
+                      << std::endl;
             exit(-1);
         }
 
@@ -140,11 +203,9 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
         //verbosity = 2;
         // Set default warning level.
         //warning_level = 1;
-
-        if (read_file(argv[1])) {
-            std::cout << "File parsed correctly" << std::endl;
-
-            if (2 > 1) {
+        if (2 > 1) {
+            if (read_file(argv[1])) {
+                std::cout << "File parsed correctly" << std::endl;
                 //
                 // Display domains and problems.
                 //
@@ -152,13 +213,14 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
                     //std::cout << *di->second << std::endl;
                     //PPDDLInterface::Domain d(di->second);
                     //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
-                   // exit(1);
+                    // exit(1);
                     MLODeterminizator mld;
                     mld.determinize(*(*di).second);
                 }
-            }
+
+            } else std::cout << "There were errors while parsing input file!" << std::endl;
+            exit(1);
         }
-        else std::cout << "There were errors while parsing input file!" << std::endl;exit(1);
         PPDDLInterface::Domain d(argv[1]);
         std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         PPDDLInterface::Domain d_copy(d);

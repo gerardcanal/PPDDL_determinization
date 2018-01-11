@@ -7,9 +7,10 @@
 
 
 /**
- * THIS CLASSES ARE AN INTERFACE TO THE MDPSIM PARSER CLASSES, HANDLE THE MEMORY AND EASENS THE INTERFACE. THESE ARE THE
- * ONLY ONES THAT SHOULD BE USED TO INTERACT WITH THE PLANNING DOMAIN!
+ * THIS CLASSES ARE AN INTERFACE TO THE MDPSIM PARSER CLASSES, HANDLE THE MEMORY AND EASENS THE INTERACTION WITH THEM.
+ * NOTE THESE ARE THE ONLY ONES THAT SHOULD BE USED TO INTERACT WITH THE PLANNING DOMAIN!
  */
+
 
 #include "PPDDLParser/domains.h"
 
@@ -22,11 +23,14 @@ namespace PPDDLInterface {
     typedef ::ConjunctiveEffect p_ConjunctiveEffect;
     typedef ::ProbabilisticEffect p_ProbabilisticEffect;
     typedef ::ActionSchema p_actionSchema;
+
 // Classes
     //Generic class Effect
    class Effect {
+       friend class Action;
     public:
         Effect(const p_Effect* e);
+       virtual ~Effect() = default;
     private:
         const p_Effect* _eff;
     };
@@ -34,41 +38,57 @@ namespace PPDDLInterface {
     class ConjunctiveEffect : public Effect {
     public:
         ConjunctiveEffect(const p_ConjunctiveEffect* e);
+
+        size_t size() const;
+        Effect getConjunct(size_t i) const;
+        void changeConjunct(const Effect& cjct, size_t i) const;
     private:
-        const p_ConjunctiveEffect* _ce;
+        p_ConjunctiveEffect* _ce;
     };
 
     class ProbabilisticEffect : public Effect {
     public:
         ProbabilisticEffect(const p_ProbabilisticEffect* e);
+
+        size_t size() const;
+        double getProbability(size_t i) const;
+        Effect getEffect(size_t i) const;
     private:
-        const p_ProbabilisticEffect* _pe;
+        p_ProbabilisticEffect* _pe;
     };
 
 
     //class Action
-    class Action {
+    class Action { // FIXME should allow r/w access to preconditions...?
+        friend class Domain;
     public:
         explicit Action(const p_actionSchema* as);
+        Action(const Action& a);
+        Action();
         ~Action();
 
-        PPDDLInterface::Effect getEffect();
-    private:
-        const p_actionSchema* _as; // Wrapped actionSchema
-        PPDDLInterface::Effect *_action_effect; // Effect of the _as actionSchema.
-        // Stored as a pointer to the wrapper to ease the getEffect action.
-
-
+        PPDDLInterface::Effect* getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
         void setEffect(const PPDDLInterface::Effect& e);
+        inline std::string getName() const;
+    private:
+        p_actionSchema* _as; // Wrapped actionSchema
+        PPDDLInterface::Effect* _action_effect; // Effect of the _as actionSchema.
+                                                // Stored as a pointer to the wrapper to ease the getEffect action.
     };
 
-    class Domain { // TODO copy constructor initialization from a p_Domain?
+    class Domain {
         public:
+            typedef std::vector<PPDDLInterface::Action>::iterator action_iterator;
+
+
             explicit Domain(const std::string& domain_path); // Read domain
             Domain(const PPDDLInterface::Domain& p); // Copy constructor -from a PPDDL domain-
             ~Domain();
 
             PPDDLInterface::Action getAction(const std::string& name);
+            std::vector<PPDDLInterface::Action> getActions();
+
+            void setAction(const PPDDLInterface::Action& action);
         private:
              p_Domain* _dom;
 

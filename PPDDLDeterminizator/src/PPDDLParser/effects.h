@@ -103,7 +103,7 @@ struct Assign : public Update {
   /* Returns an instantiaion of this update. */
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
-  virtual  const Update& clone() const;
+  virtual const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -128,7 +128,7 @@ struct ScaleUp : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
-    virtual  const Update& clone() const;
+    virtual const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -153,7 +153,7 @@ struct ScaleDown : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
-    virtual  const Update& clone() const;
+    virtual const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -178,7 +178,7 @@ struct Increase : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
-    virtual  const Update& clone() const;
+    virtual const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -203,7 +203,7 @@ struct Decrease : public Update {
   virtual const Update& instantiation(const SubstitutionMap& subst,
                                       const ValueMap& values) const;
 
-    virtual  const Update& clone() const;
+    virtual const Update& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -474,7 +474,7 @@ struct ConditionalEffect : public Effect {
                                       const TermTable& terms,
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
-  virtual  const Effect& clone() const;
+  virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;
@@ -529,7 +529,7 @@ struct ProbabilisticEffect : public Effect {
                                       const AtomSet& atoms,
                                       const ValueMap& values) const;
 
-  virtual  const Effect& clone() const;
+  virtual const Effect& clone() const;
  protected:
   /* Prints this object on the given stream. */
   virtual void print(std::ostream& os) const;

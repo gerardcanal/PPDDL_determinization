@@ -27,10 +27,15 @@
 class MLODeterminizator : public PPDDLDeterminizator {
 public:
     Domain determinize(const Domain& d);
+    PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d);
     ActionSchema determinize(const ActionSchema& as);
+    PPDDLInterface::Action determinize(const PPDDLInterface::Action& as);
     const Effect& determinize(const Effect&);
+    const PPDDLInterface::Effect determinize(const PPDDLInterface::Effect& e);
     const Effect& determinize(const ConjunctiveEffect&);
+    const PPDDLInterface::Effect determinize(const PPDDLInterface::ConjunctiveEffect& ce);
     void determinize(ProbabilisticEffect&);
+    const PPDDLInterface::Effect determinize(const PPDDLInterface::ProbabilisticEffect& pe);
 };
 
 
