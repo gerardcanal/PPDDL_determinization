@@ -33,6 +33,7 @@ PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Doma
         PPDDLInterface::Action det_action = determinize(*it);
         d_det.setAction(det_action);
     }
+    std::cout << "----------------------\n" << d_det << std::endl;
 
     return d_det;
 }
@@ -102,8 +103,6 @@ const Effect& MLODeterminizator::determinize(const Effect& e) {
 /*
  * MLO
  */
-
-
 const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::Effect &e) {
     // Check effect type
     const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
@@ -120,6 +119,9 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 
 const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
     //TODO
+    for (size_t i = 0; i < ce.size(); ++i) {
+        ce.changeConjunct(determinize(*ce.getConjunct(i)), i);
+    }
     return ce;
 }
 
@@ -203,7 +205,7 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
         //verbosity = 2;
         // Set default warning level.
         //warning_level = 1;
-        if (2 > 1) {
+        if (-2 > 1) {
             if (read_file(argv[1])) {
                 std::cout << "File parsed correctly" << std::endl;
                 //
@@ -225,4 +227,6 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
         std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         PPDDLInterface::Domain d_copy(d);
         std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
+        MLODeterminizator mld;
+        mld.determinize(d_copy);
     }

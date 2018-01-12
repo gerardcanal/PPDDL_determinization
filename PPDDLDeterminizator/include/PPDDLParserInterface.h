@@ -13,7 +13,7 @@
 
 
 #include "PPDDLParser/domains.h"
-
+#include <memory>
 // Domain class
 namespace PPDDLInterface {
 
@@ -28,10 +28,11 @@ namespace PPDDLInterface {
     //Generic class Effect
    class Effect {
        friend class Action;
+       friend class ConjunctiveEffect;
     public:
         Effect(const p_Effect* e);
        virtual ~Effect() = default;
-    private:
+    //FIXME protected:
         const p_Effect* _eff;
     };
 
@@ -40,7 +41,7 @@ namespace PPDDLInterface {
         ConjunctiveEffect(const p_ConjunctiveEffect* e);
 
         size_t size() const;
-        Effect getConjunct(size_t i) const;
+        std::shared_ptr<Effect> getConjunct(size_t i) const;
         void changeConjunct(const Effect& cjct, size_t i) const;
     private:
         p_ConjunctiveEffect* _ce;
@@ -67,12 +68,12 @@ namespace PPDDLInterface {
         Action();
         ~Action();
 
-        PPDDLInterface::Effect* getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
+        std::shared_ptr<Effect> getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
         void setEffect(const PPDDLInterface::Effect& e);
         inline std::string getName() const;
     private:
-        p_actionSchema* _as; // Wrapped actionSchema
-        PPDDLInterface::Effect* _action_effect; // Effect of the _as actionSchema.
+        std::shared_ptr<p_actionSchema> _as; // Wrapped actionSchema
+        std::shared_ptr<PPDDLInterface::Effect> _action_effect; // Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
     };
 
@@ -90,7 +91,7 @@ namespace PPDDLInterface {
 
             void setAction(const PPDDLInterface::Action& action);
         private:
-             p_Domain* _dom;
+             std::shared_ptr<p_Domain> _dom;
 
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 

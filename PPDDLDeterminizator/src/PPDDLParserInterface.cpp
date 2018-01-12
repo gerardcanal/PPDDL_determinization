@@ -23,7 +23,7 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
                 std::cerr << "More than one domain were found. Only the first one (" << _dom->name() << ") will be used." << std::endl;
                 break;
             }
-            _dom = const_cast<p_Domain*>(di->second);
+            _dom = std::shared_ptr<p_Domain>(const_cast<p_Domain*>(di->second));
             // Note: const_cast is used here as the domain is read here (and only here) and it avoids making a copy by
             //       using the other constructor, as well as avoids removing the const from the original file which I
             //       preferred to modify as less as possible.
@@ -33,13 +33,13 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
 }
 
 PPDDLInterface::Domain::~Domain() {
-    delete _dom;
+    //delete _dom;
 }
 
 
 PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
-    const p_Domain* p = d._dom;
-    _dom = new p_Domain(p->name()+ "_det");
+    const std::shared_ptr<p_Domain> p = d._dom;
+    _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_det"));
 
     /* Domain types. */
     TypeTable types_ = p->types(); // A copy is made here
@@ -69,11 +69,11 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
     /* Domain actions. */
     //ActionSchemaMap actions_; // Copy all the actions!!
     for (ActionSchemaMap::const_iterator ai = p->actions().begin(); ai != p->actions().end(); ai++) {
-        ActionSchema* action_ = new ActionSchema(ai->first); // Allocate new actionSchema. TODO It MUST be deleted in the destructor
+        p_actionSchema* action_ = new p_actionSchema(ai->first); // Allocate new actionSchema. TODO It MUST be deleted in the destructor
         action_->set_parameters(ai->second->parameters()); // Set parameters makes the copy
         action_->set_precondition(ai->second->precondition().clone()); // Where to add it?*
         action_->set_effect(ai->second->effect().clone());
-        _dom->add_action(*action_); // FIXME ensure deletion of above news inside ActionSchema
+        _dom->add_action(*action_); // FIXME ensure deletion of above news inside p_actionSchema
     }
 }
 
@@ -104,7 +104,7 @@ std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() {
     std::vector<PPDDLInterface::Action> ret_actions(_dom->actions().size()); // Fixed size, no reallocations
     size_t i = 0;
     for (ActionSchemaMap::const_iterator ai = _dom->actions().begin(); ai != _dom->actions().end(); ai++) {
-        ret_actions[i++] = PPDDLInterface::Action(ai->second);
+       ret_actions[i++] = PPDDLInterface::Action(ai->second);
     }
     return ret_actions;
 }
@@ -116,8 +116,8 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Actions /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-PPDDLInterface::Action::Action(const ActionSchema *as) {
-    _as = new ActionSchema(as->name());
+PPDDLInterface::Action::Action(const p_actionSchema* as) {
+    _as = std::shared_ptr<p_actionSchema>(new p_actionSchema(as->name()));
     _as->set_parameters(as->parameters()); // Set parameters makes the copy
     _as->set_precondition(as->precondition().clone());
     _as->set_effect(as->effect().clone());
@@ -126,16 +126,16 @@ PPDDLInterface::Action::Action(const ActionSchema *as) {
 
     const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect*>(e);
     if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
-        _action_effect = new PPDDLInterface::ConjunctiveEffect(ce);
+        _action_effect = std::shared_ptr<PPDDLInterface::Effect>(new PPDDLInterface::ConjunctiveEffect(ce));
     }
     else {
         const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(e);
         if (pe != nullptr) {
-            _action_effect = new PPDDLInterface::ProbabilisticEffect(pe);
+            _action_effect = std::shared_ptr<PPDDLInterface::Effect>(new PPDDLInterface::ProbabilisticEffect(pe));
         }
         else {
             // it is another effect
-            _action_effect = new PPDDLInterface::Effect(e);
+            _action_effect = std::shared_ptr<PPDDLInterface::Effect>(new PPDDLInterface::Effect(e));
         }
     }
 }
@@ -143,9 +143,11 @@ PPDDLInterface::Action::Action(const ActionSchema *as) {
 
 PPDDLInterface::Action::Action() {}
 
-PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
+PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(&(*a._as)){
+    // The &(*a._as) is done to get the pointer and ease the interface to the class. it's safe as the consctructor
+    //     also makes a copy.
     /* FIXME remove
-    ActionSchema *as = new ActionSchema(a.getName());
+    p_actionSchema *as = new p_actionSchema(a.getName());
     as->set_parameters(a._as->parameters()); // Set parameters makes the copy
     as->set_precondition(a._as->precondition().clone());
     as->set_effect(a._as->effect().clone());
@@ -154,10 +156,9 @@ PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
 
 
 PPDDLInterface::Action::~Action() {
-    delete _action_effect; //FIXME think if should be done here! Can this be called other times? Should be a shared_ptr?
 }
 
-PPDDLInterface::Effect* PPDDLInterface::Action::getEffect() const {
+std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() const {
     return _action_effect; // By polymorfism it'll return the correct type
 }
 
@@ -202,13 +203,27 @@ size_t PPDDLInterface::ConjunctiveEffect::size() const {
     return _ce->conjuncts().size();
 }
 
-PPDDLInterface::Effect PPDDLInterface::ConjunctiveEffect::getConjunct(size_t i) const {
-    return PPDDLInterface::Effect(&(_ce->conjuncts()[i])->clone()); // FIXME ensure each clone's deletion!!!!
+std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getConjunct(size_t i) const {
+    const p_Effect* cjt = &_ce->conjuncts()[i]->clone(); // FIXME ensure each clone's deletion!!!!
+
+    const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(cjt);
+    if (pe != nullptr) {
+        return std::shared_ptr<PPDDLInterface::Effect>(new ProbabilisticEffect(pe));
+    }
+
+    const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect*>(cjt);
+    if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+        return std::shared_ptr<PPDDLInterface::Effect>(new ConjunctiveEffect(ce));
+    }
+
+    return std::shared_ptr<PPDDLInterface::Effect>(new Effect(cjt));
 }
 
 void PPDDLInterface::ConjunctiveEffect::changeConjunct(const PPDDLInterface::Effect &cjct, size_t i) const {
-    // TODO
-    //_ce->conjuncts()[i] = new p_ConjunctiveEffect();
+    EffectList cj_copy = _ce->conjuncts();
+    cj_copy[i] = cjct._eff;
+    _ce->set_conjuncts(cj_copy);
+    // This makes unnecessary copies... Maybe could be optimised?
 }
 
 PPDDLInterface::Effect::Effect(const PPDDLInterface::p_Effect *e) {
