@@ -28,7 +28,7 @@
 PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
     PPDDLInterface::Domain d_det(d); // Copy the domain
 
-    std::vector<PPDDLInterface::Action> actions = d_det.getActions();
+    std::vector<PPDDLInterface::Action> actions = d.getActions();
     for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
         PPDDLInterface::Action det_action = determinize(*it);
         d_det.setAction(det_action);
@@ -64,7 +64,6 @@ PPDDLInterface::Action MLODeterminizator::determinize(const PPDDLInterface::Acti
     PPDDLInterface::Action ret(as); // We copy all the action
 
     ret.setEffect(determinize(*as.getEffect()));
-
     return ret;
 }
 
@@ -118,11 +117,11 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 }
 
 const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
-    //TODO
+    PPDDLInterface::ConjunctiveEffect ret(ce);
     for (size_t i = 0; i < ce.size(); ++i) {
-        ce.changeConjunct(determinize(*ce.getConjunct(i)), i);
+        ret.changeConjunct(determinize(*ce.getConjunct(i)), i); // FIXME optimize copies in changeConjuncts
     }
-    return ce;
+    return ret;
 }
 
 const Effect& MLODeterminizator::determinize(const ConjunctiveEffect& e) { // FIXME somehow please
@@ -224,9 +223,11 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
             exit(1);
         }
         PPDDLInterface::Domain d(argv[1]);
-        std::cout << "WRAPPED DOMAIN: " << d << std::endl;
+        //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         PPDDLInterface::Domain d_copy(d);
-        std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
+        //std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
         MLODeterminizator mld;
+        std::cout << "############################\nDeterminization\n###########################" <<std::endl;
         mld.determinize(d_copy);
+        return 19;
     }

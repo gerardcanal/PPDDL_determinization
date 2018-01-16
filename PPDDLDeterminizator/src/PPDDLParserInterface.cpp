@@ -100,7 +100,7 @@ PPDDLInterface::Action PPDDLInterface::Domain::getAction(const std::string &name
     return PPDDLInterface::Action(as);
 }
 
-std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() {
+std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() const {
     std::vector<PPDDLInterface::Action> ret_actions(_dom->actions().size()); // Fixed size, no reallocations
     size_t i = 0;
     for (ActionSchemaMap::const_iterator ai = _dom->actions().begin(); ai != _dom->actions().end(); ai++) {
@@ -117,13 +117,50 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 ////////////////////////////////// Actions /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 PPDDLInterface::Action::Action(const p_actionSchema* as) {
-    _as = std::shared_ptr<p_actionSchema>(new p_actionSchema(as->name()));
+    _as = new p_actionSchema(as->name()); // FIXME ensure deletion...
     _as->set_parameters(as->parameters()); // Set parameters makes the copy
     _as->set_precondition(as->precondition().clone());
     _as->set_effect(as->effect().clone());
 
-    const p_Effect* e = &as->effect();
+    const p_Effect* e = &_as->effect();
+    setRawEffectPtr(e);
+}
 
+
+PPDDLInterface::Action::Action() {}
+
+PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
+    // The &(*a._as) is done to get the pointer and ease the interface to the class. it's safe as the consctructor
+    //     also makes a copy.
+    /* FIXME remove
+    p_actionSchema *as = new p_actionSchema(a.getName());
+    as->set_parameters(a._as->parameters()); // Set parameters makes the copy
+    as->set_precondition(a._as->precondition().clone());
+    as->set_effect(a._as->effect().clone());
+    _as = as;*/
+}
+
+
+PPDDLInterface::Action::~Action() {}
+
+std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() const {
+    return _action_effect; // By polymorfism it'll return the correct type
+}
+
+void PPDDLInterface::Action::setEffect(const PPDDLInterface::Effect &e) {
+    /**_action_effect = e;
+    _as->set_effect(e.getEffect()->clone()); // FIXME check clone is released*/
+    const p_Effect* effect_ptr = &e.getEffect()->clone();
+    setRawEffectPtr(effect_ptr); // FIXME check clone is released
+    _as->set_effect(*effect_ptr);
+
+}
+
+std::string PPDDLInterface::Action::getName() const {
+    return _as->name();
+}
+
+void PPDDLInterface::Action::setRawEffectPtr(const PPDDLInterface::p_Effect *e) {
     const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect*>(e);
     if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
         _action_effect = std::shared_ptr<PPDDLInterface::Effect>(new PPDDLInterface::ConjunctiveEffect(ce));
@@ -141,70 +178,43 @@ PPDDLInterface::Action::Action(const p_actionSchema* as) {
 }
 
 
-PPDDLInterface::Action::Action() {}
-
-PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(&(*a._as)){
-    // The &(*a._as) is done to get the pointer and ease the interface to the class. it's safe as the consctructor
-    //     also makes a copy.
-    /* FIXME remove
-    p_actionSchema *as = new p_actionSchema(a.getName());
-    as->set_parameters(a._as->parameters()); // Set parameters makes the copy
-    as->set_precondition(a._as->precondition().clone());
-    as->set_effect(a._as->effect().clone());
-    _as = as;*/
-}
-
-
-PPDDLInterface::Action::~Action() {
-}
-
-std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() const {
-    return _action_effect; // By polymorfism it'll return the correct type
-}
-
-void PPDDLInterface::Action::setEffect(const PPDDLInterface::Effect &e) {
-    *_action_effect = e;
-    _as->set_effect(e._eff->clone()); // FIXME check clone is released
-}
-
-std::string PPDDLInterface::Action::getName() const {
-    return _as->name();
-}
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////// Effects ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PPDDLInterface::ProbabilisticEffect::ProbabilisticEffect(const PPDDLInterface::p_ProbabilisticEffect *e) : Effect(_pe) {
-    _pe = const_cast<p_ProbabilisticEffect*>(dynamic_cast<const p_ProbabilisticEffect*>(&e->clone()));
+PPDDLInterface::ProbabilisticEffect::ProbabilisticEffect(const PPDDLInterface::p_ProbabilisticEffect *e) : Effect(e) {
+    //_pe = const_cast<p_ProbabilisticEffect*>(dynamic_cast<const p_ProbabilisticEffect*>(&e->clone()));
     // We copy it and remove const to be able to successfully modify the effect
 }
 
 size_t PPDDLInterface::ProbabilisticEffect::size() const {
-    return _pe->size();
+    return constEffect()->size();
 }
 
 double PPDDLInterface::ProbabilisticEffect::getProbability(size_t i) const {
-    return _pe->probability(i).double_value();
+    return constEffect()->probability(i).double_value();
 }
 
 PPDDLInterface::Effect PPDDLInterface::ProbabilisticEffect::getEffect(size_t i) const {
-    return PPDDLInterface::Effect(&_pe->effect(i).clone()); // FIXME ensure each clone's deletion!!!!
+    return PPDDLInterface::Effect(&constEffect()->effect(i).clone()); // FIXME ensure each clone's deletion!!!!
+}
+
+const PPDDLInterface::p_ProbabilisticEffect *PPDDLInterface::ProbabilisticEffect::constEffect() const {
+    return static_cast<const p_ProbabilisticEffect*>(_eff);
 }
 
 PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::p_ConjunctiveEffect *e): Effect(e) {
-    _ce = const_cast<p_ConjunctiveEffect*>(dynamic_cast<const p_ConjunctiveEffect*>(&e->clone()));
+    //_ce = const_cast<p_ConjunctiveEffect*>(dynamic_cast<const p_ConjunctiveEffect*>(&e->clone()));
     // We copy it and remove const to be able to successfully modify the effect
 }
 
 size_t PPDDLInterface::ConjunctiveEffect::size() const {
-    return _ce->conjuncts().size();
+    return constEffect()->conjuncts().size();
 }
 
 std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getConjunct(size_t i) const {
-    const p_Effect* cjt = &_ce->conjuncts()[i]->clone(); // FIXME ensure each clone's deletion!!!!
+    const p_Effect* cjt = &constEffect()->conjuncts()[i]->clone(); // FIXME ensure each clone's deletion!!!!
 
     const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(cjt);
     if (pe != nullptr) {
@@ -219,13 +229,33 @@ std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getCo
     return std::shared_ptr<PPDDLInterface::Effect>(new Effect(cjt));
 }
 
-void PPDDLInterface::ConjunctiveEffect::changeConjunct(const PPDDLInterface::Effect &cjct, size_t i) const {
-    EffectList cj_copy = _ce->conjuncts();
-    cj_copy[i] = cjct._eff;
-    _ce->set_conjuncts(cj_copy);
+void PPDDLInterface::ConjunctiveEffect::changeConjunct(const PPDDLInterface::Effect &cjct, size_t i) {
+    EffectList cj_copy = constEffect()->conjuncts();
+   //FIXME std::cout << *cj_copy[i] << std::endl;
+    cj_copy[i] = cjct.getEffect();
+    modificableEffect()->set_conjuncts(cj_copy);
+    //FIXME std::cout << *constEffect()->conjuncts()[i] << std::endl;
+
     // This makes unnecessary copies... Maybe could be optimised?
+}
+
+const PPDDLInterface::p_ConjunctiveEffect *PPDDLInterface::ConjunctiveEffect::constEffect() const {
+    return  static_cast<const p_ConjunctiveEffect*>(_eff);
+    // If it is inside the Conjunctive Effect class we are sure that the cast is okay
+}
+
+PPDDLInterface::p_ConjunctiveEffect *PPDDLInterface::ConjunctiveEffect::modificableEffect() const {
+    return const_cast<p_ConjunctiveEffect*>(constEffect());
+    // We remove const to be able to successfully modify the effect;
+}
+
+PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect &e) : PPDDLInterface::Effect(&e._eff->clone()) {
 }
 
 PPDDLInterface::Effect::Effect(const PPDDLInterface::p_Effect *e) {
     _eff = e;
+}
+
+const PPDDLInterface::p_Effect* PPDDLInterface::Effect::getEffect() const {
+    return _eff;
 }

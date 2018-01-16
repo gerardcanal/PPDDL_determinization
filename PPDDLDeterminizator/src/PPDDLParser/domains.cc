@@ -82,7 +82,10 @@ Domain::~Domain() {
 /* Adds the given action to this domain. */
 void Domain::add_action(const ActionSchema& action) {
   const ActionSchema* ai = find_action(action.name());
-  if (ai != nullptr) delete ai; // Delete action pointer if already there to avoid Memory Leaks.
+  if (ai != nullptr) {
+    actions_.erase(action.name()); // If not erased, the following insert does not insert the element!
+    delete ai;
+  } // Delete action pointer if already there to avoid Memory Leaks.
   actions_.insert(std::make_pair(action.name(), &action));
 }
 

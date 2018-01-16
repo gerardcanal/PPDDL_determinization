@@ -31,20 +31,24 @@ namespace PPDDLInterface {
        friend class ConjunctiveEffect;
     public:
         Effect(const p_Effect* e);
-       virtual ~Effect() = default;
-    //FIXME protected:
+        virtual ~Effect() = default;
+        virtual const p_Effect* getEffect() const;
+   protected:
         const p_Effect* _eff;
     };
 
     class ConjunctiveEffect : public Effect {
     public:
         ConjunctiveEffect(const p_ConjunctiveEffect* e);
+        ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect& e);
 
         size_t size() const;
         std::shared_ptr<Effect> getConjunct(size_t i) const;
-        void changeConjunct(const Effect& cjct, size_t i) const;
+        void changeConjunct(const Effect& cjct, size_t i);
     private:
-        p_ConjunctiveEffect* _ce;
+        inline const p_ConjunctiveEffect* constEffect() const;
+        inline p_ConjunctiveEffect* modificableEffect() const;
+
     };
 
     class ProbabilisticEffect : public Effect {
@@ -55,7 +59,7 @@ namespace PPDDLInterface {
         double getProbability(size_t i) const;
         Effect getEffect(size_t i) const;
     private:
-        p_ProbabilisticEffect* _pe;
+        inline const p_ProbabilisticEffect* constEffect() const;
     };
 
 
@@ -70,11 +74,12 @@ namespace PPDDLInterface {
 
         std::shared_ptr<Effect> getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
         void setEffect(const PPDDLInterface::Effect& e);
-        inline std::string getName() const;
+        std::string getName() const;
     private:
-        std::shared_ptr<p_actionSchema> _as; // Wrapped actionSchema
+        p_actionSchema* _as; // Wrapped actionSchema
         std::shared_ptr<PPDDLInterface::Effect> _action_effect; // Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
+        void setRawEffectPtr(const p_Effect *e);
     };
 
     class Domain {
@@ -87,7 +92,7 @@ namespace PPDDLInterface {
             ~Domain();
 
             PPDDLInterface::Action getAction(const std::string& name);
-            std::vector<PPDDLInterface::Action> getActions();
+            std::vector<PPDDLInterface::Action> getActions() const;
 
             void setAction(const PPDDLInterface::Action& action);
         private:
