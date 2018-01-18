@@ -1,6 +1,6 @@
 /*
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,9 @@ const ObjectList& TermTable::compatible_objects(const Type& type) const {
   } else {
     ObjectList* objects;
     if (parent_ != 0) {
-      objects = new ObjectList(parent_->compatible_objects(type));
+      ObjectList parent_objects = parent_->compatible_objects(type);
+      objects = new ObjectList(parent_objects);
+      delete &parent_objects;
     } else {
       objects = new ObjectList();
     }

@@ -306,8 +306,10 @@ const StateFormula& Atom::instantiation(const SubstitutionMap& subst,
       if ((state || PredicateTable::static_predicate(predicate()))
           && objects == inst_terms.size()) {
         if (atoms.find(&inst_atom) != atoms.end()) {
+          delete &inst_atom; // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
           return TRUE;
         } else {
+          delete &inst_atom; // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
           return FALSE;
         }
       } else {
