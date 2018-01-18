@@ -23,8 +23,6 @@
 
 //using namespace PPDDLInterface;
 
-
-
 PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
     PPDDLInterface::Domain d_det(d); // Copy the domain
 
@@ -38,66 +36,12 @@ PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Doma
     return d_det;
 }
 
-
-Domain MLODeterminizator::determinize(const Domain& d) { //FIXME move upper
-    Domain det_dom(d.name() + "_det"); // Copy the domain name
-
-    // Types, terms, predicates and constants are maintained
-    det_dom.types() = d.types();
-    det_dom.terms() = d.terms();
-    det_dom.predicates() = d.predicates();
-    det_dom.functions() = d.functions();
-
-    // Now let's determinize the actions
-    for (ActionSchemaMap::const_iterator ai = d.actions().begin(); ai != d.actions().end(); ai++) {
-        ActionSchema detas = determinize(*(*ai).second);
-        det_dom.add_action(detas);
-    }
-// TODO assign detas to the domain
-    std::cout << det_dom << std::endl;
-
-    return det_dom;
-}
-
-
 PPDDLInterface::Action MLODeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
 
     ret.setEffect(determinize(*as.getEffect()));
     return ret;
 }
-
-
-ActionSchema MLODeterminizator::determinize(const ActionSchema& as) { // FIXME move upwards to base class // FIXME Consistent signature
-    // Copy name, preconditions and parameters as they do not vary
-    ActionSchema det_as(as.name());
-    det_as.set_precondition(as.precondition());
-    det_as.set_parameters(as.parameters());
-
-    // Determinize effects
-    det_as.set_effect(determinize(as.effect()));
-    return det_as;
-}
-
-const Effect& MLODeterminizator::determinize(const Effect& e) {
-    // Check which kind of effect it is -> not needed as polymorphism does its magic.
-    /*const ProbabilisticEffect* pe = dynamic_cast<const ProbabilisticEffect*>(&e);
-    if (pe != NULL) { // Then it's probabilistic
-        return determinize(*pe);
-    }
-
-    const ConjunctiveEffect* ce = dynamic_cast<const ConjunctiveEffect*>(&e);
-    if (ce != NULL) {
-        return determinize(*ce);
-    }*/
-
-    // Otherwise we don't have to modify this effect
-    // Do nothing
-    return e;
-}
-
-
-
 
 /*
  * MLO
@@ -124,16 +68,6 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
     return ret;
 }
 
-const Effect& MLODeterminizator::determinize(const ConjunctiveEffect& e) { // FIXME somehow please
-    EffectList el = e.conjuncts();
-    for (size_t i = 0 ; i < el.size(); ++i) el[i] = &determinize(*el[i]);
-    ConjunctiveEffect ec = e;
-    ec.set_conjuncts(el);
-
-    //std::shared_ptr<Effect> p = new ConjunctiveEffect();
-    return ec;
-}
-
 const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
     size_t n = pe.size();
     double max_pr = pe.getProbability(0);
@@ -147,22 +81,6 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
     }
     return pe.getEffect(max_i);
 }
-
-void MLODeterminizator::determinize(ProbabilisticEffect& e) {
-    size_t n = e.size();
-    double max_pr = e.probability(0).double_value();
-    size_t max_i = 0;
-    // Find the
-    for (size_t o = 1; o < n; ++o) {
-        if (e.probability(o) > max_pr) {
-            max_pr = e.probability(o).double_value();
-            max_i = o;
-        }
-    }
-
-    //return e.effect(max_i);
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,7 +134,7 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
                     //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
                     // exit(1);
                     MLODeterminizator mld;
-                    mld.determinize(*(*di).second);
+                    //mld.determinize(*(*di).second);
                 }
 
             } else std::cout << "There were errors while parsing input file!" << std::endl;
