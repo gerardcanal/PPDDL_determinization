@@ -111,23 +111,19 @@ std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() const {
 
 void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action) {
     _dom->add_action(*new_action._as); // As it is an ActionMap, it will override the action in case it is already there
+    const_cast<PPDDLInterface::Action*>(&new_action)->releasePtr();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Actions /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 PPDDLInterface::Action::Action(const p_actionSchema* as) {
-    _as = new p_actionSchema(as->name()); // FIXME ensure deletion...
-    _as->set_parameters(as->parameters()); // Set parameters makes the copy
-    _as->set_precondition(as->precondition().clone());
-    _as->set_effect(as->effect().clone());
-
-    const p_Effect* e = &_as->effect();
-    setRawEffectPtr(e);
+    initFrom(as);
+    _delete_actionschema = true;
 }
 
 
-PPDDLInterface::Action::Action() {}
+PPDDLInterface::Action::Action() {_delete_actionschema = true;}
 
 PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
     // The &(*a._as) is done to get the pointer and ease the interface to the class. it's safe as the consctructor
@@ -141,7 +137,9 @@ PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
 }
 
 
-PPDDLInterface::Action::~Action() {}
+PPDDLInterface::Action::~Action() {
+    if (_delete_actionschema) delete _as;
+}
 
 std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() const {
     return _action_effect; // By polymorfism it'll return the correct type
@@ -175,6 +173,25 @@ void PPDDLInterface::Action::setRawEffectPtr(const PPDDLInterface::p_Effect *e) 
             _action_effect = std::shared_ptr<PPDDLInterface::Effect>(new PPDDLInterface::Effect(e));
         }
     }
+}
+
+void PPDDLInterface::Action::releasePtr() {
+    _delete_actionschema = false;
+}
+
+PPDDLInterface::Action &PPDDLInterface::Action::operator=(const PPDDLInterface::Action &other) {
+    initFrom(other._as);
+    return *this;
+}
+
+void PPDDLInterface::Action::initFrom(const PPDDLInterface::p_actionSchema *as) {
+    _as = new p_actionSchema(as->name()); // FIXME ensure deletion...
+    _as->set_parameters(as->parameters()); // Set parameters makes the copy
+    _as->set_precondition(as->precondition().clone());
+    _as->set_effect(as->effect().clone());
+
+    const p_Effect* e = &_as->effect();
+    setRawEffectPtr(e);
 }
 
 
@@ -231,11 +248,8 @@ std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getCo
 
 void PPDDLInterface::ConjunctiveEffect::changeConjunct(const PPDDLInterface::Effect &cjct, size_t i) {
     EffectList cj_copy = constEffect()->conjuncts();
-   //FIXME std::cout << *cj_copy[i] << std::endl;
     cj_copy[i] = cjct.getEffect();
     modificableEffect()->set_conjuncts(cj_copy);
-    //FIXME std::cout << *constEffect()->conjuncts()[i] << std::endl;
-
     // This makes unnecessary copies... Maybe could be optimised?
 }
 

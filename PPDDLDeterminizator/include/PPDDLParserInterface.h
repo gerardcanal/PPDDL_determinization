@@ -75,17 +75,20 @@ namespace PPDDLInterface {
         std::shared_ptr<Effect> getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
         void setEffect(const PPDDLInterface::Effect& e);
         std::string getName() const;
+        Action & operator= (const Action & other);
     private:
         p_actionSchema* _as; // Wrapped actionSchema
+        bool _delete_actionschema;
         std::shared_ptr<PPDDLInterface::Effect> _action_effect; // Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
         void setRawEffectPtr(const p_Effect *e);
+        void releasePtr();
+        void initFrom(const p_actionSchema* as);
     };
 
     class Domain {
         public:
             typedef std::vector<PPDDLInterface::Action>::iterator action_iterator;
-
 
             explicit Domain(const std::string& domain_path); // Read domain
             Domain(const PPDDLInterface::Domain& p); // Copy constructor -from a PPDDL domain-

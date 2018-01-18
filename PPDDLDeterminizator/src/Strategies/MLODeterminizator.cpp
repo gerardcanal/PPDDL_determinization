@@ -28,12 +28,12 @@
 PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
     PPDDLInterface::Domain d_det(d); // Copy the domain
 
-    std::vector<PPDDLInterface::Action> actions = d.getActions();
+    std::vector<PPDDLInterface::Action> actions = d_det.getActions();
     for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
         PPDDLInterface::Action det_action = determinize(*it);
         d_det.setAction(det_action);
     }
-    std::cout << "----------------------\n" << d_det << std::endl;
+    //std::cout << "----------------------\n" << d_det << std::endl;
 
     return d_det;
 }
@@ -223,11 +223,18 @@ void MLODeterminizator::determinize(ProbabilisticEffect& e) {
             exit(1);
         }
         PPDDLInterface::Domain d(argv[1]);
-        //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
-        PPDDLInterface::Domain d_copy(d);
-        //std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
+        //PPDDLInterface::Domain d_copy(d);
         MLODeterminizator mld;
         std::cout << "############################\nDeterminization\n###########################" <<std::endl;
-        mld.determinize(d_copy);
+        PPDDLInterface::Domain determinized = mld.determinize(d);
+
+        /*std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
+        std::cout << "WRAPPED DOMAIN: " << d << std::endl;
+        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
+        std::cout << "COPIED DOMAIN: " << d_copy << std::endl;*/
+        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
+        std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
+
+
         return 19;
     }
