@@ -69,11 +69,11 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
     /* Domain actions. */
     //ActionSchemaMap actions_; // Copy all the actions!!
     for (ActionSchemaMap::const_iterator ai = p->actions().begin(); ai != p->actions().end(); ai++) {
-        p_actionSchema* action_ = new p_actionSchema(ai->first); // Allocate new actionSchema. TODO It MUST be deleted in the destructor
+        p_actionSchema* action_ = new p_actionSchema(ai->first); // Allocate new actionSchema.
         action_->set_parameters(ai->second->parameters()); // Set parameters makes the copy
         action_->set_precondition(ai->second->precondition().clone()); // Where to add it?*
         action_->set_effect(ai->second->effect().clone());
-        _dom->add_action(*action_); // FIXME ensure deletion of above news inside p_actionSchema
+        _dom->add_action(*action_);
     }
 }
 
@@ -146,10 +146,8 @@ std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() cons
 }
 
 void PPDDLInterface::Action::setEffect(const PPDDLInterface::Effect &e) {
-    /**_action_effect = e;
-    _as->set_effect(e.getEffect()->clone()); // FIXME check clone is released*/
     const p_Effect* effect_ptr = &e.getEffect()->clone();
-    setRawEffectPtr(effect_ptr); // FIXME check clone is released
+    setRawEffectPtr(effect_ptr);
     _as->set_effect(*effect_ptr);
 
 }
@@ -185,7 +183,7 @@ PPDDLInterface::Action &PPDDLInterface::Action::operator=(const PPDDLInterface::
 }
 
 void PPDDLInterface::Action::initFrom(const PPDDLInterface::p_actionSchema *as) {
-    _as = new p_actionSchema(as->name()); // FIXME ensure deletion...
+    _as = new p_actionSchema(as->name());
     _as->set_parameters(as->parameters()); // Set parameters makes the copy
     _as->set_precondition(as->precondition().clone());
     _as->set_effect(as->effect().clone());

@@ -86,9 +86,9 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 
 #include <cstring>
 /* The parse function. */
-    extern int ppddl_parse(); // FIXME namespace this variables!?
+   // extern int ppddl_parse(); // FIXME namespace this variables!?
 /* File to parse. */
-    extern FILE* yyin;
+   // extern FILE* yyin;
 /* Name of current file. */
     extern std::string current_file;
 /* Level of warnings. */

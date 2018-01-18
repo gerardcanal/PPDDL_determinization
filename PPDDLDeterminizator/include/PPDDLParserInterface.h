@@ -64,7 +64,7 @@ namespace PPDDLInterface {
 
 
     //class Action
-    class Action { // FIXME should allow r/w access to preconditions...?
+    class Action { // TODO should allow r/w access to preconditions...?
         friend class Domain;
     public:
         explicit Action(const p_actionSchema* as);
