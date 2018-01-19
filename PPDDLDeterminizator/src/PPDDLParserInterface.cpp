@@ -139,6 +139,7 @@ PPDDLInterface::Action::Action(const PPDDLInterface::Action &a) : Action(a._as){
 
 PPDDLInterface::Action::~Action() {
     if (_delete_actionschema) delete _as;
+    //RCObject::destructive_deref(_action_effect->getEffect());
 }
 
 std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() const {
@@ -147,9 +148,12 @@ std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::Action::getEffect() cons
 
 void PPDDLInterface::Action::setEffect(const PPDDLInterface::Effect &e) {
     const p_Effect* effect_ptr = &e.getEffect()->clone();
-    setRawEffectPtr(effect_ptr);
     _as->set_effect(*effect_ptr);
 
+    setRawEffectPtr(effect_ptr);
+
+    _action_effect->releasePtr(); // As it will remain in _as, the pointer doesn't have to be deleted by _as
+    RCObject::deref(effect_ptr); // As effect_ptr will be removed here, we have to decrement the counter
 }
 
 std::string PPDDLInterface::Action::getName() const {
@@ -189,6 +193,10 @@ void PPDDLInterface::Action::initFrom(const PPDDLInterface::p_actionSchema *as) 
     _as->set_effect(as->effect().clone());
 
     const p_Effect* e = &_as->effect();
+    RCObject::deref(e); // As the set effect increments the reference, and the clone() does too, we have to
+                        // decrement once the reference here -> e pointer will disappear when it's out of scope, so it
+                        // will have one less reference
+
     setRawEffectPtr(e);
 }
 
@@ -198,7 +206,7 @@ void PPDDLInterface::Action::initFrom(const PPDDLInterface::p_actionSchema *as) 
 /////////////////////////////////////////////////// Effects ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PPDDLInterface::ProbabilisticEffect::ProbabilisticEffect(const PPDDLInterface::p_ProbabilisticEffect *e) : Effect(e) {
+PPDDLInterface::ProbabilisticEffect::ProbabilisticEffect(const PPDDLInterface::p_ProbabilisticEffect *e) : Effect(e) {// FIXME should be clone?!
     //_pe = const_cast<p_ProbabilisticEffect*>(dynamic_cast<const p_ProbabilisticEffect*>(&e->clone()));
     // We copy it and remove const to be able to successfully modify the effect
 }
@@ -224,12 +232,17 @@ PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::p_Con
     // We copy it and remove const to be able to successfully modify the effect
 }
 
+
+PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect &e) : PPDDLInterface::Effect(&e._eff->clone()) {// FIXME ensure each clone's deletion!!!!
+}
+
 size_t PPDDLInterface::ConjunctiveEffect::size() const {
     return constEffect()->conjuncts().size();
 }
 
 std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getConjunct(size_t i) const {
     const p_Effect* cjt = &constEffect()->conjuncts()[i]->clone(); // FIXME ensure each clone's deletion!!!!
+   /// RCObject::deref(cjt); // Decrement the reference as the constructor for PPDDLInterface::Effect will increase it
 
     const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(cjt);
     if (pe != nullptr) {
@@ -246,13 +259,15 @@ std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getCo
 
 void PPDDLInterface::ConjunctiveEffect::changeConjunct(const PPDDLInterface::Effect &cjct, size_t i) {
     EffectList cj_copy = constEffect()->conjuncts();
+    RCObject::destructive_deref(cj_copy[i]); // Dereference and delete it as we're overwriting it
     cj_copy[i] = cjct.getEffect();
+    RCObject::ref(cj_copy[i]); // Increase the reference as we made a copy
     modificableEffect()->set_conjuncts(cj_copy);
     // This makes unnecessary copies... Maybe could be optimised?
 }
 
 const PPDDLInterface::p_ConjunctiveEffect *PPDDLInterface::ConjunctiveEffect::constEffect() const {
-    return  static_cast<const p_ConjunctiveEffect*>(_eff);
+    return  static_cast<const p_ConjunctiveEffect*>(getEffect());
     // If it is inside the Conjunctive Effect class we are sure that the cast is okay
 }
 
@@ -261,13 +276,34 @@ PPDDLInterface::p_ConjunctiveEffect *PPDDLInterface::ConjunctiveEffect::modifica
     // We remove const to be able to successfully modify the effect;
 }
 
-PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect &e) : PPDDLInterface::Effect(&e._eff->clone()) {
-}
-
 PPDDLInterface::Effect::Effect(const PPDDLInterface::p_Effect *e) {
     _eff = e;
+    RCObject::ref(_eff);
+    _delete_ptr = true;
+}
+
+
+PPDDLInterface::Effect::Effect(const Effect &e) {
+    this->_eff = &e._eff->clone(); // FIXME should clone? :/
+    this->_delete_ptr = e._delete_ptr;
+    //RCObject::ref(_eff);
+}
+
+PPDDLInterface::Effect &PPDDLInterface::Effect::operator=(const Effect &other) {
+    this->_eff = &other._eff->clone(); // FIXME should clone? :/
+    this->_delete_ptr = other._delete_ptr;
+    //RCObject::ref(_eff);
+    return *this;
 }
 
 const PPDDLInterface::p_Effect* PPDDLInterface::Effect::getEffect() const {
     return _eff;
+}
+
+PPDDLInterface::Effect::~Effect() {
+    if (_delete_ptr) RCObject::destructive_deref(_eff);//
+}
+
+void PPDDLInterface::Effect::releasePtr() {
+    _delete_ptr = false;
 }

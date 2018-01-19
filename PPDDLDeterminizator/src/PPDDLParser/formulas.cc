@@ -962,6 +962,7 @@ const StateFormula& Exists::instantiation(const SubstitutionMap& subst,
     Type t = TermTable::type(parameters()[i]);
     arguments[i] = &terms.compatible_objects(t);
     if (arguments[i]->empty()) {
+      for (int i = 0; i < n; i++) delete arguments[i]; // Fixes memory leak by removing previous compatible_objects()
       return FALSE;
     }
     next_arg.push_back(arguments[i]->begin());
@@ -984,6 +985,7 @@ const StateFormula& Exists::instantiation(const SubstitutionMap& subst,
           destructive_deref(disjuncts.top());
           disjuncts.pop();
         }
+        for (int i = 0; i < n; i++) delete arguments[i]; // Fixes memory leak.
         return *inst_exists;
       }
       for (int j = i; j >= 0; j--) {
@@ -1013,6 +1015,7 @@ const StateFormula& Exists::instantiation(const SubstitutionMap& subst,
     destructive_deref(disjuncts.top());
     disjuncts.pop();
   }
+  for (int i = 0; i < n; i++) delete arguments[i]; // Fixes memory leak.
   return *inst_exists;
 }
 

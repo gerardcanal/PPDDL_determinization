@@ -130,7 +130,7 @@ const ObjectList& TermTable::compatible_objects(const Type& type) const {
     if (parent_ != 0) {
       const ObjectList *parent_objects = &(parent_->compatible_objects(type));
       objects = new ObjectList(*parent_objects);
-      delete parent_objects;
+      delete parent_objects;  // Fixes memory leak.
     } else {
       objects = new ObjectList();
     }

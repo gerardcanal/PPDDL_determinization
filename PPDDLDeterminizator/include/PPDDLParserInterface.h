@@ -29,12 +29,17 @@ namespace PPDDLInterface {
    class Effect {
        friend class Action;
        friend class ConjunctiveEffect;
+       friend class ProabbilisticEffect;
     public:
         Effect(const p_Effect* e);
-        virtual ~Effect() = default;
-        virtual const p_Effect* getEffect() const;
+        Effect(const Effect& e);
+        virtual ~Effect();
+        const p_Effect* getEffect() const;
+        Effect & operator= (const Effect & other);
    protected:
         const p_Effect* _eff;
+       bool _delete_ptr;
+       void releasePtr();
     };
 
     class ConjunctiveEffect : public Effect {

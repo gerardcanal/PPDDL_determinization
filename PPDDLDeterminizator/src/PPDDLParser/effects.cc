@@ -323,7 +323,9 @@ void AddEffect::state_change(AtomList& adds, AtomList& deletes,
 }
 
 const Effect& AddEffect::clone() const {
-  return *new AddEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+  AddEffect* cpy = new AddEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+  ref(cpy);
+  return *cpy;
 }
 
 /* Returns an instantiation of this effect. */
@@ -374,7 +376,9 @@ const Effect& DeleteEffect::instantiation(const SubstitutionMap& subst,
 }
 
 const Effect& DeleteEffect::clone() const {
-  return *new DeleteEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+  DeleteEffect* cpy = new DeleteEffect(Atom::make(this->atom().predicate(), this->atom().terms()));
+  ref(cpy);
+  return *cpy;
 }
 
 /* Prints this object on the given stream. */
@@ -431,7 +435,9 @@ const Effect& UpdateEffect::instantiation(const SubstitutionMap& subst,
 }
 
 const Effect& UpdateEffect::clone() const {
-  return make(this->update_->clone());
+  const Effect* cpy = &make(this->update_->clone());
+  ref(cpy);
+  return *cpy;
 }
 
 /* Prints this object on the given stream. */
@@ -442,9 +448,10 @@ void UpdateEffect::print(std::ostream& os) const {
 
 /* ====================================================================== */
 /* ConjunctiveEffect */
-
+int clonectr = 0, del = 0; // FIXME remove
 /* Deletes this conjunctive effect. */
 ConjunctiveEffect::~ConjunctiveEffect() {
+    std::cout << "clone() " << clonectr << " ~ConjunctiveEffect() " << ++del << std::endl;
   for (EffectList::const_iterator ei = conjuncts().begin();
        ei != conjuncts().end(); ei++) {
     destructive_deref(*ei);
@@ -452,7 +459,9 @@ ConjunctiveEffect::~ConjunctiveEffect() {
 }
 
 const Effect& ConjunctiveEffect::clone() const {
+    std::cout << "clone() " << ++clonectr << " ~ConjunctiveEffect() " << del << std::endl;//FIXME
   ConjunctiveEffect *cpy = new ConjunctiveEffect();
+  ref(cpy);
   cpy->conjuncts_.resize(conjuncts_.size());
   for (size_t i = 0; i < conjuncts_.size(); ++i) {
     cpy->conjuncts_[i] = &this->conjuncts_[i]->clone();
@@ -565,7 +574,9 @@ void ConditionalEffect::state_change(AtomList& adds, AtomList& deletes,
 }
 
  const Effect& ConditionalEffect::clone() const {
-   return *new ConditionalEffect(condition_->clone(), effect_->clone());
+   ConditionalEffect* cpy = new ConditionalEffect(condition_->clone(), effect_->clone());
+   ref(cpy);
+   return *cpy;
  }
 
 /* Returns an instantiation of this effect. */
@@ -693,6 +704,7 @@ ProbabilisticEffect::instantiation(const SubstitutionMap& subst,
 
 const  Effect& ProbabilisticEffect::clone() const {
   ProbabilisticEffect* cpy = new ProbabilisticEffect();
+  ref(cpy);
   cpy->weights_ = this->weights_;
   cpy->weight_sum_= this->weight_sum_;
   cpy->effects_.resize(this->effects_.size());
@@ -758,7 +770,9 @@ void QuantifiedEffect::state_change(AtomList& adds, AtomList& deletes,
 }
 
 const Effect& QuantifiedEffect::clone() const {
-  return *new QuantifiedEffect(parameters_, effect_->clone());
+    QuantifiedEffect* cpy = new QuantifiedEffect(parameters_, effect_->clone());
+    ref(cpy);
+    return *cpy;
 }
 
 /* Returns an instantiation of this effect. */

@@ -84,6 +84,7 @@ void ActionSchema::instantiations(ActionSet& actions, const TermTable& terms,
       Type t = TermTable::type(parameters()[i]);
       arguments[i] = &terms.compatible_objects(t);
       if (arguments[i]->empty()) {
+        for (int i = 0; i < n; i++) delete arguments[i]; // Fixes memory leak.
         return;
       }
       next_arg.push_back(arguments[i]->begin());
@@ -128,6 +129,7 @@ void ActionSchema::instantiations(ActionSet& actions, const TermTable& terms,
       RCObject::destructive_deref(preconds.top());
       preconds.pop();
     }
+    for (int i = 0; i < n; i++) delete arguments[i]; // Fixes memory leak.
   }
 }
 
