@@ -63,11 +63,7 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
     PPDDLInterface::ConjunctiveEffect ret(ce);
     for (size_t i = 0; i < ce.size(); ++i) {
-        ///
-        auto tmp0 = *ce.getConjunct(i);
-        auto tmp1 = determinize(tmp0);
-        ret.changeConjunct(tmp1, i); ////
-        //ret.changeConjunct(determinize(*ce.getConjunct(i)), i); // FIXME optimize copies in changeConjuncts
+        ret.changeConjunct(determinize(*ce.getConjunct(i)), i); // FIXME optimize copies in changeConjuncts
     }
     return ret;
 }

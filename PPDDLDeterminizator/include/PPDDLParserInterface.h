@@ -37,7 +37,7 @@ namespace PPDDLInterface {
         const p_Effect* getEffect() const;
         Effect & operator= (const Effect & other);
    protected:
-        const p_Effect* _eff;
+       const p_Effect* _eff;
        bool _delete_ptr;
        void releasePtr();
     };

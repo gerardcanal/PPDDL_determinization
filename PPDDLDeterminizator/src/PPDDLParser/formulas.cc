@@ -42,7 +42,9 @@ struct Constant : public StateFormula {
   }
 
   virtual const StateFormula& clone() const {
-        return *new Constant(value_);
+      const StateFormula* cpy = new Constant(value_);
+      //ref(cpy);
+      return *cpy;
   }
 
  protected:
@@ -333,7 +335,9 @@ void Atom::print(std::ostream& os) const {
 }
 
 const StateFormula &Atom::clone() const {
-   return Atom::make(this->predicate(), this->terms()); // It makes a copy!
+   const StateFormula* cpy = &Atom::make(this->predicate(), this->terms()); // It makes a copy!
+   //ref(cpy);
+   return *cpy;
 }
 
 
@@ -395,7 +399,9 @@ void Equality::print(std::ostream& os) const {
 }
 
 const StateFormula &Equality::clone() const {
-  return Equality::make(this->term1(), this->term2()); // It makes a copy
+  const StateFormula* cpy = &Equality::make(this->term1(), this->term2()); // It makes a copy
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -468,7 +474,9 @@ void LessThan::print(std::ostream& os) const {
 }
 
 const StateFormula &LessThan::clone() const {
-  return LessThan::make(this->expr1(), this->expr2());
+  const StateFormula* cpy = &LessThan::make(this->expr1(), this->expr2());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -525,7 +533,9 @@ void LessThanOrEqualTo::print(std::ostream& os) const {
 }
 
 const StateFormula &LessThanOrEqualTo::clone() const {
-  return LessThanOrEqualTo::make(this->expr1(), this->expr2());
+  const StateFormula* cpy= &LessThanOrEqualTo::make(this->expr1(), this->expr2());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -580,7 +590,9 @@ void EqualTo::print(std::ostream& os) const {
 }
 
 const StateFormula &EqualTo::clone() const {
-  return EqualTo::make(this->expr1(), this->expr2());
+  const StateFormula* cpy= &EqualTo::make(this->expr1(), this->expr2());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -637,7 +649,9 @@ void GreaterThanOrEqualTo::print(std::ostream& os) const {
 }
 
 const StateFormula &GreaterThanOrEqualTo::clone() const {
-  return GreaterThanOrEqualTo::make(this->expr1(), this->expr2());
+  const StateFormula* cpy= &GreaterThanOrEqualTo::make(this->expr1(), this->expr2());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -692,7 +706,9 @@ void GreaterThan::print(std::ostream& os) const {
 }
 
 const StateFormula &GreaterThan::clone() const {
-  return GreaterThan::make(this->expr1(), this->expr2());
+  const StateFormula* cpy= &GreaterThan::make(this->expr1(), this->expr2());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -753,7 +769,9 @@ void Negation::print(std::ostream& os) const {
 }
 
 const StateFormula &Negation::clone() const {
-  return Negation::make(negand_->clone());
+  const StateFormula* cpy = &Negation::make(negand_->clone());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -829,6 +847,7 @@ const StateFormula &Conjunction::clone() const {
   for (FormulaList::const_iterator fi = this->conjuncts_.begin(); fi != this->conjuncts_.end(); fi++) {
     cj->add_conjunct((**fi).clone());
   }
+  //ref(cj);
   return *cj;
 }
 
@@ -905,6 +924,7 @@ const StateFormula &Disjunction::clone() const {
   for (FormulaList::const_iterator fi = this->disjuncts_.begin(); fi != this->disjuncts_.end(); fi++) {
     dj->add_disjunct((**fi).clone());
   }
+  ref(dj);
   return *dj;
 }
 
@@ -1031,7 +1051,9 @@ void Exists::print(std::ostream& os) const {
 }
 
 const StateFormula &Exists::clone() const {
-  return Exists::make(this->parameters(), this->body().clone());
+  const StateFormula* cpy = &Exists::make(this->parameters(), this->body().clone());
+  //ref(cpy);
+  return *cpy;
 }
 
 
@@ -1137,6 +1159,8 @@ void Forall::print(std::ostream& os) const {
 }
 
 const StateFormula &Forall::clone() const {
-  return Forall::make(this->parameters(), this->body().clone());
+  const StateFormula* cpy =  &Forall::make(this->parameters(), this->body().clone());
+  //ref(cpy);
+  return *cpy;
 
 }

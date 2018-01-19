@@ -537,7 +537,9 @@ const Effect& ConditionalEffect::make(const StateFormula& condition,
   if (condition.tautology()) {
     return effect;
   } else if (condition.contradiction() || effect.empty()) {
-    return EMPTY;
+      ref(&effect); // There is a memory leak if there are no more references to this effect and the pointer gets lost.
+      destructive_deref(&effect); // As the pointer may not be initialized (0 counts), destructive_deref may underflow the counter
+      return EMPTY; // Therefore I add 1 and then remove 1 (+ deletion if it was the only reference). This causes no effect if there was more references
   } else {
     return *new ConditionalEffect(condition, effect);
   }
@@ -576,6 +578,7 @@ void ConditionalEffect::state_change(AtomList& adds, AtomList& deletes,
  const Effect& ConditionalEffect::clone() const {
    ConditionalEffect* cpy = new ConditionalEffect(condition_->clone(), effect_->clone());
    ref(cpy);
+   deref(cpy->effect_); // As ConditionalEffect() increments ref on effect, and clone() does too.
    return *cpy;
  }
 

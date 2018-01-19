@@ -72,7 +72,11 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
         p_actionSchema* action_ = new p_actionSchema(ai->first); // Allocate new actionSchema.
         action_->set_parameters(ai->second->parameters()); // Set parameters makes the copy
         action_->set_precondition(ai->second->precondition().clone()); // Where to add it?*
-        action_->set_effect(ai->second->effect().clone());
+
+        const p_Effect* eff = &ai->second->effect().clone();
+        action_->set_effect(*eff);
+        RCObject::deref(eff);
+
         _dom->add_action(*action_);
     }
 }
@@ -151,9 +155,9 @@ void PPDDLInterface::Action::setEffect(const PPDDLInterface::Effect &e) {
     _as->set_effect(*effect_ptr);
 
     setRawEffectPtr(effect_ptr);
+    RCObject::deref(effect_ptr); // As effect_ptr will be removed here, we have to decrement the counter
 
     _action_effect->releasePtr(); // As it will remain in _as, the pointer doesn't have to be deleted by _as
-    RCObject::deref(effect_ptr); // As effect_ptr will be removed here, we have to decrement the counter
 }
 
 std::string PPDDLInterface::Action::getName() const {
@@ -220,7 +224,9 @@ double PPDDLInterface::ProbabilisticEffect::getProbability(size_t i) const {
 }
 
 PPDDLInterface::Effect PPDDLInterface::ProbabilisticEffect::getEffect(size_t i) const {
-    return PPDDLInterface::Effect(&constEffect()->effect(i).clone()); // FIXME ensure each clone's deletion!!!!
+    PPDDLInterface::Effect ret(&constEffect()->effect(i).clone()); // FIXME ensure each clone's deletion!!!!
+    RCObject::deref(ret.getEffect()); // As the clone increments the reference and the constructor does too
+    return ret;
 }
 
 const PPDDLInterface::p_ProbabilisticEffect *PPDDLInterface::ProbabilisticEffect::constEffect() const {
@@ -234,6 +240,7 @@ PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::p_Con
 
 
 PPDDLInterface::ConjunctiveEffect::ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect &e) : PPDDLInterface::Effect(&e._eff->clone()) {// FIXME ensure each clone's deletion!!!!
+    RCObject::deref(_eff);
 }
 
 size_t PPDDLInterface::ConjunctiveEffect::size() const {
@@ -242,7 +249,7 @@ size_t PPDDLInterface::ConjunctiveEffect::size() const {
 
 std::shared_ptr<PPDDLInterface::Effect> PPDDLInterface::ConjunctiveEffect::getConjunct(size_t i) const {
     const p_Effect* cjt = &constEffect()->conjuncts()[i]->clone(); // FIXME ensure each clone's deletion!!!!
-   /// RCObject::deref(cjt); // Decrement the reference as the constructor for PPDDLInterface::Effect will increase it
+    RCObject::deref(cjt); // Decrement the reference as the constructor for PPDDLInterface::Effect will increase it
 
     const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(cjt);
     if (pe != nullptr) {
@@ -284,15 +291,17 @@ PPDDLInterface::Effect::Effect(const PPDDLInterface::p_Effect *e) {
 
 
 PPDDLInterface::Effect::Effect(const Effect &e) {
-    this->_eff = &e._eff->clone(); // FIXME should clone? :/
+    //this->_eff = &e._eff->clone();
+    this->_eff = e._eff; // FIXME should clone? :/
     this->_delete_ptr = e._delete_ptr;
-    //RCObject::ref(_eff);
+    RCObject::ref(_eff);
 }
 
 PPDDLInterface::Effect &PPDDLInterface::Effect::operator=(const Effect &other) {
-    this->_eff = &other._eff->clone(); // FIXME should clone? :/
+    //this->_eff = &other._eff->clone();
+    this->_eff = other._eff; // FIXME should clone? :/
     this->_delete_ptr = other._delete_ptr;
-    //RCObject::ref(_eff);
+    RCObject::ref(_eff);
     return *this;
 }
 
@@ -306,4 +315,6 @@ PPDDLInterface::Effect::~Effect() {
 
 void PPDDLInterface::Effect::releasePtr() {
     _delete_ptr = false;
+    RCObject::deref(_eff); // As we are releasing the pointer, it's like we're losing one reference as there won't be a delete in this case
+
 }
