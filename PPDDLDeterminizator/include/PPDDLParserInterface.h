@@ -33,9 +33,10 @@ namespace PPDDLInterface {
     public:
         Effect(const p_Effect* e);
         Effect(const Effect& e);
+
         virtual ~Effect();
         const p_Effect* getEffect() const;
-        Effect & operator= (const Effect & other);
+        virtual Effect & operator= (const Effect & other);
    protected:
        const p_Effect* _eff;
        bool _delete_ptr;

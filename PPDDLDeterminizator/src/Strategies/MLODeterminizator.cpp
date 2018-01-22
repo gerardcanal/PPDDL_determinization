@@ -141,15 +141,17 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
             exit(1);
         }
         PPDDLInterface::Domain d(argv[1]);
-        //PPDDLInterface::Domain d_copy(d);
+        {
+        PPDDLInterface::Domain d_copy(d);
+        }
         MLODeterminizator mld;
         std::cout << "############################\nDeterminization\n###########################" <<std::endl;
         PPDDLInterface::Domain determinized = mld.determinize(d);
 
-        /*std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
+        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        std::cout << "COPIED DOMAIN: " << d_copy << std::endl;*/
+       // std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 
