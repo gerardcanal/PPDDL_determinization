@@ -448,10 +448,8 @@ void UpdateEffect::print(std::ostream& os) const {
 
 /* ====================================================================== */
 /* ConjunctiveEffect */
-int clonectr = 0, del = 0; // FIXME remove
 /* Deletes this conjunctive effect. */
 ConjunctiveEffect::~ConjunctiveEffect() {
-    std::cout << "clone() " << clonectr << " ~ConjunctiveEffect() " << ++del << std::endl;
   for (EffectList::const_iterator ei = conjuncts().begin();
        ei != conjuncts().end(); ei++) {
     destructive_deref(*ei);
@@ -459,7 +457,6 @@ ConjunctiveEffect::~ConjunctiveEffect() {
 }
 
 const Effect& ConjunctiveEffect::clone() const {
-    std::cout << "clone() " << ++clonectr << " ~ConjunctiveEffect() " << del << std::endl;//FIXME
   ConjunctiveEffect *cpy = new ConjunctiveEffect();
   ref(cpy);
   cpy->conjuncts_.resize(conjuncts_.size());
