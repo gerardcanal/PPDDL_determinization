@@ -20,7 +20,6 @@
 %{
 #define YYDEBUG 1
 
-
 //#include <config.h>
 #include "effects.h"
 #include "formulas.h"
@@ -33,6 +32,8 @@
 #define YY_DECL extern "C" int ppddl_lex()
 
 #include "parser.tab.hh"
+
+using namespace ppddl_parser;
 
 /* Current line number. */
 size_t line_number;

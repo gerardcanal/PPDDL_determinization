@@ -18,11 +18,17 @@
 namespace PPDDLInterface {
 
 // Typedefs
-    typedef ::Domain p_Domain; // The ::Domain syntax makes it reference to the upper scope namespace i.e. to the MDPSim parser one in this case
-    typedef ::Effect p_Effect;
-    typedef ::ConjunctiveEffect p_ConjunctiveEffect;
-    typedef ::ProbabilisticEffect p_ProbabilisticEffect;
-    typedef ::ActionSchema p_actionSchema;
+    typedef ppddl_parser::Domain p_Domain; // The ::Domain syntax makes it reference to the upper scope namespace i.e. to the MDPSim parser one in this case
+    typedef ppddl_parser::Effect p_Effect;
+    typedef ppddl_parser::ConjunctiveEffect p_ConjunctiveEffect;
+    typedef ppddl_parser::ProbabilisticEffect p_ProbabilisticEffect;
+    typedef ppddl_parser::ActionSchema p_actionSchema;
+    typedef ppddl_parser::RCObject RCObject;
+    typedef ppddl_parser::EffectList EffectList;
+    /*typedef ppddl_parser::TypeTable TypeTable;
+    typedef ppddl_parser::PredicateTable PredicateTable;
+    typedef ppddl_parser::FunctionTable FunctionTable;
+    typedef ppddl_parser::TermTable TermTable;*/
 
 // Classes
     //Generic class Effect

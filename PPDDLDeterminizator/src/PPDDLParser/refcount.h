@@ -24,49 +24,51 @@
 /* ====================================================================== */
 /* RCObject */
 
+namespace ppddl_parser {
+
 /*
  * An object with a reference counter.
  */
-struct RCObject {
-  /* Increases the reference count for the given object. */
-  static void ref(const RCObject* o) {
-    if (o != 0) {
-      o->ref_count_++;
-    }
-  }
+    struct RCObject {
+        /* Increases the reference count for the given object. */
+        static void ref(const RCObject *o) {
+          if (o != 0) {
+            o->ref_count_++;
+          }
+        }
 
-  /* Decreases the reference count for the given object. */
-  static void deref(const RCObject* o) {
-    if (o != 0) {
-      o->ref_count_--;
-    }
-  }
+        /* Decreases the reference count for the given object. */
+        static void deref(const RCObject *o) {
+          if (o != 0) {
+            o->ref_count_--;
+          }
+        }
 
-  /* Decreases the reference count for the given object and deletes it
-     if the reference count becomes zero. */
-  static void destructive_deref(const RCObject* o) {
-    if (o != 0) {
-      o->ref_count_--;
-      if (o->ref_count_ == 0) {
-        delete o;
-      }
-    }
-  }
+        /* Decreases the reference count for the given object and deletes it
+           if the reference count becomes zero. */
+        static void destructive_deref(const RCObject *o) {
+          if (o != 0) {
+            o->ref_count_--;
+            if (o->ref_count_ == 0) {
+              delete o;
+            }
+          }
+        }
 
-  /* Deletes this object. */
-  virtual ~RCObject() {}
+        /* Deletes this object. */
+        virtual ~RCObject() {}
 
- protected:
-  /* Constructs an object with a reference counter. */
-  RCObject() : ref_count_(0) {}
+    protected:
+        /* Constructs an object with a reference counter. */
+        RCObject() : ref_count_(0) {}
 
-  /* Copy constructor. */
-  RCObject(const RCObject& o) : ref_count_(0) {}
+        /* Copy constructor. */
+        RCObject(const RCObject &o) : ref_count_(0) {}
 
- private:
-  /* Reference counter. */
-  mutable unsigned long ref_count_;
-};
-
+    private:
+        /* Reference counter. */
+        mutable unsigned long ref_count_;
+    };
+}
 
 #endif /* REFCOUNT_H */

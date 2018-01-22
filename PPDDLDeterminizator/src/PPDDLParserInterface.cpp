@@ -41,23 +41,23 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
     _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_det"));
 
     /* Domain types. */
-    TypeTable types_ = p->types(); // A copy is made here
+    ppddl_parser::TypeTable types_ = p->types(); // A copy is made here
     _dom->types() = types_;
 
     /* Domain predicates. */
-    PredicateTable predicates_ = p->predicates();
+    ppddl_parser::PredicateTable predicates_ = p->predicates();
     _dom->predicates() = predicates_;
 
     /* Domain functions. */
-    FunctionTable functions_ = p->functions();
+    ppddl_parser::FunctionTable functions_ = p->functions();
     _dom->functions() = functions_;
 
     /* Domain terms. */
-    TermTable terms_ = p->terms();
+    ppddl_parser::TermTable terms_ = p->terms();
     _dom->terms() = terms_;
 
     /* Domain actions. */
-    for (ActionSchemaMap::const_iterator ai = p->actions().begin(); ai != p->actions().end(); ai++) {
+    for (ppddl_parser::ActionSchemaMap::const_iterator ai = p->actions().begin(); ai != p->actions().end(); ai++) {
         p_actionSchema* action_ = new p_actionSchema(ai->first); // Allocate new actionSchema.
         action_->set_parameters(ai->second->parameters()); // Set parameters makes the copy
         action_->set_precondition(ai->second->precondition().clone()); // Where to add it?*
@@ -96,7 +96,7 @@ PPDDLInterface::Action PPDDLInterface::Domain::getAction(const std::string &name
 std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() const {
     std::vector<PPDDLInterface::Action> ret_actions(_dom->actions().size()); // Fixed size, no reallocations
     size_t i = 0;
-    for (ActionSchemaMap::const_iterator ai = _dom->actions().begin(); ai != _dom->actions().end(); ai++) {
+    for (ppddl_parser::ActionSchemaMap::const_iterator ai = _dom->actions().begin(); ai != _dom->actions().end(); ai++) {
        ret_actions[i++] = PPDDLInterface::Action(ai->second);
     }
     return ret_actions;

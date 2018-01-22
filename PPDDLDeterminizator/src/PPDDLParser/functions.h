@@ -3,7 +3,7 @@
  * Functions.
  *
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,48 +32,53 @@
 /* ====================================================================== */
 /* Function */
 
+namespace ppddl_parser {
+
 /*
  * A function.
  */
-struct Function {
-  /* Constructs a function. */
-  explicit Function(int index) : index_(index) {}
+    struct Function {
+        /* Constructs a function. */
+        explicit Function(int index) : index_(index) {}
 
- private:
-  /* Function index. */
-  int index_;
+    private:
+        /* Function index. */
+        int index_;
 
-  friend bool operator==(const Function& f1, const Function& f2);
-  friend bool operator<(const Function& f1, const Function& f2);
-  friend std::ostream& operator<<(std::ostream& os, const Function& f);
-  friend struct FunctionTable;
-};
+        friend bool operator==(const Function &f1, const Function &f2);
+
+        friend bool operator<(const Function &f1, const Function &f2);
+
+        friend std::ostream &operator<<(std::ostream &os, const Function &f);
+
+        friend struct FunctionTable;
+    };
 
 /* Equality operator for functions. */
-inline bool operator==(const Function& f1, const Function& f2) {
-  return f1.index_ == f2.index_;
-}
+    inline bool operator==(const Function &f1, const Function &f2) {
+      return f1.index_ == f2.index_;
+    }
 
 /* Inequality operator for functions. */
-inline bool operator!=(const Function& f1, const Function& f2) {
-  return !(f1 == f2);
-}
+    inline bool operator!=(const Function &f1, const Function &f2) {
+      return !(f1 == f2);
+    }
 
 /* Less-than operator for functions. */
-inline bool operator<(const Function& f1, const Function& f2) {
-  return f1.index_ < f2.index_;
-}
+    inline bool operator<(const Function &f1, const Function &f2) {
+      return f1.index_ < f2.index_;
+    }
 
 /* Output operator for functions. */
-std::ostream& operator<<(std::ostream& os, const Function& f);
+    std::ostream &operator<<(std::ostream &os, const Function &f);
 
 
 /* ====================================================================== */
 /* FunctionSet */
 
 /* Set of function declarations. */
-struct FunctionSet : public std::set<Function> {
-};
+    struct FunctionSet : public std::set<Function> {
+    };
 
 
 /* ====================================================================== */
@@ -82,47 +87,48 @@ struct FunctionSet : public std::set<Function> {
 /*
  * Function table.
  */
-struct FunctionTable {
-  /* Adds a parameter with the given type to the given function. */
-  static void add_parameter(const Function& function, const Type& type);
+    struct FunctionTable {
+        /* Adds a parameter with the given type to the given function. */
+        static void add_parameter(const Function &function, const Type &type);
 
-  /* Returns the name of the given function. */
-  static const std::string& name(const Function& function);
+        /* Returns the name of the given function. */
+        static const std::string &name(const Function &function);
 
-  /* Returns the parameter types of the given function. */
-  static const TypeList& parameters(const Function& function);
+        /* Returns the parameter types of the given function. */
+        static const TypeList &parameters(const Function &function);
 
-  /* Makes the given function dynamic. */
-  static void make_dynamic(const Function& function);
+        /* Makes the given function dynamic. */
+        static void make_dynamic(const Function &function);
 
-  /* Tests if the given function is static. */
-  static bool static_function(const Function& function);
+        /* Tests if the given function is static. */
+        static bool static_function(const Function &function);
 
-  /* Adds a function with the given name to this table and returns the
-     function. */
-  const Function& add_function(const std::string& name);
+        /* Adds a function with the given name to this table and returns the
+           function. */
+        const Function &add_function(const std::string &name);
 
-  /* Returns a pointer to the function with the given name, or 0 if no
-     function with the given name exists. */
-  const Function* find_function(const std::string& name) const;
+        /* Returns a pointer to the function with the given name, or 0 if no
+           function with the given name exists. */
+        const Function *find_function(const std::string &name) const;
 
- private:
-  /* Function names. */
-  static std::vector<std::string> names_;
-  /* Function parameters. */
-  static std::vector<TypeList> parameters_;
-  /* Static functions. */
-  static FunctionSet static_functions_;
+    private:
+        /* Function names. */
+        static std::vector<std::string> names_;
+        /* Function parameters. */
+        static std::vector<TypeList> parameters_;
+        /* Static functions. */
+        static FunctionSet static_functions_;
 
-  /* Mapping of function names to functions. */
-  std::map<std::string, Function> functions_;
+        /* Mapping of function names to functions. */
+        std::map<std::string, Function> functions_;
 
-  friend std::ostream& operator<<(std::ostream& os, const FunctionTable& t);
-  friend std::ostream& operator<<(std::ostream& os, const Function& f);
-};
+        friend std::ostream &operator<<(std::ostream &os, const FunctionTable &t);
+
+        friend std::ostream &operator<<(std::ostream &os, const Function &f);
+    };
 
 /* Output operator for function tables. */
-std::ostream& operator<<(std::ostream& os, const FunctionTable& t);
-
+    std::ostream &operator<<(std::ostream &os, const FunctionTable &t);
+}
 
 #endif /* FUNCTIONS_H */

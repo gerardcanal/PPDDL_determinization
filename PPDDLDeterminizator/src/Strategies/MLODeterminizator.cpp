@@ -118,40 +118,16 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
             exit(-1);
         }
 
-        // Set default verbosity.
-        //verbosity = 2;
-        // Set default warning level.
-        //warning_level = 1;
-        if (-2 > 1) {
-            if (read_file(argv[1])) {
-                std::cout << "File parsed correctly" << std::endl;
-                //
-                // Display domains and problems.
-                //
-                for (Domain::DomainMap::const_iterator di = Domain::begin(); di != Domain::end(); di++) {
-                    //std::cout << *di->second << std::endl;
-                    //PPDDLInterface::Domain d(di->second);
-                    //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
-                    // exit(1);
-                    MLODeterminizator mld;
-                    //mld.determinize(*(*di).second);
-                }
-
-            } else std::cout << "There were errors while parsing input file!" << std::endl;
-            exit(1);
-        }
         PPDDLInterface::Domain d(argv[1]);
-        {
         PPDDLInterface::Domain d_copy(d);
-        }
         MLODeterminizator mld;
         std::cout << "############################\nDeterminization\n###########################" <<std::endl;
-        PPDDLInterface::Domain determinized = mld.determinize(d);
+        PPDDLInterface::Domain determinized = mld.determinize(d_copy);
 
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        std::cout << "WRAPPED DOMAIN: " << d << std::endl;
+        //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-       // std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
+        //std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 

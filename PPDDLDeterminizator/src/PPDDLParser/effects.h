@@ -33,47 +33,47 @@
 
 /* ====================================================================== */
 /* Update */
-
+namespace ppddl_parser {
 /*
  * An update.
  */
-struct Update {
-  /* Deletes this update. */
-  virtual ~Update();
+    struct Update {
+        /* Deletes this update. */
+        virtual ~Update();
 
-  /* Returns the fluent of this update. */
-  const Fluent& fluent() const { return *fluent_; }
+        /* Returns the fluent of this update. */
+        const Fluent &fluent() const { return *fluent_; }
 
-  /* Returns the expression of this update. */
-  const Expression& expression() const { return *expr_; }
+        /* Returns the expression of this update. */
+        const Expression &expression() const { return *expr_; }
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const = 0;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const = 0;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const = 0;
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const = 0;
 
-  virtual const Update& clone() const = 0;
+        virtual const Update &clone() const = 0;
 
- protected:
-  /* Constructs an update. */
-  Update(const Fluent& fluent, const Expression& expr);
+    protected:
+        /* Constructs an update. */
+        Update(const Fluent &fluent, const Expression &expr);
 
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const = 0;
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const = 0;
 
- private:
-  /* Fluent affected by this update. */
-  const Fluent* fluent_;
-  /* Expression. */
-  const Expression* expr_;
+    private:
+        /* Fluent affected by this update. */
+        const Fluent *fluent_;
+        /* Expression. */
+        const Expression *expr_;
 
-  friend std::ostream& operator<<(std::ostream& os, const Update& u);
-};
+        friend std::ostream &operator<<(std::ostream &os, const Update &u);
+    };
 
 /* Output operator for updates. */
-std::ostream& operator<<(std::ostream& os, const Update& u);
+    std::ostream &operator<<(std::ostream &os, const Update &u);
 
 
 /* ====================================================================== */
@@ -82,8 +82,8 @@ std::ostream& operator<<(std::ostream& os, const Update& u);
 /*
  * List of updates.
  */
-struct UpdateList : public std::vector<const Update*> {
-};
+    struct UpdateList : public std::vector<const Update *> {
+    };
 
 
 /* ====================================================================== */
@@ -92,22 +92,24 @@ struct UpdateList : public std::vector<const Update*> {
 /*
  * An assign update.
  */
-struct Assign : public Update {
-  /* Constructs an assign update. */
-  Assign(const Fluent& fluent, const Expression& expr)
-    : Update(fluent, expr) {}
+    struct Assign : public Update {
+        /* Constructs an assign update. */
+        Assign(const Fluent &fluent, const Expression &expr)
+                : Update(fluent, expr) {}
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const;
-  virtual const Update& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const;
+
+        virtual const Update &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -116,23 +118,24 @@ struct Assign : public Update {
 /*
  * An scale-up update.
  */
-struct ScaleUp : public Update {
-  /* Constructs an scale-up update. */
-  ScaleUp(const Fluent& fluent, const Expression& expr)
-    : Update(fluent, expr) {}
+    struct ScaleUp : public Update {
+        /* Constructs an scale-up update. */
+        ScaleUp(const Fluent &fluent, const Expression &expr)
+                : Update(fluent, expr) {}
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const;
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const;
 
-    virtual const Update& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Update &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -141,23 +144,24 @@ struct ScaleUp : public Update {
 /*
  * An scale-down update.
  */
-struct ScaleDown : public Update {
-  /* Constructs an scale-down update. */
-  ScaleDown(const Fluent& fluent, const Expression& expr)
-    : Update(fluent, expr) {}
+    struct ScaleDown : public Update {
+        /* Constructs an scale-down update. */
+        ScaleDown(const Fluent &fluent, const Expression &expr)
+                : Update(fluent, expr) {}
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const;
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const;
 
-    virtual const Update& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Update &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -166,23 +170,24 @@ struct ScaleDown : public Update {
 /*
  * An increase update.
  */
-struct Increase : public Update {
-  /* Constructs an increase update. */
-  Increase(const Fluent& fluent, const Expression& expr)
-    : Update(fluent, expr) {}
+    struct Increase : public Update {
+        /* Constructs an increase update. */
+        Increase(const Fluent &fluent, const Expression &expr)
+                : Update(fluent, expr) {}
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const;
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const;
 
-    virtual const Update& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Update &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -191,23 +196,24 @@ struct Increase : public Update {
 /*
  * An decrease update.
  */
-struct Decrease : public Update {
-  /* Constructs an decrease update. */
-  Decrease(const Fluent& fluent, const Expression& expr)
-    : Update(fluent, expr) {}
+    struct Decrease : public Update {
+        /* Constructs an decrease update. */
+        Decrease(const Fluent &fluent, const Expression &expr)
+                : Update(fluent, expr) {}
 
-  /* Changes the given state according to this update. */
-  virtual void affect(ValueMap& values) const;
+        /* Changes the given state according to this update. */
+        virtual void affect(ValueMap &values) const;
 
-  /* Returns an instantiaion of this update. */
-  virtual const Update& instantiation(const SubstitutionMap& subst,
-                                      const ValueMap& values) const;
+        /* Returns an instantiaion of this update. */
+        virtual const Update &instantiation(const SubstitutionMap &subst,
+                                            const ValueMap &values) const;
 
-    virtual const Update& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Update &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -216,41 +222,41 @@ struct Decrease : public Update {
 /*
  * An effect.
  */
-struct Effect : public RCObject {
-  /* The empty effect. */
-  static const Effect& EMPTY;
+    struct Effect : public RCObject {
+        /* The empty effect. */
+        static const Effect &EMPTY;
 
-  /* Tests if this is the empty effect. */
-  bool empty() const { return this == &EMPTY; }
+        /* Tests if this is the empty effect. */
+        bool empty() const { return this == &EMPTY; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const = 0;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const = 0;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const = 0;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const = 0;
 
-  virtual const Effect& clone() const = 0;
+        virtual const Effect &clone() const = 0;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const = 0;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const = 0;
 
-  friend std::ostream& operator<<(std::ostream& os, const Effect& e);
-};
+        friend std::ostream &operator<<(std::ostream &os, const Effect &e);
+    };
 
 /* Conjunction operator for effects. */
-const Effect& operator&&(const Effect& e1, const Effect& e2);
+    const Effect &operator&&(const Effect &e1, const Effect &e2);
 
 /* Output operator for effects. */
-std::ostream& operator<<(std::ostream& os, const Effect& e);
+    std::ostream &operator<<(std::ostream &os, const Effect &e);
 
 
 /* ====================================================================== */
@@ -259,8 +265,8 @@ std::ostream& operator<<(std::ostream& os, const Effect& e);
 /*
  * List of effects.
  */
-struct EffectList : public std::vector<const Effect*> {
-};
+    struct EffectList : public std::vector<const Effect *> {
+    };
 
 
 /* ====================================================================== */
@@ -269,22 +275,23 @@ struct EffectList : public std::vector<const Effect*> {
 /*
  * A simple effect.
  */
-struct SimpleEffect : public Effect {
-  /* Deletes this simple effect. */
-  virtual ~SimpleEffect();
+    struct SimpleEffect : public Effect {
+        /* Deletes this simple effect. */
+        virtual ~SimpleEffect();
 
-  /* Returns the atom associated with this simple effect. */
-  const Atom& atom() const { return *atom_; }
+        /* Returns the atom associated with this simple effect. */
+        const Atom &atom() const { return *atom_; }
 
-    virtual const Effect& clone() const =0;
- protected:
-  /* Constructs a simple effect. */
-  explicit SimpleEffect(const Atom& atom);
+        virtual const Effect &clone() const =0;
 
- private:
-  /* Atom added by this effect. */
-  const Atom* atom_;
-};
+    protected:
+        /* Constructs a simple effect. */
+        explicit SimpleEffect(const Atom &atom);
+
+    private:
+        /* Atom added by this effect. */
+        const Atom *atom_;
+    };
 
 
 /* ====================================================================== */
@@ -293,29 +300,30 @@ struct SimpleEffect : public Effect {
 /*
  * An add effect.
  */
-struct AddEffect : public SimpleEffect {
-  /* Constructs an add effect. */
-  explicit AddEffect(const Atom& atom) : SimpleEffect(atom) {}
+    struct AddEffect : public SimpleEffect {
+        /* Constructs an add effect. */
+        explicit AddEffect(const Atom &atom) : SimpleEffect(atom) {}
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
-    virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Effect &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -324,29 +332,30 @@ struct AddEffect : public SimpleEffect {
 /*
  * A delete effect.
  */
-struct DeleteEffect : public SimpleEffect {
-  /* Constructs a delete effect. */
-  explicit DeleteEffect(const Atom& atom) : SimpleEffect(atom) {}
+    struct DeleteEffect : public SimpleEffect {
+        /* Constructs a delete effect. */
+        explicit DeleteEffect(const Atom &atom) : SimpleEffect(atom) {}
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
-    virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
-};
+        virtual const Effect &clone() const;
+
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+    };
 
 
 /* ====================================================================== */
@@ -355,41 +364,43 @@ struct DeleteEffect : public SimpleEffect {
 /*
  * An update effect.
  */
-struct UpdateEffect : public Effect {
-  /* Returns an effect for the given update. */
-  static const Effect& make(const Update& update);
+    struct UpdateEffect : public Effect {
+        /* Returns an effect for the given update. */
+        static const Effect &make(const Update &update);
 
-  /* Deletes this update effect. */
-  virtual ~UpdateEffect();
+        /* Deletes this update effect. */
+        virtual ~UpdateEffect();
 
-  /* Returns the update performed by this effect. */
-  const Update& update() const { return *update_; }
+        /* Returns the update performed by this effect. */
+        const Update &update() const { return *update_; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
-    virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
- private:
-  /* Update performed by this effect. */
-  const Update* update_;
+        virtual const Effect &clone() const;
 
-  /* Constructs an update effect. */
-  explicit UpdateEffect(const Update& update) : update_(&update) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Update performed by this effect. */
+        const Update *update_;
+
+        /* Constructs an update effect. */
+        explicit UpdateEffect(const Update &update) : update_(&update) {}
+    };
 
 
 /* ====================================================================== */
@@ -398,47 +409,48 @@ struct UpdateEffect : public Effect {
 /*
  * A conjunctive effect.
  */
-struct ConjunctiveEffect : public Effect {
-  /* Deletes this conjunctive effect. */
-  virtual ~ConjunctiveEffect();
+    struct ConjunctiveEffect : public Effect {
+        /* Deletes this conjunctive effect. */
+        virtual ~ConjunctiveEffect();
 
-  /* Returns the conjuncts of this conjunctive effect. */
-  const EffectList& conjuncts() const { return conjuncts_; }
+        /* Returns the conjuncts of this conjunctive effect. */
+        const EffectList &conjuncts() const { return conjuncts_; }
 
-  /* Sets the conjuncts of this conjunctive effect. */
-  void set_conjuncts(const EffectList& new_cj) { conjuncts_= new_cj; }
+        /* Sets the conjuncts of this conjunctive effect. */
+        void set_conjuncts(const EffectList &new_cj) { conjuncts_ = new_cj; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
-  virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        virtual const Effect &clone() const;
 
- private:
-  /* The conjuncts. */
-  EffectList conjuncts_;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* Constructs a conjunctive effect. */
-  ConjunctiveEffect() {}
+    private:
+        /* The conjuncts. */
+        EffectList conjuncts_;
 
-  /* Adds a conjunct to this conjunctive effect. */
-  void add_conjunct(const Effect& conjunct);
+        /* Constructs a conjunctive effect. */
+        ConjunctiveEffect() {}
 
-  friend const Effect& operator&&(const Effect& e1, const Effect& e2);
-};
+        /* Adds a conjunct to this conjunctive effect. */
+        void add_conjunct(const Effect &conjunct);
+
+        friend const Effect &operator&&(const Effect &e1, const Effect &e2);
+    };
 
 
 /* ====================================================================== */
@@ -447,47 +459,49 @@ struct ConjunctiveEffect : public Effect {
 /*
  * A conditional effect.
  */
-struct ConditionalEffect : public Effect {
-  /* Returns a conditional effect. */
-  static const Effect& make(const StateFormula& condition,
-                            const Effect& effect);
+    struct ConditionalEffect : public Effect {
+        /* Returns a conditional effect. */
+        static const Effect &make(const StateFormula &condition,
+                                  const Effect &effect);
 
-  /* Deletes this conditional effect. */
-  virtual ~ConditionalEffect();
+        /* Deletes this conditional effect. */
+        virtual ~ConditionalEffect();
 
-  /* Returns the condition of this effect. */
-  const StateFormula& condition() const { return *condition_; }
+        /* Returns the condition of this effect. */
+        const StateFormula &condition() const { return *condition_; }
 
-  /* Returns the conditional effect of this effect. */
-  const Effect& effect() const { return *effect_; }
+        /* Returns the conditional effect of this effect. */
+        const Effect &effect() const { return *effect_; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
-  virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
- private:
-  /* Effect condition. */
-  const StateFormula* condition_;
-  /* Effect. */
-  const Effect* effect_;
+        virtual const Effect &clone() const;
 
-  /* Constructs a conditional effect. */
-  ConditionalEffect(const StateFormula& condition, const Effect& effect);
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Effect condition. */
+        const StateFormula *condition_;
+        /* Effect. */
+        const Effect *effect_;
+
+        /* Constructs a conditional effect. */
+        ConditionalEffect(const StateFormula &condition, const Effect &effect);
+    };
 
 
 /* ====================================================================== */
@@ -496,58 +510,59 @@ struct ConditionalEffect : public Effect {
 /*
  * A probabilistic effect.
  */
-struct ProbabilisticEffect : public Effect {
-  /* Returns a probabilistic effect. */
-  static const Effect&
-  make(const std::vector<std::pair<Rational, const Effect*> >& os);
+    struct ProbabilisticEffect : public Effect {
+        /* Returns a probabilistic effect. */
+        static const Effect &
+        make(const std::vector<std::pair<Rational, const Effect *> > &os);
 
-  /* Deletes this probabilistic effect. */
-  virtual ~ProbabilisticEffect();
+        /* Deletes this probabilistic effect. */
+        virtual ~ProbabilisticEffect();
 
-  /* Returns the number of outcomes of this probabilistic effect. */
-  size_t size() const { return weights_.size(); }
+        /* Returns the number of outcomes of this probabilistic effect. */
+        size_t size() const { return weights_.size(); }
 
-  /* Returns the ith outcome's probability. */
-  Rational probability(size_t i) const {
-    return Rational(weights_[i], weight_sum_);
-  }
+        /* Returns the ith outcome's probability. */
+        Rational probability(size_t i) const {
+            return Rational(weights_[i], weight_sum_);
+        }
 
-  /* Returns the ith outcome's effect. */
-  const Effect& effect(size_t i) const { return *effects_[i]; }
+        /* Returns the ith outcome's effect. */
+        const Effect &effect(size_t i) const { return *effects_[i]; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
-  virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        virtual const Effect &clone() const;
 
- private:
-  /* Weights associated with outcomes. */
-  std::vector<int> weights_;
-  /* The sum of weights. */
-  int weight_sum_;
-  /* Outcome effects. */
-  EffectList effects_;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* Constructs an empty probabilistic effect. */
-  ProbabilisticEffect() : weight_sum_(0) {}
+    private:
+        /* Weights associated with outcomes. */
+        std::vector<int> weights_;
+        /* The sum of weights. */
+        int weight_sum_;
+        /* Outcome effects. */
+        EffectList effects_;
 
-  /* Adds an outcome to this probabilistic effect. */
-  bool add_outcome(const Rational& p, const Effect& effect);
-};
+        /* Constructs an empty probabilistic effect. */
+        ProbabilisticEffect() : weight_sum_(0) {}
+
+        /* Adds an outcome to this probabilistic effect. */
+        bool add_outcome(const Rational &p, const Effect &effect);
+    };
 
 
 /* ====================================================================== */
@@ -556,49 +571,51 @@ struct ProbabilisticEffect : public Effect {
 /*
  * A universally quantified effect.
  */
-struct QuantifiedEffect : public Effect {
-  /* Returns a universally quantified effect. */
-  static const Effect& make(const VariableList& parameters,
-                            const Effect& body);
+    struct QuantifiedEffect : public Effect {
+        /* Returns a universally quantified effect. */
+        static const Effect &make(const VariableList &parameters,
+                                  const Effect &body);
 
-  /* Deletes this universally quantifed effect. */
-  virtual ~QuantifiedEffect();
+        /* Deletes this universally quantifed effect. */
+        virtual ~QuantifiedEffect();
 
-  /* Returns the parameters of this universally quantified effect. */
-  const VariableList& parameters() const { return parameters_; }
+        /* Returns the parameters of this universally quantified effect. */
+        const VariableList &parameters() const { return parameters_; }
 
-  /* Returns the quantified effect. */
-  const Effect& effect() const { return *effect_; }
+        /* Returns the quantified effect. */
+        const Effect &effect() const { return *effect_; }
 
-  /* Fills the provided lists with a sampled state change for this
-     effect in the given state. */
-  virtual void state_change(AtomList& adds, AtomList& deletes,
-                            UpdateList& updates,
-                            const TermTable& terms,
-                            const AtomSet& atoms,
-                            const ValueMap& values) const;
+        /* Fills the provided lists with a sampled state change for this
+           effect in the given state. */
+        virtual void state_change(AtomList &adds, AtomList &deletes,
+                                  UpdateList &updates,
+                                  const TermTable &terms,
+                                  const AtomSet &atoms,
+                                  const ValueMap &values) const;
 
-  /* Returns an instantiation of this effect. */
-  virtual const Effect& instantiation(const SubstitutionMap& subst,
-                                      const TermTable& terms,
-                                      const AtomSet& atoms,
-                                      const ValueMap& values) const;
+        /* Returns an instantiation of this effect. */
+        virtual const Effect &instantiation(const SubstitutionMap &subst,
+                                            const TermTable &terms,
+                                            const AtomSet &atoms,
+                                            const ValueMap &values) const;
 
-    virtual const Effect& clone() const;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        virtual const Effect &clone() const;
 
- private:
-  /* Quantified variables. */
-  VariableList parameters_;
-  /* The quantified effect. */
-  const Effect* effect_;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* Constructs a universally quantified effect. */
-  explicit QuantifiedEffect(const VariableList& parameters,
-                            const Effect& effect);
-};
+    private:
+        /* Quantified variables. */
+        VariableList parameters_;
+        /* The quantified effect. */
+        const Effect *effect_;
 
+        /* Constructs a universally quantified effect. */
+        explicit QuantifiedEffect(const VariableList &parameters,
+                                  const Effect &effect);
+    };
+
+}
 
 #endif /* EFFECTS_H */

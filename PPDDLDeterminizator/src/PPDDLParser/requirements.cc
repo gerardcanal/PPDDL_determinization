@@ -1,6 +1,6 @@
 /*
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,39 @@
 /* ====================================================================== */
 /* Requirements */
 
+namespace ppddl_parser {
+
 /* Constructs a default requirements object. */
-Requirements::Requirements()
-  : strips(true), typing(false), negative_preconditions(false),
-    disjunctive_preconditions(false), equality(false),
-    existential_preconditions(false), universal_preconditions(false),
-    conditional_effects(false), fluents(false), probabilistic_effects(false),
-    rewards(false) {}
+    Requirements::Requirements()
+            : strips(true), typing(false), negative_preconditions(false),
+              disjunctive_preconditions(false), equality(false),
+              existential_preconditions(false), universal_preconditions(false),
+              conditional_effects(false), fluents(false), probabilistic_effects(false),
+              rewards(false) {}
 
 
 /* Enables quantified preconditions. */
-void Requirements::quantified_preconditions() {
-  existential_preconditions = true;
-  universal_preconditions = true;
-}
+    void Requirements::quantified_preconditions() {
+      existential_preconditions = true;
+      universal_preconditions = true;
+    }
 
 
 /* Enables ADL style actions. */
-void Requirements::adl() {
-  strips = true;
-  typing = true;
-  negative_preconditions = true;
-  disjunctive_preconditions = true;
-  equality = true;
-  quantified_preconditions();
-  conditional_effects = true;
-}
+    void Requirements::adl() {
+      strips = true;
+      typing = true;
+      negative_preconditions = true;
+      disjunctive_preconditions = true;
+      equality = true;
+      quantified_preconditions();
+      conditional_effects = true;
+    }
 
 
 /* Enables MDP planning problems. */
-void Requirements::mdp() {
-  probabilistic_effects = true;
-  rewards = true;
+    void Requirements::mdp() {
+      probabilistic_effects = true;
+      rewards = true;
+    }
 }

@@ -40,50 +40,53 @@
 /* ====================================================================== */
 /* StateFormula */
 
-struct AtomSet;
+namespace ppddl_parser {
+
+    struct AtomSet;
 
 /*
  * A state formula.
  */
-struct StateFormula : public RCObject {
-  /* A formula true in every state. */
-  static const StateFormula& TRUE;
-  /* A formula false in every state. */
-  static const StateFormula& FALSE;
+    struct StateFormula : public RCObject {
+        /* A formula true in every state. */
+        static const StateFormula &TRUE;
+        /* A formula false in every state. */
+        static const StateFormula &FALSE;
 
-  /* Tests if this state formula is a tautology. */
-  bool tautology() const { return this == &TRUE; }
+        /* Tests if this state formula is a tautology. */
+        bool tautology() const { return this == &TRUE; }
 
-  /* Tests if this state formula is a contradiction. */
-  bool contradiction() const { return this == &FALSE; }
+        /* Tests if this state formula is a contradiction. */
+        bool contradiction() const { return this == &FALSE; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const = 0;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const = 0;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const = 0;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const = 0;
 
-  virtual const StateFormula& clone() const=0;
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const = 0;
+        virtual const StateFormula &clone() const =0;
 
-  friend std::ostream& operator<<(std::ostream& os, const StateFormula& f);
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const = 0;
+
+        friend std::ostream &operator<<(std::ostream &os, const StateFormula &f);
+    };
 
 /* Conjunction operator for state formulas. */
-const StateFormula& operator&&(const StateFormula& f1, const StateFormula& f2);
+    const StateFormula &operator&&(const StateFormula &f1, const StateFormula &f2);
 
 /* Disjunction operator for state formulas. */
-const StateFormula& operator||(const StateFormula& f1, const StateFormula& f2);
+    const StateFormula &operator||(const StateFormula &f1, const StateFormula &f2);
 
 /* Output operator for state formulas. */
-std::ostream& operator<<(std::ostream& os, const StateFormula& f);
+    std::ostream &operator<<(std::ostream &os, const StateFormula &f);
 
 
 /* ====================================================================== */
@@ -92,8 +95,8 @@ std::ostream& operator<<(std::ostream& os, const StateFormula& f);
 /*
  * List of formulas.
  */
-struct FormulaList : public std::vector<const StateFormula*> {
-};
+    struct FormulaList : public std::vector<const StateFormula *> {
+    };
 
 
 /* ====================================================================== */
@@ -102,65 +105,66 @@ struct FormulaList : public std::vector<const StateFormula*> {
 /*
  * An atom.
  */
-struct Atom : public StateFormula {
-  /* Returns an atom with the given predicate and terms. */
-  static const Atom& make(Predicate predicate, const TermList& terms);
+    struct Atom : public StateFormula {
+        /* Returns an atom with the given predicate and terms. */
+        static const Atom &make(Predicate predicate, const TermList &terms);
 
-  /* Deletes this atom. */
-  virtual ~Atom();
+        /* Deletes this atom. */
+        virtual ~Atom();
 
-  /* Returns the predicate of this atom. */
-  Predicate predicate() const { return predicate_; }
+        /* Returns the predicate of this atom. */
+        Predicate predicate() const { return predicate_; }
 
-  /* Returns the terms of this atom. */
-  const TermList& terms() const { return terms_; }
+        /* Returns the terms of this atom. */
+        const TermList &terms() const { return terms_; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns this atom subject to the given substitution. */
-  const Atom& substitution(const SubstitutionMap& subst) const;
+        /* Returns this atom subject to the given substitution. */
+        const Atom &substitution(const SubstitutionMap &subst) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Less-than comparison function object for atoms. */
-  struct AtomLess
-    : public std::binary_function<const Atom*, const Atom*, bool> {
-    /* Comparison function. */
-    bool operator()(const Atom* a1, const Atom* a2) const;
-  };
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* A table of atoms. */
-  struct AtomTable : std::set<const Atom*, AtomLess> {
-  };
+    private:
+        /* Less-than comparison function object for atoms. */
+        struct AtomLess
+                : public std::binary_function<const Atom *, const Atom *, bool> {
+            /* Comparison function. */
+            bool operator()(const Atom *a1, const Atom *a2) const;
+        };
 
-  /* Table of atoms. */
-  static AtomTable atoms;
+        /* A table of atoms. */
+        struct AtomTable : std::set<const Atom *, AtomLess> {
+        };
 
-  /* Predicate of this atom. */
-  Predicate predicate_;
-  /* Terms of this atom. */
-  TermList terms_;
+        /* Table of atoms. */
+        static AtomTable atoms;
 
-  /* Constructs an atom with the given predicate. */
-  explicit Atom(Predicate predicate) : predicate_(predicate) {}
+        /* Predicate of this atom. */
+        Predicate predicate_;
+        /* Terms of this atom. */
+        TermList terms_;
 
-  /* Adds a term to this atom. */
-  void add_term(const Term& term) { terms_.push_back(term); }
-};
+        /* Constructs an atom with the given predicate. */
+        explicit Atom(Predicate predicate) : predicate_(predicate) {}
+
+        /* Adds a term to this atom. */
+        void add_term(const Term &term) { terms_.push_back(term); }
+    };
 
 
 /* ====================================================================== */
@@ -169,44 +173,44 @@ struct Atom : public StateFormula {
 /*
  * Equality formula.
  */
-struct Equality : public StateFormula {
-  /* Returns an equality of the two terms. */
-  static const StateFormula& make(const Term& term1, const Term& term2);
+    struct Equality : public StateFormula {
+        /* Returns an equality of the two terms. */
+        static const StateFormula &make(const Term &term1, const Term &term2);
 
-  /* Returns the first term of this equality formula. */
-  const Term& term1() const { return term1_; }
+        /* Returns the first term of this equality formula. */
+        const Term &term1() const { return term1_; }
 
-  /* Returns the second term of this equality formula. */
-  const Term& term2() const { return term2_; }
+        /* Returns the second term of this equality formula. */
+        const Term &term2() const { return term2_; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
- private:
-  /* First term of equality formula. */
-  Term term1_;
-  /* Second term of equality formula. */
-  Term term2_;
+    private:
+        /* First term of equality formula. */
+        Term term1_;
+        /* Second term of equality formula. */
+        Term term2_;
 
-  /* Constructs an equality formula. */
-  Equality(const Term& term1, const Term& term2)
-    : term1_(term1), term2_(term2) {}
-};
+        /* Constructs an equality formula. */
+        Equality(const Term &term1, const Term &term2)
+                : term1_(term1), term2_(term2) {}
+    };
 
 
 /* ====================================================================== */
@@ -215,29 +219,29 @@ struct Equality : public StateFormula {
 /*
  * A comparison formula.
  */
-struct Comparison : public StateFormula {
-  /* Deletes this comparison. */
-  virtual ~Comparison();
+    struct Comparison : public StateFormula {
+        /* Deletes this comparison. */
+        virtual ~Comparison();
 
-  /* Returns the first expression of this comparison. */
-  const Expression& expr1() const { return *expr1_; }
+        /* Returns the first expression of this comparison. */
+        const Expression &expr1() const { return *expr1_; }
 
-  /* Returns the second expression of this comparison. */
-  const Expression& expr2() const { return *expr2_; }
+        /* Returns the second expression of this comparison. */
+        const Expression &expr2() const { return *expr2_; }
 
-  /* Clones this state formula. */
-  virtual const StateFormula& clone() const =0;
+        /* Clones this state formula. */
+        virtual const StateFormula &clone() const =0;
 
- protected:
-  /* Constructs a comparison. */
-  Comparison(const Expression& expr1, const Expression& expr2);
+    protected:
+        /* Constructs a comparison. */
+        Comparison(const Expression &expr1, const Expression &expr2);
 
- private:
-  /* The first expression. */
-  const Expression* expr1_;
-  /* The second expression. */
-  const Expression* expr2_;
-};
+    private:
+        /* The first expression. */
+        const Expression *expr1_;
+        /* The second expression. */
+        const Expression *expr2_;
+    };
 
 
 /* ====================================================================== */
@@ -246,33 +250,34 @@ struct Comparison : public StateFormula {
 /*
  * A less-than comparison.
  */
-struct LessThan : public Comparison {
-  /* Returns a less-than comparison of the two expressions. */
-  static const StateFormula& make(const Expression& expr1,
-                                  const Expression& expr2);
+    struct LessThan : public Comparison {
+        /* Returns a less-than comparison of the two expressions. */
+        static const StateFormula &make(const Expression &expr1,
+                                        const Expression &expr2);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Constructs a less-than comparision. */
-  LessThan(const Expression& expr1, const Expression& expr2)
-    : Comparison(expr1, expr2) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Constructs a less-than comparision. */
+        LessThan(const Expression &expr1, const Expression &expr2)
+                : Comparison(expr1, expr2) {}
+    };
 
 
 /* ====================================================================== */
@@ -281,33 +286,34 @@ struct LessThan : public Comparison {
 /*
  * A less-than-or-equal-to comparison.
  */
-struct LessThanOrEqualTo : public Comparison {
-  /* Returns a less-than-or-equal-to comparison of the two expressions. */
-  static const StateFormula& make(const Expression& expr1,
-                                  const Expression& expr2);
+    struct LessThanOrEqualTo : public Comparison {
+        /* Returns a less-than-or-equal-to comparison of the two expressions. */
+        static const StateFormula &make(const Expression &expr1,
+                                        const Expression &expr2);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Constructs a less-than-or-equal-to comparision. */
-  LessThanOrEqualTo(const Expression& expr1, const Expression& expr2)
-    : Comparison(expr1, expr2) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Constructs a less-than-or-equal-to comparision. */
+        LessThanOrEqualTo(const Expression &expr1, const Expression &expr2)
+                : Comparison(expr1, expr2) {}
+    };
 
 
 /* ====================================================================== */
@@ -316,33 +322,34 @@ struct LessThanOrEqualTo : public Comparison {
 /*
  * A equal-to comparison.
  */
-struct EqualTo : public Comparison {
-  /* Returns a equal-to comparison of the two expressions. */
-  static const StateFormula& make(const Expression& expr1,
-                                  const Expression& expr2);
+    struct EqualTo : public Comparison {
+        /* Returns a equal-to comparison of the two expressions. */
+        static const StateFormula &make(const Expression &expr1,
+                                        const Expression &expr2);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Constructs a equal-to comparision. */
-  EqualTo(const Expression& expr1, const Expression& expr2)
-    : Comparison(expr1, expr2) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Constructs a equal-to comparision. */
+        EqualTo(const Expression &expr1, const Expression &expr2)
+                : Comparison(expr1, expr2) {}
+    };
 
 
 /* ====================================================================== */
@@ -351,34 +358,34 @@ struct EqualTo : public Comparison {
 /*
  * A greater-than-or-equal-to comparison.
  */
-struct GreaterThanOrEqualTo : public Comparison {
-  /* Returns a greater-than-or-equal-to comparison of the two expressions. */
-  static const StateFormula& make(const Expression& expr1,
-                                  const Expression& expr2);
+    struct GreaterThanOrEqualTo : public Comparison {
+        /* Returns a greater-than-or-equal-to comparison of the two expressions. */
+        static const StateFormula &make(const Expression &expr1,
+                                        const Expression &expr2);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
- private:
-  /* Constructs a greater-than-or-equal-to comparision. */
-  GreaterThanOrEqualTo(const Expression& expr1, const Expression& expr2)
-    : Comparison(expr1, expr2) {}
-};
+    private:
+        /* Constructs a greater-than-or-equal-to comparision. */
+        GreaterThanOrEqualTo(const Expression &expr1, const Expression &expr2)
+                : Comparison(expr1, expr2) {}
+    };
 
 
 /* ====================================================================== */
@@ -387,34 +394,34 @@ struct GreaterThanOrEqualTo : public Comparison {
 /*
  * A greater-than comparison.
  */
-struct GreaterThan : public Comparison {
-  /* Returns a greater-than comparison of the two expressions. */
-  static const StateFormula& make(const Expression& expr1,
-                                  const Expression& expr2);
+    struct GreaterThan : public Comparison {
+        /* Returns a greater-than comparison of the two expressions. */
+        static const StateFormula &make(const Expression &expr1,
+                                        const Expression &expr2);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
-protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
- private:
-  /* Constructs a greater-than comparision. */
-  GreaterThan(const Expression& expr1, const Expression& expr2)
-    : Comparison(expr1, expr2) {}
-};
+    private:
+        /* Constructs a greater-than comparision. */
+        GreaterThan(const Expression &expr1, const Expression &expr2)
+                : Comparison(expr1, expr2) {}
+    };
 
 
 /* ====================================================================== */
@@ -423,41 +430,41 @@ protected:
 /*
  * A negated state formula.
  */
-struct Negation : public StateFormula {
-  /* Returns the negation of the given state formula. */
-  static const StateFormula& make(const StateFormula& formula);
+    struct Negation : public StateFormula {
+        /* Returns the negation of the given state formula. */
+        static const StateFormula &make(const StateFormula &formula);
 
-  /* Deletes this negation. */
-  virtual ~Negation();
+        /* Deletes this negation. */
+        virtual ~Negation();
 
-  /* Returns the negand of this negation. */
-  const StateFormula& negand() const { return *negand_; }
+        /* Returns the negand of this negation. */
+        const StateFormula &negand() const { return *negand_; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
-    /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
-protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
- private:
-  /* The negand of this negation. */
-  const StateFormula* negand_;
+    private:
+        /* The negand of this negation. */
+        const StateFormula *negand_;
 
-  /* Constructs a negated state formula. */
-  explicit Negation(const StateFormula& negand);
-};
+        /* Constructs a negated state formula. */
+        explicit Negation(const StateFormula &negand);
+    };
 
 
 /* ====================================================================== */
@@ -466,46 +473,47 @@ protected:
 /*
  * A conjunction of state formulas.
  */
-struct Conjunction : public StateFormula {
-  /* Returns the conjunction of the given conjuncts */
-  static const StateFormula& make(const FormulaList& conjuncts);
+    struct Conjunction : public StateFormula {
+        /* Returns the conjunction of the given conjuncts */
+        static const StateFormula &make(const FormulaList &conjuncts);
 
-  /* Deletes this conjunction. */
-  virtual ~Conjunction();
+        /* Deletes this conjunction. */
+        virtual ~Conjunction();
 
-  /* Returns the conjuncts of this conjunction. */
-  const FormulaList& conjuncts() const { return conjuncts_; }
+        /* Returns the conjuncts of this conjunction. */
+        const FormulaList &conjuncts() const { return conjuncts_; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-    /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* The conjuncts. */
-  FormulaList conjuncts_;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* Constructs a conjunction. */
-  Conjunction() {}
+    private:
+        /* The conjuncts. */
+        FormulaList conjuncts_;
 
-  /* Adds a conjunct to this conjunction. */
-  void add_conjunct(const StateFormula& conjunct);
+        /* Constructs a conjunction. */
+        Conjunction() {}
 
-  friend const StateFormula& operator&&(const StateFormula& f1,
-                                        const StateFormula& f2);
-};
+        /* Adds a conjunct to this conjunction. */
+        void add_conjunct(const StateFormula &conjunct);
+
+        friend const StateFormula &operator&&(const StateFormula &f1,
+                                              const StateFormula &f2);
+    };
 
 
 /* ====================================================================== */
@@ -514,46 +522,47 @@ struct Conjunction : public StateFormula {
 /*
  * A disjunction of state formulas.
  */
-struct Disjunction : public StateFormula {
-  /* Returns the conjunction of the given conjuncts */
-  static const StateFormula& make(const FormulaList& disjuncts);
+    struct Disjunction : public StateFormula {
+        /* Returns the conjunction of the given conjuncts */
+        static const StateFormula &make(const FormulaList &disjuncts);
 
-  /* Deletes this disjunction. */
-  virtual ~Disjunction();
+        /* Deletes this disjunction. */
+        virtual ~Disjunction();
 
-  /* Returns the disjuncts of this disjunction. */
-  const FormulaList& disjuncts() const { return disjuncts_; }
+        /* Returns the disjuncts of this disjunction. */
+        const FormulaList &disjuncts() const { return disjuncts_; }
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* The disjuncts. */
-  FormulaList disjuncts_;
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
 
-  /* Constructs a disjunction. */
-  Disjunction() {}
+    private:
+        /* The disjuncts. */
+        FormulaList disjuncts_;
 
-  /* Adds a disjunct to this disjunction. */
-  void add_disjunct(const StateFormula& disjunct);
+        /* Constructs a disjunction. */
+        Disjunction() {}
 
-  friend const StateFormula& operator||(const StateFormula& f1,
-                                        const StateFormula& f2);
-};
+        /* Adds a disjunct to this disjunction. */
+        void add_disjunct(const StateFormula &disjunct);
+
+        friend const StateFormula &operator||(const StateFormula &f1,
+                                              const StateFormula &f2);
+    };
 
 
 /* ====================================================================== */
@@ -562,29 +571,29 @@ struct Disjunction : public StateFormula {
 /*
  * Abstract quantified formula.
  */
-struct Quantification : public StateFormula {
-  /* Deletes this quantification. */
-  virtual ~Quantification();
+    struct Quantification : public StateFormula {
+        /* Deletes this quantification. */
+        virtual ~Quantification();
 
-  /* Returns the quanitfied variables. */
-  const VariableList& parameters() const { return parameters_; }
+        /* Returns the quanitfied variables. */
+        const VariableList &parameters() const { return parameters_; }
 
-  /* Returns the quantified formula. */
-  const StateFormula& body() const { return *body_; }
+        /* Returns the quantified formula. */
+        const StateFormula &body() const { return *body_; }
 
-  /* Clones this state formula. */
-  virtual const StateFormula& clone() const=0;
+        /* Clones this state formula. */
+        virtual const StateFormula &clone() const =0;
 
- protected:
-  /* Constructs a quantification. */
-  Quantification(const VariableList& parameters, const StateFormula& body);
+    protected:
+        /* Constructs a quantification. */
+        Quantification(const VariableList &parameters, const StateFormula &body);
 
- private:
-  /* Quanitfied variables. */
-  VariableList parameters_;
-  /* The quantified formula. */
-  const StateFormula* body_;
-};
+    private:
+        /* Quanitfied variables. */
+        VariableList parameters_;
+        /* The quantified formula. */
+        const StateFormula *body_;
+    };
 
 
 /* ====================================================================== */
@@ -593,33 +602,34 @@ struct Quantification : public StateFormula {
 /*
  * Existentially quantified state formula.
  */
-struct Exists : public Quantification {
-  /* Returns an existentially quantified formula. */
-  static const StateFormula& make(const VariableList& parameters,
-                                  const StateFormula& body);
+    struct Exists : public Quantification {
+        /* Returns an existentially quantified formula. */
+        static const StateFormula &make(const VariableList &parameters,
+                                        const StateFormula &body);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-  /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Constructs an existentially quantified formula. */
-  Exists(const VariableList& parameters, const StateFormula& body)
-    : Quantification(parameters, body) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Constructs an existentially quantified formula. */
+        Exists(const VariableList &parameters, const StateFormula &body)
+                : Quantification(parameters, body) {}
+    };
 
 
 /* ====================================================================== */
@@ -628,33 +638,34 @@ struct Exists : public Quantification {
 /*
  * Universally quantified state formula.
  */
-struct Forall : public Quantification {
-  /* Returns a universally quantified formula. */
-  static const StateFormula& make(const VariableList& parameters,
-                                  const StateFormula& body);
+    struct Forall : public Quantification {
+        /* Returns a universally quantified formula. */
+        static const StateFormula &make(const VariableList &parameters,
+                                        const StateFormula &body);
 
-  /* Tests if this state formula holds in the given state. */
-  virtual bool holds(const TermTable& terms,
-                     const AtomSet& atoms, const ValueMap& values) const;
+        /* Tests if this state formula holds in the given state. */
+        virtual bool holds(const TermTable &terms,
+                           const AtomSet &atoms, const ValueMap &values) const;
 
-  /* Returns an instantiation of this state formula. */
-  virtual const StateFormula& instantiation(const SubstitutionMap& subst,
-                                            const TermTable& terms,
-                                            const AtomSet& atoms,
-                                            const ValueMap& values,
-                                            bool state) const;
-    /* Clones this state formula. */
-  const StateFormula& clone() const override;
+        /* Returns an instantiation of this state formula. */
+        virtual const StateFormula &instantiation(const SubstitutionMap &subst,
+                                                  const TermTable &terms,
+                                                  const AtomSet &atoms,
+                                                  const ValueMap &values,
+                                                  bool state) const;
 
- protected:
-  /* Prints this object on the given stream. */
-  virtual void print(std::ostream& os) const;
+        /* Clones this state formula. */
+        const StateFormula &clone() const override;
 
- private:
-  /* Constructs a universally quantified formula. */
-  Forall(const VariableList& parameters, const StateFormula& body)
-    : Quantification(parameters, body) {}
-};
+    protected:
+        /* Prints this object on the given stream. */
+        virtual void print(std::ostream &os) const;
+
+    private:
+        /* Constructs a universally quantified formula. */
+        Forall(const VariableList &parameters, const StateFormula &body)
+                : Quantification(parameters, body) {}
+    };
 
 
 /* ====================================================================== */
@@ -663,8 +674,8 @@ struct Forall : public Quantification {
 /*
  * A set of atoms.
  */
-struct AtomSet : public std::set<const Atom*> {
-};
+    struct AtomSet : public std::set<const Atom *> {
+    };
 
 
 /* ====================================================================== */
@@ -673,8 +684,9 @@ struct AtomSet : public std::set<const Atom*> {
 /*
  * List of atoms.
  */
-struct AtomList : public std::vector<const Atom*> {
-};
+    struct AtomList : public std::vector<const Atom *> {
+    };
 
+}
 
 #endif /* FORMULAS_H */

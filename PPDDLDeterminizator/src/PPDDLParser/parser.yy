@@ -39,6 +39,7 @@
 #include <stdexcept>
 #include <typeinfo>
 
+using namespace ppddl_parser; // To avoid namespacing everything
 
 /* Workaround for bug in Bison 1.35 that disables stack growth. */
 #define YYLTYPE_IS_TRIVIAL 1
@@ -268,17 +269,17 @@ static void set_default_metric();
 %token ILLEGAL_TOKEN
 
 %union {
-  const Effect* effect;
-  std::vector<std::pair<Rational, const Effect*> >* outcomes;
-  const StateFormula* formula;
-  const Atom* atom;
-  const Expression* expr;
-  const Fluent* fluent;
-  const Type* type;
-  TypeSet* types;
+  const ppddl_parser::Effect* effect;
+  std::vector<std::pair<ppddl_parser::Rational, const ppddl_parser::Effect*> >* outcomes;
+  const ppddl_parser::StateFormula* formula;
+  const ppddl_parser::Atom* atom;
+  const ppddl_parser::Expression* expr;
+  const ppddl_parser::Fluent* fluent;
+  const ppddl_parser::Type* type;
+  ppddl_parser::TypeSet* types;
   const std::string* str;
   std::vector<const std::string*>* strs;
-  const Rational* num;
+  const ppddl_parser::Rational* num;
 }
 
 %type <effect> eff_formula p_effect simple_init one_init eff_formulas one_inits
