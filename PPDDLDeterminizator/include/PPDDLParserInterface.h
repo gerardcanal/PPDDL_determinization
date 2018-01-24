@@ -13,6 +13,7 @@
 
 
 #include "PPDDLParser/domains.h"
+#include "ptree.h"
 #include <memory>
 // Domain class
 namespace PPDDLInterface {
@@ -112,9 +113,11 @@ namespace PPDDLInterface {
             void setAction(const PPDDLInterface::Action& action);
         private:
              std::shared_ptr<p_Domain> _dom;
+            bool determinized; // FIXME initialize somehow
 
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 
+            VAL::domain getVALDomain();
 
             friend std::ostream &operator<<(std::ostream &output, const Domain &D) {
                 output << *D._dom;
@@ -127,7 +130,7 @@ namespace PPDDLInterface {
 /// Definitions for the parser /////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* The parse function. */
-extern int ppddl_parse(); // FIXME namespace this variables!?
+extern int ppddl_parse();
 /* File to parse. */
-extern FILE* yyin;
+extern FILE* ppddl_in;
 #endif //ROSPLAN_PLANNING_SYSTEM_PPDDLPARSERINTERFACE_H

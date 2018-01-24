@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+%option prefix="ppddl_"  // To avoid conflicts with ROSPlan pddl parser, it changes the default "yy" prefix in parser methods
 %{
 #define YYDEBUG 1
 

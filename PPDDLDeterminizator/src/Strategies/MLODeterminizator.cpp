@@ -98,15 +98,15 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 
 /* Parses the given file, and returns true on success. */
     static bool read_file(const char* name) {
-        yyin = fopen(name, "r");
-        if (yyin == 0) {
+    ppddl_in = fopen(name, "r");
+        if (ppddl_in == 0) {
             std::cerr << "mdpclient:" << name << ": " << strerror(errno)
                       << std::endl;
             return false;
         } else {
             current_file = name;
             bool success = (ppddl_parse() == 0);
-            fclose(yyin);
+            fclose(ppddl_in);
             return success;
         }
     }
@@ -125,9 +125,9 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         PPDDLInterface::Domain determinized = mld.determinize(d_copy);
 
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        //std::cout << "WRAPPED DOMAIN: " << d << std::endl;
+        std::cout << "WRAPPED DOMAIN: " << d << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        //std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
+        std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 

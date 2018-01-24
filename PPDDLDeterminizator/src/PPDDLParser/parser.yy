@@ -19,7 +19,8 @@
  */
 
 
-%name-prefix "ppddl_" // To avoid conflicts with ROSPlan pddl parser, it changes the default "yy" prefix in parser methods
+//%name-prefix "ppddl_" // To avoid conflicts with ROSPlan pddl parser, it changes the default "yy" prefix in parser methods
+%define api.prefix {ppddl_} // To avoid conflicts with ROSPlan pddl parser, it changes the default "yy" prefix in parser methods
 %{
 //#include <config.h>
 #include "problems.h"

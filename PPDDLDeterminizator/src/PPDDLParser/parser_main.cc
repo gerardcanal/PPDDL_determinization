@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 #include "problems.h"
-
+using namespace ppddl_parser;
 
 /* The parse function. */
 extern int yyparse();

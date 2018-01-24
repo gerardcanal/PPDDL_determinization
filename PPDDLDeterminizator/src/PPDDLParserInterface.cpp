@@ -30,6 +30,7 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
         }
     }
     else std::cerr << "There were errors while parsing input file!" << std::endl;
+    getVALDomain();
 }
 
 PPDDLInterface::Domain::~Domain() {
@@ -74,15 +75,15 @@ bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_
     warning_level = new_warning_level;
 
     /* Parses the given file, and returns true on success. */
-    yyin = fopen(domain_path.c_str(), "r");
-    if (yyin == nullptr) {
+    ppddl_in = fopen(domain_path.c_str(), "r");
+    if (ppddl_in == nullptr) {
         std::cerr << "mdpclient:" << domain_path << ": " << strerror(errno)
                   << std::endl;
         return false;
     } else {
         current_file = domain_path;
         bool success = (ppddl_parse() == 0);
-        fclose(yyin);
+        fclose(ppddl_in);
         return success;
     }
 }
@@ -105,6 +106,12 @@ std::vector<PPDDLInterface::Action> PPDDLInterface::Domain::getActions() const {
 void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action) {
     _dom->add_action(*new_action._as); // As it is an ActionMap, it will override the action in case it is already there
     const_cast<PPDDLInterface::Action*>(&new_action)->releasePtr();
+}
+
+VAL::domain PPDDLInterface::Domain::getVALDomain() {
+    if (determinized);
+
+    return VAL::domain(nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
