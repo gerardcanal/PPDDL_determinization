@@ -13,6 +13,7 @@
 
 
 #include "PPDDLParser/domains.h"
+#include "PPDDLParser/problems.h"
 #include "ptree.h"
 #include <memory>
 // Domain class

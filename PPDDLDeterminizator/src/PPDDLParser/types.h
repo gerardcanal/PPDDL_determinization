@@ -124,6 +124,12 @@ namespace ppddl_parser {
            type with the given name exists in this table. */
         const Type *find_type(const std::string &name) const;
 
+        /* Returns the names a list with the names of the types */
+        const std::vector<std::string> names() const { return names_; }
+
+        /* Returns the type name of the given type */
+        const std::string typestring(const Type& t) const ;
+
     private:
         /* Type names. */
         static std::vector<std::string> names_;

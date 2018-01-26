@@ -210,4 +210,11 @@ namespace ppddl_parser {
       }
       return os;
     }
+
+    const std::string TypeTable::typestring(const Type &t) const {
+      if (!t.simple()) {
+        return "";
+      }
+      return names_[t.index_-1];
+    }
 }

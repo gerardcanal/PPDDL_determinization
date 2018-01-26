@@ -203,6 +203,8 @@ namespace ppddl_parser {
            type. */
         const ObjectList &compatible_objects(const Type &type) const;
 
+        /* Returns the names a list with the names of the types */
+        const std::vector<std::string> names() const { return names_; }
     private:
         /* Object names. */
         static std::vector<std::string> names_;

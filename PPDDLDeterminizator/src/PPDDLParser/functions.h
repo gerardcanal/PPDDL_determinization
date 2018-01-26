@@ -111,6 +111,8 @@ namespace ppddl_parser {
            function with the given name exists. */
         const Function *find_function(const std::string &name) const;
 
+        /* Returns the names a list with the names of the types */
+        const std::vector<std::string> names() const { return names_; }
     private:
         /* Function names. */
         static std::vector<std::string> names_;

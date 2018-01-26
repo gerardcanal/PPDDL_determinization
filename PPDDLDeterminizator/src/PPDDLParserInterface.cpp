@@ -30,6 +30,7 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
         }
     }
     else std::cerr << "There were errors while parsing input file!" << std::endl;
+
     getVALDomain();
 }
 
@@ -83,6 +84,7 @@ bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_
     } else {
         current_file = domain_path;
         bool success = (ppddl_parse() == 0);
+        std::cout << "di: "; ppddl_parser::Domain::begin()->second->terms().find_object("");
         fclose(ppddl_in);
         return success;
     }
@@ -109,9 +111,80 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 }
 
 VAL::domain PPDDLInterface::Domain::getVALDomain() {
-    if (determinized);
+    if (determinized);// TODO
+    VAL::domain d(new VAL::structure_store()); // The pointer is deleted inside the constructor
+    d.name = _dom->name();
 
-    return VAL::domain(nullptr);
+    d.req; /* TODO pddl_req_flag */
+
+    // TYPES
+    d.types = new VAL::pddl_type_list;
+    std::vector<std::string> names = _dom->types().names();
+    for (auto it = names.begin(); it != names.end(); ++it) {
+        VAL::pddl_type* t = new VAL::pddl_type(*it);
+        d.types->push_back(t); // FIXME it sets as symbols. Make sure the type is correct (as displays NULL)...
+    }
+
+    // CONSTANTS -- aka terms()
+    d.constants = new VAL::const_symbol_list; /* TODO const_symbol_list* */
+    std::cout <<  _dom->terms().names().size() << " " << _dom->terms().names()[0] << std::endl;
+    names = _dom->terms().names(); // Variable reuse!
+    for (auto it = names.begin(); it != names.end(); ++it) {
+        std::cout << *it << std::endl;
+        VAL::const_symbol* cs = new VAL::const_symbol(*it);
+
+        const ppddl_parser::Object* x = _dom->terms().find_object(*it); // FIXME IF NOT IN DOMAIN, TERMS ARE IN THE PROBLEM FILE! TAKE THEM FROM THERE?
+        if (x != nullptr)  _dom->terms().type(ppddl_parser::Term(*x));// TODO get type and finish this
+        cs->type = new VAL::pddl_type(*it); // TODO PUT TYPE
+        d.constants->push_back(cs);
+    }
+
+    d.pred_vars;  // Vars used in predicate declarations /* TODO var_symbol_table* */
+    // TODO Not sure what this is so not filling this one... check if needed
+
+    // PREDICATES
+    d.predicates = new VAL::pred_decl_list; /* pred_decl_list* */
+    names = _dom->predicates().names();
+    for (auto it = names.begin(); it != names.end(); ++it) {
+        VAL::pred_symbol* s = new VAL::pred_symbol(*it);
+        VAL::var_symbol_list* sl = new VAL::var_symbol_list;
+
+        // get all the parameters/arguments
+        ppddl_parser::TypeList tl = _dom->predicates().parameters(*_dom->predicates().find_predicate(*it));
+        for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
+            // get type name
+            std::string t_name = _dom->types().typestring(*tlit);
+
+
+            sl->push_back(new VAL::var_symbol(t_name));
+        }
+
+        d.predicates->push_back(new VAL::pred_decl(s, sl, new VAL::var_symbol_table));
+    }
+
+    // FUNCTIONS
+    d.functions = new VAL::func_decl_list; /* TODO func_decl_list* */
+    names = _dom->functions().names();
+    for (auto it = names.begin(); it != names.end(); ++it) {
+        VAL::func_symbol* fs = new VAL::func_symbol(*it);
+        VAL::var_symbol_list* sl = new VAL::var_symbol_list;
+
+        const ppddl_parser::TypeList fparam = _dom->functions().parameters(*_dom->functions().find_function(*it));
+        for (auto fparamit = fparam.begin(); fparamit != fparam.end(); ++fparamit) {
+            // get type name
+            std::string t_name = _dom->types().typestring(*fparamit);
+
+            sl->push_back(new VAL::var_symbol(t_name));
+        }
+
+        d.functions->push_back(new VAL::func_decl(fs, sl, new VAL::var_symbol_table));
+    }
+
+    d.constraints; /* TODO con_goal* */
+    d.ops; /* TODO operator_list* */
+    d.drvs; /* TODO derivations_list* */
+
+    return d;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

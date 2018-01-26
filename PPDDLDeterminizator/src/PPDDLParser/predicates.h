@@ -109,6 +109,9 @@ namespace ppddl_parser {
            no predicate with the given name exists. */
         const Predicate *find_predicate(const std::string &name) const;
 
+        /* Returns the names a list with the names of the types */
+        const std::vector<std::string> names() const { return names_; }
+
     private:
         /* Predicate names. */
         static std::vector<std::string> names_;
