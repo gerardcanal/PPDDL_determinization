@@ -24,4 +24,4 @@ add_executable(parser2 ${PPDDL_PARSER_ALL}
         MLODeterminizator.cpp
         MLODeterminizator.h
         PPDDLDeterminizator.h PPDDLParserInterface.cpp PPDDLParserInterface.h
-        ${VAL_ABSOLUTE_SOURCES})
+        ${VAL_ABSOLUTE_SOURCES} VALConversion.cpp VALConversion.h)

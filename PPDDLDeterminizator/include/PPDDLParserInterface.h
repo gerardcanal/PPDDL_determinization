@@ -14,6 +14,7 @@
 
 #include "PPDDLParser/domains.h"
 #include "PPDDLParser/problems.h"
+#include "VALConversion.h"
 #include "ptree.h"
 #include <memory>
 // Domain class
@@ -124,6 +125,7 @@ namespace PPDDLInterface {
                 output << *D._dom;
                 return output;
             }
+            friend class VALConversion;
     };
 }
 
