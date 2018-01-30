@@ -84,7 +84,6 @@ bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_
     } else {
         current_file = domain_path;
         bool success = (ppddl_parse() == 0);
-        std::cout << "di: "; ppddl_parser::Domain::begin()->second->terms().find_object("");
         fclose(ppddl_in);
         return success;
     }

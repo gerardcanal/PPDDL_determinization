@@ -211,7 +211,7 @@ namespace ppddl_parser {
       return os;
     }
 
-    const std::string TypeTable::typestring(const Type &t) const {
+    const std::string TypeTable::typestring(const Type &t) {
       if (!t.simple()) {
         return "";
       }

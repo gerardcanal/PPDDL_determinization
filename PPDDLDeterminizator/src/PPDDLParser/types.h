@@ -128,7 +128,7 @@ namespace ppddl_parser {
         const std::vector<std::string> names() const { return names_; }
 
         /* Returns the type name of the given type */
-        const std::string typestring(const Type& t) const ;
+        static const std::string typestring(const Type& t) ;
 
     private:
         /* Type names. */

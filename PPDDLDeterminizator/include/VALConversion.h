@@ -13,8 +13,12 @@ class VALConversion {
 public:
     static VAL::domain toVALDomain(const std::shared_ptr<ppddl_parser::Domain>& d);
 private:
-    static VAL::goal *
-    toVALPrecondition(const ppddl_parser::StateFormula *precondition, const ppddl_parser::Domain *dom);
+    static VAL::goal* toVALPrecondition(const ppddl_parser::StateFormula *formula,
+                                        const std::shared_ptr<ppddl_parser::Domain> &dom);
+    static VAL::expression *toVALExpression(const ppddl_parser::Expression *exp,
+                                            const std::shared_ptr<ppddl_parser::Domain> &dom);
+    static VAL::effect_lists* toVALEffects(const ppddl_parser::Effect *e,
+                                           const std::shared_ptr<ppddl_parser::Domain> &dom);
 };
 
 
