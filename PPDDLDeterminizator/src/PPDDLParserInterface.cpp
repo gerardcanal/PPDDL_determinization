@@ -30,8 +30,6 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
         }
     }
     else std::cerr << "There were errors while parsing input file!" << std::endl;
-
-    getVALDomain();
 }
 
 PPDDLInterface::Domain::~Domain() {
@@ -91,7 +89,7 @@ bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_
 
 PPDDLInterface::Action PPDDLInterface::Domain::getAction(const std::string &name) {
     const p_actionSchema* as = _dom->find_action(name);
-    if (as == nullptr) std::runtime_error("ERROR: Unknown action name " + name + ".");
+    if (as == nullptr) throw std::runtime_error("ERROR: Unknown action name " + name + ".");
     return PPDDLInterface::Action(as);
 }
 
@@ -112,6 +110,14 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 VAL::domain PPDDLInterface::Domain::getVALDomain() {
     if (determinized);// TODO
     return VALConversion::toVALDomain(_dom);
+}
+
+void PPDDLInterface::Domain::printPDDL(ostream &o) {
+    VAL::domain val_d = getVALDomain();
+    val_d.setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
+    o << val_d;
+    //VAL::PrettyPrinter printer;
+    //printer.write_domain(o, &val_d);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

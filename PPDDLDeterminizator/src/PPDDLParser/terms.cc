@@ -110,7 +110,6 @@ namespace ppddl_parser {
    the given name exists. */
     const Object *TermTable::find_object(const std::string &name) const {
       std::map<std::string, Object>::const_iterator oi = objects_.find(name);
-        std::cout << objects_.size() << std::endl;
       if (oi != objects_.end()) {
         return &(*oi).second;
       } else if (parent_ != 0) {

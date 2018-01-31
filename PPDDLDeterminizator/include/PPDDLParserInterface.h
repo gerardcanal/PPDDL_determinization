@@ -16,6 +16,7 @@
 #include "PPDDLParser/problems.h"
 #include "VALConversion.h"
 #include "ptree.h"
+#include "PrettyPrinter.h"
 #include <memory>
 // Domain class
 namespace PPDDLInterface {
@@ -113,6 +114,7 @@ namespace PPDDLInterface {
             std::vector<PPDDLInterface::Action> getActions() const;
 
             void setAction(const PPDDLInterface::Action& action);
+            void printPDDL(std::ostream & o=std::cout);
         private:
              std::shared_ptr<p_Domain> _dom;
             bool determinized; // FIXME initialize somehow

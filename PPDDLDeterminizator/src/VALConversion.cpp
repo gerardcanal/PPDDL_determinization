@@ -24,7 +24,7 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     d.constants = new VAL::const_symbol_list; /* TODO const_symbol_list* */
     std::vector<std::string> term_names = _dom->terms().names(); // Variable reuse!
     for (auto it = term_names.begin(); it != term_names.end(); ++it) {
-        std::cout << *it << std::endl;
+        std::cout << "VALCONVERSION.cpp:27 " << *it << std::endl;
         VAL::const_symbol* cs = new VAL::const_symbol(*it);
 
         const ppddl_parser::Object* x = _dom->terms().find_object(*it); // FIXME IF NOT IN DOMAIN, TERMS ARE IN THE PROBLEM FILE! TAKE THEM FROM THERE?
@@ -43,37 +43,57 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     for (auto it = names.begin(); it != names.end(); ++it) {
         VAL::pred_symbol* s = new VAL::pred_symbol(*it);
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
+        VAL::var_symbol_table* st = new VAL::var_symbol_table();
 
         // get all the parameters/arguments
         ppddl_parser::TypeList tl = _dom->predicates().parameters(*_dom->predicates().find_predicate(*it));
+        std::map<std::string, int> var_names;
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
             // get type name
             std::string t_name = _dom->types().typestring(*tlit);
 
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_names.find(vname) == var_names.end()) var_names[vname] = 0;
+            VAL::var_symbol* vs = new VAL::var_symbol(vname + ((var_names[vname] == 0)? "" : std::to_string(var_names[vname])));
+            ++var_names[vname];
 
-            sl->push_back(new VAL::var_symbol(t_name));
+            // Define the type and set object
+            vs->type = new VAL::pddl_type(t_name);
+            sl->push_back(vs);
+            st->insert(std::make_pair(vname, vs));
         }
 
-        d.predicates->push_back(new VAL::pred_decl(s, sl, new VAL::var_symbol_table));
+        d.predicates->push_back(new VAL::pred_decl(s, sl, st));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // FUNCTIONS
     d.functions = new VAL::func_decl_list; /* func_decl_list* */
     names = _dom->functions().names();
-    for (auto it = names.begin(); it != names.end(); ++it) {
+    std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
+    for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
         VAL::func_symbol* fs = new VAL::func_symbol(*it);
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
+        VAL::var_symbol_table* st = new VAL::var_symbol_table;
 
         const ppddl_parser::TypeList fparam = _dom->functions().parameters(*_dom->functions().find_function(*it));
+        std::map<std::string, int> var_names;
         for (auto fparamit = fparam.begin(); fparamit != fparam.end(); ++fparamit) {
             // get type name
             std::string t_name = _dom->types().typestring(*fparamit);
 
-            sl->push_back(new VAL::var_symbol(t_name));
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_names.find(vname) == var_names.end()) var_names[vname] = 0;
+            VAL::var_symbol* vs = new VAL::var_symbol(vname + ((var_names[vname] == 0)? "" : std::to_string(var_names[vname])));
+            ++var_names[vname];
+
+            sl->push_back(vs);
+            st->insert(std::make_pair(vname, vs));
         }
 
-        d.functions->push_back(new VAL::func_decl(fs, sl, new VAL::var_symbol_table));
+        d.functions->push_back(new VAL::func_decl(fs, sl, st));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,23 +103,32 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     d.ops = new VAL::operator_list; /* TODO operator_list* */
     for (auto it = _dom->actions().begin(); it != _dom->actions().end(); ++it) {
 
-        // TO fill
+        // TODO fill
         VAL::operator_symbol *name = new VAL::operator_symbol(it->first);
         VAL::var_symbol_table* symtab = new VAL::var_symbol_table();
 
         VAL::var_symbol_list *parameters = new VAL::var_symbol_list();
+        std::map<std::string, int> var_names;
         for (auto pit = it->second->parameters().begin(); pit != it->second->parameters().end(); ++pit) {
-            std::string pname = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*pit));
-            VAL::var_symbol* sym = new VAL::var_symbol(pname);
-            parameters->push_back(sym);
-            symtab->insert(std::make_pair(pname, sym));
+            std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*pit));
+
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_names.find(vname) == var_names.end()) var_names[vname] = 0;
+            VAL::var_symbol* vs = new VAL::var_symbol(vname + ((var_names[vname] == 0)? "" : std::to_string(var_names[vname])));
+            ++var_names[vname];
+
+            // Define the type and set object
+            vs->type = new VAL::pddl_type(t_name);
+            parameters->push_back(vs);
+            symtab->insert(std::make_pair(vname, vs));
         }
 
         VAL::goal *precondition = toVALCondition(&it->second->precondition(), _dom);
 
         VAL::effect_lists* effects = toVALEffects(&it->second->effect(), _dom);
         //
-        VAL::operator_* op = new VAL::operator_(name, parameters, precondition, effects, symtab);
+        VAL::operator_* op = new VAL::action(name, parameters, precondition, effects, symtab);
         d.ops->push_back(op);
     }
 
@@ -219,7 +248,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
         return new VAL::qfied_goal(VAL::quantifier::E_FORALL, sl, toVALCondition(&fa->body(), dom), st);
     }
 
-    std::runtime_error("Error: [toVALCondition] At least one condition should have been satisfied! Unrecognized StateFormula type.");
+    throw std::runtime_error("Error: [toVALCondition] At least one condition should have been satisfied! Unrecognized StateFormula type.");
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp,
@@ -269,7 +298,7 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
         VAL::expression* a2 = toVALExpression(&s->operand2(), nullptr);
         return new VAL::div_expression(a1, a2);
     }
-    std::runtime_error("Error: [toVALExpression] At least one condition should have been satisfied! Unrecognized Expression type.");
+    throw std::runtime_error("Error: [toVALExpression] At least one condition should have been satisfied! Unrecognized Expression type.");
 }
 
 VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
@@ -300,12 +329,14 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
         else if (de != 0) {
             ef->del_effects.push_back(new VAL::simple_effect(prop));
         }
+        return ef;
     }
 
     const ppddl_parser::UpdateEffect* ue = dynamic_cast<const ppddl_parser::UpdateEffect*>(e); // ie decrease / increase
     if (ue != nullptr) {
         VAL::assignment* ass = toVALUpdate(&ue->update(), dom);
         ef->assign_effects.push_back(ass);
+        return ef;
     }
 
     const ppddl_parser::ConjunctiveEffect* ce = dynamic_cast<const ppddl_parser::ConjunctiveEffect*>(e);
@@ -315,18 +346,14 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
             VAL::effect_lists* conjunct = toVALEffects(*it, dom);
             ef->append_effects(conjunct);
         }
+        return ef;
     }
-    /*pc_list<simple_effect*> add_effects;
-pc_list<simple_effect*> del_effects;
-pc_list<forall_effect*> forall_effects;
-pc_list<cond_effect*>   cond_effects;
-pc_list<cond_effect*>   cond_assign_effects;
-pc_list<assignment*>    assign_effects;
-pc_list<timed_effect*>  timed_effects;*/
+
     const ppddl_parser::ConditionalEffect* cone = dynamic_cast<const ppddl_parser::ConditionalEffect*>(e);
     if (cone != nullptr) {
         VAL::cond_effect* condeff = new VAL::cond_effect(toVALCondition(&cone->condition(), dom), toVALEffects(&cone->effect(), dom));
         ef->cond_effects.push_back(condeff);
+        return ef;
     }
 
     const ppddl_parser::QuantifiedEffect* qe = dynamic_cast<const ppddl_parser::QuantifiedEffect*>(e);
@@ -343,13 +370,14 @@ pc_list<timed_effect*>  timed_effects;*/
 
         VAL::forall_effect* fae = new VAL::forall_effect(toVALEffects(&qe->effect(), dom), sl, st);
         ef->forall_effects.push_back(fae);
+        return ef;
     }
 
     const ppddl_parser::ProbabilisticEffect* pe = dynamic_cast<const ppddl_parser::ProbabilisticEffect*>(e);
     if (pe != nullptr) {
-        std::runtime_error("Error: Probabilistic effects can not be converted to PDDL! Please determinize the domain first.");
+        throw std::runtime_error("Error: Probabilistic effects can not be converted to PDDL! Please determinize the domain first.");
     }
-    std::runtime_error("Error: [toVALEffects] At least one condition should have been satisfied! Unrecognized Effect type.");
+    throw std::runtime_error("Error: [toVALEffects] At least one condition should have been satisfied! Unrecognized Effect type.");
 }
 
 VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const std::shared_ptr<ppddl_parser::Domain> &dom) {
@@ -374,7 +402,7 @@ VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, cons
         op = VAL::assign_op::E_DECREASE;
     }
     else {
-        std::runtime_error(
+        throw std::runtime_error(
                 "Error: [toVALUpdate] At least one condition should have been satisfied! Unrecognized Update type.");
     }
     return new VAL::assignment(ft, op, exp);

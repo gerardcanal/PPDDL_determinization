@@ -85,6 +85,7 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <cstring>
+#include <fstream>
 /* The parse function. */
    // extern int ppddl_parse(); // FIXME namespace this variables!?
 /* File to parse. */
@@ -131,6 +132,8 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 
-
+        std::ofstream o("/home/gcanal/Desktop/domain_test.pddl");
+        determinized.printPDDL(o);
+        o.close();
         return 19;
     }
