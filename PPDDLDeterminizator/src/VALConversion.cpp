@@ -95,7 +95,7 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
             symtab->insert(std::make_pair(pname, sym));
         }
 
-        VAL::goal *precondition = toVALPrecondition(&it->second->precondition(), _dom);
+        VAL::goal *precondition = toVALCondition(&it->second->precondition(), _dom);
 
         VAL::effect_lists* effects = toVALEffects(&it->second->effect(), _dom);
         //
@@ -110,8 +110,8 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
 }
 
 
-VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *precondition,
-                                            const std::shared_ptr<ppddl_parser::Domain> &dom) {
+VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *precondition,
+                                         const std::shared_ptr<ppddl_parser::Domain> &dom) {
     const ppddl_parser::Atom* a = dynamic_cast<const ppddl_parser::Atom*>(precondition);
     if (a != nullptr) {
         VAL::pred_symbol* h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
@@ -168,7 +168,7 @@ VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *pr
 
     const ppddl_parser::Negation* n = dynamic_cast<const ppddl_parser::Negation*>(precondition);
     if (n != nullptr) {
-        return new VAL::neg_goal(toVALPrecondition(&n->negand(), dom));
+        return new VAL::neg_goal(toVALCondition(&n->negand(), dom));
     }
 
     const ppddl_parser::Conjunction* cjt = dynamic_cast<const ppddl_parser::Conjunction*>(precondition);
@@ -176,7 +176,7 @@ VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *pr
         VAL::goal_list* gl = new VAL::goal_list();
         ppddl_parser::FormulaList cjs = cjt->conjuncts();
         for (auto it = cjs.begin(); it != cjs.end(); ++it) {
-            gl->push_back(toVALPrecondition(*it, dom));
+            gl->push_back(toVALCondition(*it, dom));
         }
         return new VAL::conj_goal(gl);
     }
@@ -186,7 +186,7 @@ VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *pr
         VAL::goal_list* gl = new VAL::goal_list();
         ppddl_parser::FormulaList djs = djt->disjuncts();
         for (auto it = djs.begin(); it != djs.end(); ++it) {
-            gl->push_back(toVALPrecondition(*it, dom));
+            gl->push_back(toVALCondition(*it, dom));
         }
         return new VAL::disj_goal(gl);
     }
@@ -202,7 +202,7 @@ VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *pr
             sl->push_back(sym);
             st->insert(std::make_pair(var, sym));
         }
-        return new VAL::qfied_goal(VAL::quantifier::E_EXISTS, sl, toVALPrecondition(&ex->body(), dom), st);
+        return new VAL::qfied_goal(VAL::quantifier::E_EXISTS, sl, toVALCondition(&ex->body(), dom), st);
     }
 
     const ppddl_parser::Forall* fa = dynamic_cast<const ppddl_parser::Forall*>(precondition);
@@ -216,10 +216,10 @@ VAL::goal* VALConversion::toVALPrecondition(const ppddl_parser::StateFormula *pr
             sl->push_back(sym);
             st->insert(std::make_pair(var, sym));
         }
-        return new VAL::qfied_goal(VAL::quantifier::E_FORALL, sl, toVALPrecondition(&fa->body(), dom), st);
+        return new VAL::qfied_goal(VAL::quantifier::E_FORALL, sl, toVALCondition(&fa->body(), dom), st);
     }
 
-    std::runtime_error("Error: [toVALPrecondition] At least one condition should have been satisfied! Unrecognized StateFormula type.");
+    std::runtime_error("Error: [toVALCondition] At least one condition should have been satisfied! Unrecognized StateFormula type.");
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp,
@@ -243,28 +243,28 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
     }
 
     const ppddl_parser::Addition* c = dynamic_cast<const ppddl_parser::Addition*>(exp);
-    if (c != 0) {
+    if (c != nullptr) {
         VAL::expression* a1 = toVALExpression(&c->operand1(), nullptr);
         VAL::expression* a2 = toVALExpression(&c->operand2(), nullptr);
         return new VAL::plus_expression(a1, a2);
     }
 
     const ppddl_parser::Subtraction* s = dynamic_cast<const ppddl_parser::Subtraction*>(exp);
-    if (s != 0) {
+    if (s != nullptr) {
         VAL::expression* a1 = toVALExpression(&s->operand1(), nullptr);
         VAL::expression* a2 = toVALExpression(&s->operand2(), nullptr);
         return new VAL::minus_expression(a1, a2);
     }
 
     const ppddl_parser::Multiplication* m = dynamic_cast<const ppddl_parser::Multiplication*>(exp);
-    if (m != 0) {
+    if (m != nullptr) {
         VAL::expression* a1 = toVALExpression(&s->operand1(), nullptr);
         VAL::expression* a2 = toVALExpression(&s->operand2(), nullptr);
         return new VAL::mul_expression(a1, a2);
     }
 
     const ppddl_parser::Division* d = dynamic_cast<const ppddl_parser::Division*>(exp);
-    if (d != 0) {
+    if (d != nullptr) {
         VAL::expression* a1 = toVALExpression(&s->operand1(), nullptr);
         VAL::expression* a2 = toVALExpression(&s->operand2(), nullptr);
         return new VAL::div_expression(a1, a2);
@@ -277,7 +277,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
     VAL::effect_lists* ef = new VAL::effect_lists();
 
     const ppddl_parser::SimpleEffect* se = dynamic_cast<const ppddl_parser::SimpleEffect*>(e);
-    if (se != 0) {
+    if (se != nullptr) {
         const ppddl_parser::Atom *a = &se->atom();
 
         VAL::pred_symbol *h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
@@ -294,7 +294,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
 
         const ppddl_parser::AddEffect* ae = dynamic_cast<const ppddl_parser::AddEffect*>(e);
         const ppddl_parser::DeleteEffect *de = dynamic_cast<const ppddl_parser::DeleteEffect *>(e);
-        if (ae != 0) {
+        if (ae != nullptr) {
             ef->add_effects.push_back(new VAL::simple_effect(prop));
         }
         else if (de != 0) {
@@ -302,6 +302,20 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
         }
     }
 
+    const ppddl_parser::UpdateEffect* ue = dynamic_cast<const ppddl_parser::UpdateEffect*>(e); // ie decrease / increase
+    if (ue != nullptr) {
+        VAL::assignment* ass = toVALUpdate(&ue->update(), dom);
+        ef->assign_effects.push_back(ass);
+    }
+
+    const ppddl_parser::ConjunctiveEffect* ce = dynamic_cast<const ppddl_parser::ConjunctiveEffect*>(e);
+    if (ce != nullptr) {
+        ppddl_parser::EffectList cjts = ce->conjuncts();
+        for (auto it = cjts.begin(); it != cjts.end(); ++it) {
+            VAL::effect_lists* conjunct = toVALEffects(*it, dom);
+            ef->append_effects(conjunct);
+        }
+    }
     /*pc_list<simple_effect*> add_effects;
 pc_list<simple_effect*> del_effects;
 pc_list<forall_effect*> forall_effects;
@@ -309,36 +323,60 @@ pc_list<cond_effect*>   cond_effects;
 pc_list<cond_effect*>   cond_assign_effects;
 pc_list<assignment*>    assign_effects;
 pc_list<timed_effect*>  timed_effects;*/
-
-    const ppddl_parser::UpdateEffect* ue = dynamic_cast<const ppddl_parser::UpdateEffect*>(e); // ie decrease / increase
-    if (ue != 0) {
-        //TODO ef->assign_effects.push_back();
-
-    }
-
-    const ppddl_parser::ConjunctiveEffect* ce = dynamic_cast<const ppddl_parser::ConjunctiveEffect*>(e);
-    if (ce != 0) {
-        ppddl_parser::EffectList cjts = ce->conjuncts();
-        for (auto it = cjts.begin(); it != cjts.end(); ++it) {
-            VAL::effect_lists* conjunct = toVALEffects(*it, dom);
-            ef->append_effects(conjunct);
-        }
-    }
-
     const ppddl_parser::ConditionalEffect* cone = dynamic_cast<const ppddl_parser::ConditionalEffect*>(e);
-    if (cone != 0) {
-
+    if (cone != nullptr) {
+        VAL::cond_effect* condeff = new VAL::cond_effect(toVALCondition(&cone->condition(), dom), toVALEffects(&cone->effect(), dom));
+        ef->cond_effects.push_back(condeff);
     }
 
     const ppddl_parser::QuantifiedEffect* qe = dynamic_cast<const ppddl_parser::QuantifiedEffect*>(e);
-    if (qe != 0) {
+    if (qe != nullptr) {
+        ppddl_parser::VariableList params = qe->parameters();
+        VAL::var_symbol_list* sl = new VAL::var_symbol_list();
+        VAL::var_symbol_table* st = new VAL::var_symbol_table();
+        for (auto it = params.begin(); it != params.end(); ++it) {
+            std::string var = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
+            VAL::var_symbol* sym = new VAL::var_symbol(var);
+            sl->push_back(sym);
+            st->insert(std::make_pair(var, sym));
+        }
 
+        VAL::forall_effect* fae = new VAL::forall_effect(toVALEffects(&qe->effect(), dom), sl, st);
+        ef->forall_effects.push_back(fae);
     }
 
     const ppddl_parser::ProbabilisticEffect* pe = dynamic_cast<const ppddl_parser::ProbabilisticEffect*>(e);
-    if (pe != 0) {
+    if (pe != nullptr) {
         std::runtime_error("Error: Probabilistic effects can not be converted to PDDL! Please determinize the domain first.");
     }
     std::runtime_error("Error: [toVALEffects] At least one condition should have been satisfied! Unrecognized Effect type.");
+}
+
+VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const std::shared_ptr<ppddl_parser::Domain> &dom) {
+
+    VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom)); // As we pass a Fluent, it will return the correct func_term
+    VAL::expression* exp = toVALExpression(&up->expression(), dom);
+    VAL::assign_op op;
+
+    if (dynamic_cast<const ppddl_parser::Assign*>(up) != nullptr) {
+        op = VAL::assign_op::E_ASSIGN;
+    }
+    else if (dynamic_cast<const ppddl_parser::ScaleUp*>(up) != nullptr) {
+        op = VAL::assign_op::E_SCALE_UP;
+    }
+    else if (dynamic_cast<const ppddl_parser::ScaleDown*>(up) != nullptr) {
+        op = VAL::assign_op::E_SCALE_DOWN;
+    }
+    else if (dynamic_cast<const ppddl_parser::Increase*>(up) != nullptr) {
+        op = VAL::assign_op::E_INCREASE;
+    }
+    else if (dynamic_cast<const ppddl_parser::Decrease*>(up) != nullptr) {
+        op = VAL::assign_op::E_DECREASE;
+    }
+    else {
+        std::runtime_error(
+                "Error: [toVALUpdate] At least one condition should have been satisfied! Unrecognized Update type.");
+    }
+    return new VAL::assignment(ft, op, exp);
 }
 
