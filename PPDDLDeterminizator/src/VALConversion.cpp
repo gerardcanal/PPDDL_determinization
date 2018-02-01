@@ -21,20 +21,21 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CONSTANTS -- aka terms()
-    d.constants = new VAL::const_symbol_list; /* TODO const_symbol_list* */
+    d.constants = new VAL::const_symbol_list; /* const_symbol_list* */
     std::vector<std::string> term_names = _dom->terms().names(); // Variable reuse!
     for (auto it = term_names.begin(); it != term_names.end(); ++it) {
-        std::cout << "VALCONVERSION.cpp:27 " << *it << std::endl;
-        VAL::const_symbol* cs = new VAL::const_symbol(*it);
 
-        const ppddl_parser::Object* x = _dom->terms().find_object(*it); // FIXME IF NOT IN DOMAIN, TERMS ARE IN THE PROBLEM FILE! TAKE THEM FROM THERE?
-        if (x != nullptr)  _dom->terms().type(ppddl_parser::Term(*x));// TODO get type and finish this
-        cs->type = new VAL::pddl_type(*it); // TODO PUT TYPE
-        d.constants->push_back(cs);
+        const ppddl_parser::Object* x = _dom->terms().find_object(*it); // If not in the domain, the terms are objects from the problem file
+        if (x != nullptr) {
+            VAL::const_symbol* cs = new VAL::const_symbol(*it);
+            std::string t_name = _dom->types().typestring(_dom->terms().type(ppddl_parser::Term(*x)));
+            cs->type = new VAL::pddl_type(t_name);
+            d.constants->push_back(cs);
+        }
     }
 
-    d.pred_vars;  // Vars used in predicate declarations /* TODO var_symbol_table* */
-    // TODO Not sure what this is so not filling this one... check if needed
+    d.pred_vars;  // Vars used in predicate declarations /* var_symbol_table* */
+    // Not filling this one as it is not getting used by VAL.
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PREDICATES
@@ -101,18 +102,34 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     d.ops = new VAL::operator_list; /* TODO operator_list* */
-    for (auto it = _dom->actions().begin(); it != _dom->actions().end(); ++it) {
 
-        // TODO fill
+    // Add objects and constants as declared variables!
+    std::map<ppddl_parser::Term, std::string> const_obj_decl;
+    std::vector<std::string> obj_names = _dom->terms().names();
+    for (auto oit = obj_names.begin(); oit != obj_names.end(); ++oit) {
+        const ppddl_parser::Object* obj = _dom->terms().find_object(*oit);
+        if (obj != nullptr) {
+            const_obj_decl[*obj] = *oit;
+        }
+        else {
+            for (auto probit = ppddl_parser::Problem::begin(); probit != ppddl_parser::Problem::end(); ++probit) {
+                obj = probit->second->terms().find_object(*oit);
+                if (obj != nullptr) {
+                    const_obj_decl[*obj] = *oit;
+                }
+            }
+        }
+    }
+
+    for (auto it = _dom->actions().begin(); it != _dom->actions().end(); ++it) {
         VAL::operator_symbol *name = new VAL::operator_symbol(it->first);
         VAL::var_symbol_table* symtab = new VAL::var_symbol_table();
 
         VAL::var_symbol_list* parameters = new VAL::var_symbol_list();
         std::map<std::string, int> var_name_ctr;
-        std::map<ppddl_parser::Term, std::string> var_decl;
+        std::map<ppddl_parser::Term, std::string> var_decl(const_obj_decl.begin(), const_obj_decl.end());
         for (auto pit = it->second->parameters().begin(); pit != it->second->parameters().end(); ++pit) {
             std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*pit));
-std::cout << "Param: " << *pit << std::endl;
 
             // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
             std::string vname = t_name.substr(0,1);
@@ -121,7 +138,6 @@ std::cout << "Param: " << *pit << std::endl;
             VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
             ++var_name_ctr[vname];
             var_decl[ppddl_parser::Term(*pit)] = new_vname; // Here I set the name to the term to use it accordingly
-std::cout << "   " << var_decl[ppddl_parser::Term(*pit)] << " " << var_decl[*pit] << std::endl;
 
             // Define the type and set object
             vs->type = new VAL::pddl_type(t_name);
@@ -152,14 +168,10 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
     if (a != nullptr) {
         VAL::pred_symbol* h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
         VAL::parameter_symbol_list* sl = new VAL::parameter_symbol_list;
-        //ppddl_parser::TypeList tl = ppddl_parser::PredicateTable::parameters(a->predicate()); FIXMe delete?
         ppddl_parser::TermList tl = a->terms();
-std::cout << "Predicate: " << a->predicate(); int k = 0;for (auto i=a->terms().begin();i!=a->terms().end();++i ) std::cout << " " << *i << " - " << tl[k++]; std::cout << std::endl;
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            // get type name
-            //std::string t_name = dom->types().typestring(*tlit); // FIXME delete?
-
-            sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
+            if (tlit->object()) sl->push_back(new VAL::const_symbol(var_decl[*tlit]));
+            else sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
         }
 
         VAL::proposition* prop = new VAL::proposition(h, sl);
@@ -168,8 +180,6 @@ std::cout << "Predicate: " << a->predicate(); int k = 0;for (auto i=a->terms().b
 
     const ppddl_parser::Equality* eq = dynamic_cast<const ppddl_parser::Equality*>(precondition);
     if (eq != nullptr) {
-        /*VAL::expression* exp1 = new VAL::expression();
-        //VAL::comparison* cmp = new VAL::comparison(VAL::comparison_op::E_EQUALS, )*/
         std::cerr << "Equality component could not be converted" << std::endl;
         return 0;
     }
@@ -244,7 +254,6 @@ std::cout << "Predicate: " << a->predicate(); int k = 0;for (auto i=a->terms().b
             VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
             ++var_name_ctr[vname];
             var_decl[ppddl_parser::Term(*it)] = new_vname; // Here I set the name to the term to use it accordingly
-std::cout << "   " << var_decl[ppddl_parser::Term(*it)] << " " << var_decl[*it] << std::endl;
 
             // Define the type and set object
             vs->type = new VAL::pddl_type(t_name);
@@ -345,7 +354,8 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
+            if (tlit->object()) sl->push_back(new VAL::const_symbol(var_decl[*tlit]));
+            else sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
         }
 
         VAL::proposition *prop = new VAL::proposition(h, sl);
