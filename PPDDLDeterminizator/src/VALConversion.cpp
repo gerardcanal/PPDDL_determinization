@@ -107,16 +107,21 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
         VAL::operator_symbol *name = new VAL::operator_symbol(it->first);
         VAL::var_symbol_table* symtab = new VAL::var_symbol_table();
 
-        VAL::var_symbol_list *parameters = new VAL::var_symbol_list();
-        std::map<std::string, int> var_names;
+        VAL::var_symbol_list* parameters = new VAL::var_symbol_list();
+        std::map<std::string, int> var_name_ctr;
+        std::map<ppddl_parser::Term, std::string> var_decl;
         for (auto pit = it->second->parameters().begin(); pit != it->second->parameters().end(); ++pit) {
             std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*pit));
+std::cout << "Param: " << *pit << std::endl;
 
             // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
             std::string vname = t_name.substr(0,1);
-            if (var_names.find(vname) == var_names.end()) var_names[vname] = 0;
-            VAL::var_symbol* vs = new VAL::var_symbol(vname + ((var_names[vname] == 0)? "" : std::to_string(var_names[vname])));
-            ++var_names[vname];
+            if (var_name_ctr.find(vname) == var_name_ctr.end()) var_name_ctr[vname] = 0;
+            std::string new_vname = vname + ((var_name_ctr[vname] == 0)? "" : std::to_string(var_name_ctr[vname]));
+            VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
+            ++var_name_ctr[vname];
+            var_decl[ppddl_parser::Term(*pit)] = new_vname; // Here I set the name to the term to use it accordingly
+std::cout << "   " << var_decl[ppddl_parser::Term(*pit)] << " " << var_decl[*pit] << std::endl;
 
             // Define the type and set object
             vs->type = new VAL::pddl_type(t_name);
@@ -124,9 +129,9 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
             symtab->insert(std::make_pair(vname, vs));
         }
 
-        VAL::goal *precondition = toVALCondition(&it->second->precondition(), _dom);
+        VAL::goal *precondition = toVALCondition(&it->second->precondition(), _dom, var_name_ctr,var_decl);
 
-        VAL::effect_lists* effects = toVALEffects(&it->second->effect(), _dom);
+        VAL::effect_lists* effects = toVALEffects(&it->second->effect(), _dom, var_name_ctr, var_decl);
         //
         VAL::operator_* op = new VAL::action(name, parameters, precondition, effects, symtab);
         d.ops->push_back(op);
@@ -140,17 +145,21 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
 
 
 VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *precondition,
-                                         const std::shared_ptr<ppddl_parser::Domain> &dom) {
+                                         const std::shared_ptr<ppddl_parser::Domain> &dom,
+                                         std::map<std::string, int>& var_name_ctr,
+                                         std::map<ppddl_parser::Term, std::string>& var_decl) {
     const ppddl_parser::Atom* a = dynamic_cast<const ppddl_parser::Atom*>(precondition);
     if (a != nullptr) {
         VAL::pred_symbol* h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
         VAL::parameter_symbol_list* sl = new VAL::parameter_symbol_list;
-        ppddl_parser::TypeList tl = ppddl_parser::PredicateTable::parameters(a->predicate());
+        //ppddl_parser::TypeList tl = ppddl_parser::PredicateTable::parameters(a->predicate()); FIXMe delete?
+        ppddl_parser::TermList tl = a->terms();
+std::cout << "Predicate: " << a->predicate(); int k = 0;for (auto i=a->terms().begin();i!=a->terms().end();++i ) std::cout << " " << *i << " - " << tl[k++]; std::cout << std::endl;
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
             // get type name
-            std::string t_name = dom->types().typestring(*tlit);
+            //std::string t_name = dom->types().typestring(*tlit); // FIXME delete?
 
-            sl->push_back(new VAL::var_symbol(t_name));
+            sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
         }
 
         VAL::proposition* prop = new VAL::proposition(h, sl);
@@ -197,7 +206,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
 
     const ppddl_parser::Negation* n = dynamic_cast<const ppddl_parser::Negation*>(precondition);
     if (n != nullptr) {
-        return new VAL::neg_goal(toVALCondition(&n->negand(), dom));
+        return new VAL::neg_goal(toVALCondition(&n->negand(), dom, var_name_ctr, var_decl));
     }
 
     const ppddl_parser::Conjunction* cjt = dynamic_cast<const ppddl_parser::Conjunction*>(precondition);
@@ -205,7 +214,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
         VAL::goal_list* gl = new VAL::goal_list();
         ppddl_parser::FormulaList cjs = cjt->conjuncts();
         for (auto it = cjs.begin(); it != cjs.end(); ++it) {
-            gl->push_back(toVALCondition(*it, dom));
+            gl->push_back(toVALCondition(*it, dom, var_name_ctr, var_decl));
         }
         return new VAL::conj_goal(gl);
     }
@@ -215,7 +224,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
         VAL::goal_list* gl = new VAL::goal_list();
         ppddl_parser::FormulaList djs = djt->disjuncts();
         for (auto it = djs.begin(); it != djs.end(); ++it) {
-            gl->push_back(toVALCondition(*it, dom));
+            gl->push_back(toVALCondition(*it, dom, var_name_ctr, var_decl));
         }
         return new VAL::disj_goal(gl);
     }
@@ -226,12 +235,23 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
         VAL::var_symbol_list* sl = new VAL::var_symbol_list();
         VAL::var_symbol_table* st = new VAL::var_symbol_table();
         for (auto it = params.begin(); it != params.end(); ++it) {
-            std::string var = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
-            VAL::var_symbol* sym = new VAL::var_symbol(var);
-            sl->push_back(sym);
-            st->insert(std::make_pair(var, sym));
+            std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
+
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_name_ctr.find(vname) == var_name_ctr.end()) var_name_ctr[vname] = 0;
+            std::string new_vname = vname + ((var_name_ctr[vname] == 0)? "" : std::to_string(var_name_ctr[vname]));
+            VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
+            ++var_name_ctr[vname];
+            var_decl[ppddl_parser::Term(*it)] = new_vname; // Here I set the name to the term to use it accordingly
+std::cout << "   " << var_decl[ppddl_parser::Term(*it)] << " " << var_decl[*it] << std::endl;
+
+            // Define the type and set object
+            vs->type = new VAL::pddl_type(t_name);
+            sl->push_back(vs);
+            st->insert(std::make_pair(vname, vs));
         }
-        return new VAL::qfied_goal(VAL::quantifier::E_EXISTS, sl, toVALCondition(&ex->body(), dom), st);
+        return new VAL::qfied_goal(VAL::quantifier::E_EXISTS, sl, toVALCondition(&ex->body(), dom,var_name_ctr, var_decl), st);
     }
 
     const ppddl_parser::Forall* fa = dynamic_cast<const ppddl_parser::Forall*>(precondition);
@@ -240,12 +260,22 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
         VAL::var_symbol_list* sl = new VAL::var_symbol_list();
         VAL::var_symbol_table* st = new VAL::var_symbol_table();
         for (auto it = params.begin(); it != params.end(); ++it) {
-            std::string var = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
-            VAL::var_symbol* sym = new VAL::var_symbol(var);
-            sl->push_back(sym);
-            st->insert(std::make_pair(var, sym));
+            std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
+
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_name_ctr.find(vname) == var_name_ctr.end()) var_name_ctr[vname] = 0;
+            std::string new_vname = vname + ((var_name_ctr[vname] == 0)? "" : std::to_string(var_name_ctr[vname]));
+            VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
+            ++var_name_ctr[vname];
+            var_decl[ppddl_parser::Term(*it)] = new_vname; // Here I set the name to the term to use it accordingly
+
+            // Define the type and set object
+            vs->type = new VAL::pddl_type(t_name);
+            sl->push_back(vs);
+            st->insert(std::make_pair(vname, vs));
         }
-        return new VAL::qfied_goal(VAL::quantifier::E_FORALL, sl, toVALCondition(&fa->body(), dom), st);
+        return new VAL::qfied_goal(VAL::quantifier::E_FORALL, sl, toVALCondition(&fa->body(), dom, var_name_ctr, var_decl), st);
     }
 
     throw std::runtime_error("Error: [toVALCondition] At least one condition should have been satisfied! Unrecognized StateFormula type.");
@@ -302,7 +332,9 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 }
 
 VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
-                                               const std::shared_ptr<ppddl_parser::Domain> &dom) {
+                                               const std::shared_ptr<ppddl_parser::Domain> &dom,
+                                               std::map<std::string, int>& var_name_ctr,
+                                               std::map<ppddl_parser::Term, std::string>& var_decl) {
     VAL::effect_lists* ef = new VAL::effect_lists();
 
     const ppddl_parser::SimpleEffect* se = dynamic_cast<const ppddl_parser::SimpleEffect*>(e);
@@ -311,12 +343,9 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
 
         VAL::pred_symbol *h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
-        ppddl_parser::TypeList tl = ppddl_parser::PredicateTable::parameters(a->predicate());
+        ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            // get type name
-            std::string t_name = dom->types().typestring(*tlit);
-
-            sl->push_back(new VAL::var_symbol(t_name));
+            sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
         }
 
         VAL::proposition *prop = new VAL::proposition(h, sl);
@@ -343,7 +372,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
     if (ce != nullptr) {
         ppddl_parser::EffectList cjts = ce->conjuncts();
         for (auto it = cjts.begin(); it != cjts.end(); ++it) {
-            VAL::effect_lists* conjunct = toVALEffects(*it, dom);
+            VAL::effect_lists* conjunct = toVALEffects(*it, dom, var_name_ctr, var_decl);
             ef->append_effects(conjunct);
         }
         return ef;
@@ -351,7 +380,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
 
     const ppddl_parser::ConditionalEffect* cone = dynamic_cast<const ppddl_parser::ConditionalEffect*>(e);
     if (cone != nullptr) {
-        VAL::cond_effect* condeff = new VAL::cond_effect(toVALCondition(&cone->condition(), dom), toVALEffects(&cone->effect(), dom));
+        VAL::cond_effect* condeff = new VAL::cond_effect(toVALCondition(&cone->condition(), dom, var_name_ctr, var_decl), toVALEffects(&cone->effect(), dom, var_name_ctr, var_decl));
         ef->cond_effects.push_back(condeff);
         return ef;
     }
@@ -362,13 +391,23 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
         VAL::var_symbol_list* sl = new VAL::var_symbol_list();
         VAL::var_symbol_table* st = new VAL::var_symbol_table();
         for (auto it = params.begin(); it != params.end(); ++it) {
-            std::string var = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
-            VAL::var_symbol* sym = new VAL::var_symbol(var);
-            sl->push_back(sym);
-            st->insert(std::make_pair(var, sym));
+            std::string t_name = ppddl_parser::TypeTable::typestring(ppddl_parser::TermTable::type(*it));
+
+            // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
+            std::string vname = t_name.substr(0,1);
+            if (var_name_ctr.find(vname) == var_name_ctr.end()) var_name_ctr[vname] = 0;
+            std::string new_vname = vname + ((var_name_ctr[vname] == 0)? "" : std::to_string(var_name_ctr[vname]));
+            VAL::var_symbol* vs = new VAL::var_symbol(new_vname);
+            ++var_name_ctr[vname];
+            var_decl[ppddl_parser::Term(*it)] = new_vname; // Here I set the name to the term to use it accordingly
+
+            // Define the type and set object
+            vs->type = new VAL::pddl_type(t_name);
+            sl->push_back(vs);
+            st->insert(std::make_pair(t_name, vs));
         }
 
-        VAL::forall_effect* fae = new VAL::forall_effect(toVALEffects(&qe->effect(), dom), sl, st);
+        VAL::forall_effect* fae = new VAL::forall_effect(toVALEffects(&qe->effect(), dom, var_name_ctr, var_decl), sl, st);
         ef->forall_effects.push_back(fae);
         return ef;
     }
