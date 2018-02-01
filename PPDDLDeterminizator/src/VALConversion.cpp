@@ -2,33 +2,34 @@
 // Created by gcanal on 29/01/18.
 //
 
+#include <cstring>
 #include "VALConversion.h"
 
-VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domain> &_dom) {
+VAL::domain VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     VAL::domain d(new VAL::structure_store()); // The pointer is deleted inside the constructor
-    d.name = _dom->name();
+    d.name = dom->name();
 
     d.req; /* TODO pddl_req_flag */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // TYPES
     d.types = new VAL::pddl_type_list;
-    std::vector<std::string> names = _dom->types().names();
+    std::vector<std::string> names = dom->types().names();
     for (auto it = names.begin(); it != names.end(); ++it) {
         VAL::pddl_type* t = new VAL::pddl_type(*it);
-        d.types->push_back(t); // FIXME it sets as symbols. Make sure the type is correct (as displays NULL)...
+        d.types->push_back(t);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CONSTANTS -- aka terms()
     d.constants = new VAL::const_symbol_list; /* const_symbol_list* */
-    std::vector<std::string> term_names = _dom->terms().names(); // Variable reuse!
+    std::vector<std::string> term_names = dom->terms().names(); // Variable reuse!
     for (auto it = term_names.begin(); it != term_names.end(); ++it) {
 
-        const ppddl_parser::Object* x = _dom->terms().find_object(*it); // If not in the domain, the terms are objects from the problem file
+        const ppddl_parser::Object* x = dom->terms().find_object(*it); // If not in the domain, the terms are objects from the problem file
         if (x != nullptr) {
             VAL::const_symbol* cs = new VAL::const_symbol(*it);
-            std::string t_name = _dom->types().typestring(_dom->terms().type(ppddl_parser::Term(*x)));
+            std::string t_name = dom->types().typestring(dom->terms().type(ppddl_parser::Term(*x)));
             cs->type = new VAL::pddl_type(t_name);
             d.constants->push_back(cs);
         }
@@ -40,18 +41,18 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PREDICATES
     d.predicates = new VAL::pred_decl_list; /* pred_decl_list* */
-    names = _dom->predicates().names();
+    names = dom->predicates().names();
     for (auto it = names.begin(); it != names.end(); ++it) {
         VAL::pred_symbol* s = new VAL::pred_symbol(*it);
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
         VAL::var_symbol_table* st = new VAL::var_symbol_table();
 
         // get all the parameters/arguments
-        ppddl_parser::TypeList tl = _dom->predicates().parameters(*_dom->predicates().find_predicate(*it));
+        ppddl_parser::TypeList tl = dom->predicates().parameters(*dom->predicates().find_predicate(*it));
         std::map<std::string, int> var_names;
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
             // get type name
-            std::string t_name = _dom->types().typestring(*tlit);
+            std::string t_name = dom->types().typestring(*tlit);
 
             // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
             std::string vname = t_name.substr(0,1);
@@ -71,18 +72,18 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // FUNCTIONS
     d.functions = new VAL::func_decl_list; /* func_decl_list* */
-    names = _dom->functions().names();
+    names = dom->functions().names();
     std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
     for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
         VAL::func_symbol* fs = new VAL::func_symbol(*it);
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
         VAL::var_symbol_table* st = new VAL::var_symbol_table;
 
-        const ppddl_parser::TypeList fparam = _dom->functions().parameters(*_dom->functions().find_function(*it));
+        const ppddl_parser::TypeList fparam = dom->functions().parameters(*dom->functions().find_function(*it));
         std::map<std::string, int> var_names;
         for (auto fparamit = fparam.begin(); fparamit != fparam.end(); ++fparamit) {
             // get type name
-            std::string t_name = _dom->types().typestring(*fparamit);
+            std::string t_name = dom->types().typestring(*fparamit);
 
             // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
             std::string vname = t_name.substr(0,1);
@@ -98,16 +99,16 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    d.constraints; /* TODO con_goal* -> not printed!? */
+    d.constraints; /* con_goal* -> not printed!? */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    d.ops = new VAL::operator_list; /* TODO operator_list* */
+    d.ops = new VAL::operator_list; /* operator_list* */
 
     // Add objects and constants as declared variables!
     std::map<ppddl_parser::Term, std::string> const_obj_decl;
-    std::vector<std::string> obj_names = _dom->terms().names();
+    std::vector<std::string> obj_names = dom->terms().names();
     for (auto oit = obj_names.begin(); oit != obj_names.end(); ++oit) {
-        const ppddl_parser::Object* obj = _dom->terms().find_object(*oit);
+        const ppddl_parser::Object* obj = dom->terms().find_object(*oit);
         if (obj != nullptr) {
             const_obj_decl[*obj] = *oit;
         }
@@ -121,7 +122,7 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
         }
     }
 
-    for (auto it = _dom->actions().begin(); it != _dom->actions().end(); ++it) {
+    for (auto it = dom->actions().begin(); it != dom->actions().end(); ++it) {
         VAL::operator_symbol *name = new VAL::operator_symbol(it->first);
         VAL::var_symbol_table* symtab = new VAL::var_symbol_table();
 
@@ -145,9 +146,9 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
             symtab->insert(std::make_pair(vname, vs));
         }
 
-        VAL::goal *precondition = toVALCondition(&it->second->precondition(), _dom, var_name_ctr,var_decl);
+        VAL::goal *precondition = toVALCondition(&it->second->precondition(), dom, var_name_ctr,var_decl);
 
-        VAL::effect_lists* effects = toVALEffects(&it->second->effect(), _dom, var_name_ctr, var_decl);
+        VAL::effect_lists* effects = toVALEffects(&it->second->effect(), dom, var_name_ctr, var_decl);
         //
         VAL::operator_* op = new VAL::action(name, parameters, precondition, effects, symtab);
         d.ops->push_back(op);
@@ -161,7 +162,7 @@ VAL::domain VALConversion::toVALDomain(const std::shared_ptr<ppddl_parser::Domai
 
 
 VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *precondition,
-                                         const std::shared_ptr<ppddl_parser::Domain> &dom,
+                                         const ppddl_parser::Domain* dom,
                                          std::map<std::string, int>& var_name_ctr,
                                          std::map<ppddl_parser::Term, std::string>& var_decl) {
     const ppddl_parser::Atom* a = dynamic_cast<const ppddl_parser::Atom*>(precondition);
@@ -291,7 +292,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp,
-                                                 const std::shared_ptr<ppddl_parser::Domain> &dom) {
+                                                 const ppddl_parser::Domain* dom) {
     const ppddl_parser::Value* v = dynamic_cast<const ppddl_parser::Value*>(exp);
     if (v != 0) {
         return new VAL::float_expression(v->value().double_value());
@@ -341,7 +342,7 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 }
 
 VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
-                                               const std::shared_ptr<ppddl_parser::Domain> &dom,
+                                               const ppddl_parser::Domain* dom,
                                                std::map<std::string, int>& var_name_ctr,
                                                std::map<ppddl_parser::Term, std::string>& var_decl) {
     VAL::effect_lists* ef = new VAL::effect_lists();
@@ -429,7 +430,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e,
     throw std::runtime_error("Error: [toVALEffects] At least one condition should have been satisfied! Unrecognized Effect type.");
 }
 
-VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const std::shared_ptr<ppddl_parser::Domain> &dom) {
+VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain* dom) {
 
     VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom)); // As we pass a Fluent, it will return the correct func_term
     VAL::expression* exp = toVALExpression(&up->expression(), dom);
@@ -455,5 +456,112 @@ VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, cons
                 "Error: [toVALUpdate] At least one condition should have been satisfied! Unrecognized Update type.");
     }
     return new VAL::assignment(ft, op, exp);
+}
+
+VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
+    VAL::problem ret;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PROBLEM NAME
+    ret.name = new char[p->name().size()+1];
+    strcpy(ret.name, p->name().c_str());
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // DOMAIN NAME
+    ret.domain_name =  new char[p->domain().name().size()+1];
+    strcpy(ret.domain_name, p->domain().name().c_str());
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PDDL REQUIREMENTS
+    //pddl_req_flag req; TODO
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PDDL TYPES
+    ret.types = new VAL::pddl_type_list;; //pddl_type_list*
+    ppddl_parser::TypeTable ttable = p->domain().types();
+    for (auto it = ttable.names().begin(); it != ttable.names().end(); ++it) {
+        VAL::pddl_type* t = new VAL::pddl_type(*it);
+        ret.types->push_back(t);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // OBJECTS
+    ret.objects = new VAL::const_symbol_list; // const_symbol_list*
+
+    map<std::string, int> var_name_ctr; // Not used but needed in the VALConversion methods
+    std::map<ppddl_parser::Term, std::string> const_obj_decl;
+    std::vector<std::string> obj_names = p->terms().names();
+    for (auto oit = obj_names.begin(); oit != obj_names.end(); ++oit) {
+        const ppddl_parser::Object* obj = p->terms().find_object(*oit);
+        if (obj != nullptr) {
+            const_obj_decl[*obj] = *oit;
+            VAL::const_symbol* sym = new VAL::const_symbol(*oit);
+            sym->type = new VAL::pddl_type(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))));
+            ret.objects->push_back(sym);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // INITIAL STATE
+    ret.initial_state = new VAL::effect_lists; /*effect_lists*/
+    for (auto it = p->init_atoms().begin(); it != p->init_atoms().end();++it) {
+        const ppddl_parser::Atom *a = *it;
+        VAL::pred_symbol *h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
+        VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
+        ppddl_parser::TermList tl = a->terms();
+        for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
+            if (tlit->object()) sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
+            else sl->push_back(new VAL::var_symbol(const_obj_decl[*tlit]));
+        }
+        ret.initial_state->add_effects.push_back(new VAL::simple_effect(new VAL::proposition(h, sl)));
+    }
+
+    // Add the rest
+    for (auto eit = p->init_effects().begin(); eit != p->init_effects().end(); ++eit) {
+        ret.initial_state->append_effects(toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // GOAL
+    ret.the_goal = toVALCondition(&p->goal(), &p->domain(), var_name_ctr, const_obj_decl); // goal*
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CONSTRAINTS
+    ret.constraints;//con_goal * TODO can't find it in the ppddl_parser GOAL REWARD??
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // METRIC
+    VAL::optimization op = VAL::optimization::E_MAXIMIZE;
+    const ppddl_parser::Expression* metric = &p->metric();
+    const ppddl_parser::Subtraction* sub = dynamic_cast<const ppddl_parser::Subtraction*>(metric);
+    if (sub != nullptr) {
+        // The ppddl_parser always maximizes, and represents the minimization of X as maximize (- 0 X), so we check if it's a 0-X case
+        const ppddl_parser::Value* op1 = dynamic_cast<const ppddl_parser::Value*>(&sub->operand1());
+        if (op1 != nullptr && op1->value().double_value()==0) {
+            // It is a 0-X case, so the metric is minimizing, and the value is the operand2.
+            op = VAL::optimization::E_MINIMIZE;
+            metric = &sub->operand2();
+        }
+
+    }
+    ret.metric = new VAL::metric_spec(op, toVALExpression(metric, &p->domain())); // metric_spec*
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // LENGTH
+    // ret.length; //length_spec* // Not available in ppddl_parser
+    std::cout << "-------------------------- " << std::endl << std::endl;
+    for (auto it = p->init_atoms().begin(); it != p->init_atoms().end();++it)std::cout << **it<< " " ;std::cout<<p->init_atoms().size()  << std::endl;
+    //for (auto it = p->init_values().begin(); it != p->init_values().end();++it)std::cout << it->second<< " " ;std::cout<<p->init_values().size()  << std::endl;
+    //for (auto it = p->init_effects().begin(); it != p->init_effects().end();++it)std::cout << **it << " " ;std::cout<<p->init_effects().size()  << std::endl;
+    std::cerr << std::endl;
+    std::cout << p->domain().predicates() << std::endl;
+
+/*
+/* Returns the initial atoms of this problem.
+const AtomSet &init_atoms() const { return init_atoms_; }
+
+/* Returns the initial values of this problem.
+const ValueMap &init_values() const { return init_values_; }*/
+    return ret;
 }
 

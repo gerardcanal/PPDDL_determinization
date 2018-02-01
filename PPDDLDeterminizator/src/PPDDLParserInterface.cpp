@@ -109,7 +109,7 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 
 VAL::domain PPDDLInterface::Domain::getVALDomain() {
     if (determinized);// TODO
-    return VALConversion::toVALDomain(_dom);
+    return VALConversion::toVALDomain(&*_dom);
 }
 
 void PPDDLInterface::Domain::printPDDL(ostream &o) {
@@ -118,6 +118,8 @@ void PPDDLInterface::Domain::printPDDL(ostream &o) {
     o << val_d;
     //VAL::PrettyPrinter printer;
     //printer.write_domain(o, &val_d);
+    const ppddl_parser::Problem* p = ppddl_parser::Problem::begin()->second;
+    o << VALConversion::toVALProblem(p);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
