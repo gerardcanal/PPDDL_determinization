@@ -519,7 +519,9 @@ VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
 
     // Add the rest
     for (auto eit = p->init_effects().begin(); eit != p->init_effects().end(); ++eit) {
-        ret.initial_state->append_effects(toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl));
+        VAL::effect_lists* init_eff = toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl);
+        ret.initial_state->append_effects(init_eff);
+        delete init_eff; // As we appended them to the problem, they were copied and the pointer is lost
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,8 +552,6 @@ VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // LENGTH
     // ret.length; //length_spec* // Not available in ppddl_parser
-
-
 
     // ValueMap ppddl_parser::Problem::init_values() // It is not being used!
     return ret;
