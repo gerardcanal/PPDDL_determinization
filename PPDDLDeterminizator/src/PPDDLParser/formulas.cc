@@ -308,10 +308,12 @@ namespace ppddl_parser {
           if ((state || PredicateTable::static_predicate(predicate()))
               && objects == inst_terms.size()) {
             if (atoms.find(&inst_atom) != atoms.end()) {
-              delete &inst_atom; // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
+              ref(&inst_atom); // in case the reference is 0, we increment to 1 to decrement it and delete it, else we add 1 and subtract 1
+              destructive_deref(&inst_atom); // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
               return TRUE;
             } else {
-              delete &inst_atom; // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
+              ref(&inst_atom); // in case the reference is 0, we increment to 1 to decrement it and delete it, else we add 1 and subtract 1
+              destructive_deref(&inst_atom); // There was a memory leak as if this condition happens, the return never frees the Atom created by make()
               return FALSE;
             }
           } else {
