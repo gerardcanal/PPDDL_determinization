@@ -9,7 +9,7 @@ VAL::domain VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     VAL::domain d(new VAL::structure_store()); // The pointer is deleted inside the constructor
     d.name = dom->name();
 
-    d.req; /* TODO pddl_req_flag */
+    d.req = toVALRequirements(&dom->requirements); /* pddl_req_flag */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // TYPES
@@ -155,7 +155,7 @@ VAL::domain VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    d.drvs; /* TODO derivations_list* */
+    // d.drvs; /* derivations_list* */ They are not printed in the pddl
 
     return d;
 }
@@ -300,7 +300,8 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 
     const ppddl_parser::Fluent* f = dynamic_cast<const ppddl_parser::Fluent*>(exp);
     if (f != 0) {
-        ppddl_parser::TermList tll = f->terms(); // FIXME what are these?
+        // ppddl_parser::TermList tll = f->terms(); // FIXME  Not sure what are these or if I should use them
+
         VAL::func_symbol* fs = new VAL::func_symbol(dom->functions().name(f->function()));
         VAL::parameter_symbol_list* sl = new VAL::parameter_symbol_list();
         ppddl_parser::TypeList tl = dom->functions().parameters(f->function());
@@ -473,14 +474,14 @@ VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PDDL REQUIREMENTS
-    //pddl_req_flag req; TODO
+    ret.req = toVALRequirements(&p->domain().requirements);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PDDL TYPES
     ret.types = new VAL::pddl_type_list;; //pddl_type_list*
     ppddl_parser::TypeTable ttable = p->domain().types();
-    for (auto it = ttable.names().begin(); it != ttable.names().end(); ++it) {
-        VAL::pddl_type* t = new VAL::pddl_type(*it);
+    for (size_t i = 0; i < ttable.names().size(); ++i) {
+        VAL::pddl_type* t = new VAL::pddl_type(ttable.names()[i]);
         ret.types->push_back(t);
     }
 
@@ -527,7 +528,7 @@ VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CONSTRAINTS
-    ret.constraints;//con_goal * TODO can't find it in the ppddl_parser GOAL REWARD??
+    //ret.constraints;//con_goal * can't find something similar in the ppddl_parser GOAL REWARD??
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // METRIC
@@ -549,19 +550,28 @@ VAL::problem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // LENGTH
     // ret.length; //length_spec* // Not available in ppddl_parser
-    std::cout << "-------------------------- " << std::endl << std::endl;
-    for (auto it = p->init_atoms().begin(); it != p->init_atoms().end();++it)std::cout << **it<< " " ;std::cout<<p->init_atoms().size()  << std::endl;
-    //for (auto it = p->init_values().begin(); it != p->init_values().end();++it)std::cout << it->second<< " " ;std::cout<<p->init_values().size()  << std::endl;
-    //for (auto it = p->init_effects().begin(); it != p->init_effects().end();++it)std::cout << **it << " " ;std::cout<<p->init_effects().size()  << std::endl;
-    std::cerr << std::endl;
-    std::cout << p->domain().predicates() << std::endl;
 
-/*
-/* Returns the initial atoms of this problem.
-const AtomSet &init_atoms() const { return init_atoms_; }
 
-/* Returns the initial values of this problem.
-const ValueMap &init_values() const { return init_values_; }*/
+
+    // ValueMap ppddl_parser::Problem::init_values() // It is not being used!
     return ret;
+}
+
+VAL::pddl_req_flag VALConversion::toVALRequirements(const ppddl_parser::Requirements *req) {
+    VAL::pddl_req_flag reqflag = 0;
+
+    if (req->strips) reqflag ^= VAL::pddl_req_attr::E_STRIPS;
+    else if (req->typing) reqflag ^= VAL::pddl_req_attr::E_TYPING;
+    else if (req->negative_preconditions) reqflag ^= VAL::pddl_req_attr::E_NEGATIVE_PRECONDITIONS;
+    else if (req->disjunctive_preconditions) reqflag ^= VAL::pddl_req_attr::E_DISJUNCTIVE_PRECONDS;
+    else if (req->equality) reqflag ^= VAL::pddl_req_attr::E_EQUALITY;
+    else if (req->existential_preconditions) reqflag ^= VAL::pddl_req_attr::E_EXT_PRECS;
+    else if (req->universal_preconditions) reqflag ^= VAL::pddl_req_attr::E_UNIV_PRECS;
+    else if (req->conditional_effects) reqflag ^= VAL::pddl_req_attr::E_COND_EFFS;
+    else if (req->fluents) reqflag ^= VAL::pddl_req_attr::E_NFLUENTS ^ VAL::pddl_req_attr::E_OFLUENTS;
+    //else if (req->probabilistic_effects) // Can't be possible in a deterministic domain!
+    else if (req->rewards) reqflag ^= VAL::pddl_req_attr::E_ACTIONCOSTS; // not sure if equivalent
+
+    return reqflag;
 }
 

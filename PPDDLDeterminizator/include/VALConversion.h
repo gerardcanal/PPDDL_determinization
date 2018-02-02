@@ -26,6 +26,7 @@ private:
                                            std::map<ppddl_parser::Term, std::string>& var_decl);
 
     static VAL::assignment *toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain* dom);
+    static VAL::pddl_req_flag toVALRequirements(const ppddl_parser::Requirements *req);
 };
 
 
