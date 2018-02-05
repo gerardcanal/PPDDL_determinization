@@ -552,7 +552,7 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            if (tlit->object()) ret.const_tab.find(const_obj_decl[*tlit])->second;//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
+            if (tlit->object()) sl->push_back(ret.const_tab.find(const_obj_decl[*tlit])->second);//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
             else sl->push_back(new VAL::var_symbol(const_obj_decl[*tlit]));
         }
         problem->initial_state->add_effects.push_back(new VAL::simple_effect(new VAL::proposition(h, sl)));
