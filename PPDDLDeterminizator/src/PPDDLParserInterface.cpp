@@ -119,13 +119,14 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 void PPDDLInterface::Domain::printPDDL(ostream &o) {
     //VAL::domain val_d = *getVALDomain().get();
     VALDomain* wrapper = VALConversion::toVALDomain(&*_dom);
-    VAL::domain val_d = *wrapper->get();
-    val_d.setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
-    o << val_d;
+    const VAL::domain* val_d = wrapper->get();
+    val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
+    o << *val_d;
     //VAL::PrettyPrinter printer;
     //printer.write_domain(o, &val_d);
     const ppddl_parser::Problem* p = ppddl_parser::Problem::begin()->second;
     o << *VALConversion::toVALProblem(p, nullptr).get();
+    delete wrapper;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

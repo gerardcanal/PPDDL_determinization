@@ -45,7 +45,7 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
         }
     }
 
-    d->pred_vars;  // Vars used in predicate declarations /* var_symbol_table* */
+    d->pred_vars = new VAL::var_symbol_table;  // Vars used in predicate declarations /* var_symbol_table* */
     // Not filling this one as it is not getting used by VAL.
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
             // Define the type and set object
             vs->type = _domain_wrapper->pddl_type_tab.find(t_name)->second; // Types were already defined
             sl->push_back(vs);
-            st->insert(std::make_pair(vname, vs));
+            st->insert(std::make_pair(vs->getName(), vs));
         }
 
         d->predicates->push_back(new VAL::pred_decl(s, sl, st));
@@ -111,10 +111,10 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    d->constraints; /* con_goal* -> not printed!? */
+    d->constraints = new VAL::con_goal; /* con_goal* -> not printed!? */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    d->ops = new VAL::operator_list; /* operator_list* */
+    //d->ops = the new is performed in the constructor of d /* operator_list* */
 
     // Add objects and constants as declared variables!
     std::map<ppddl_parser::Term, std::string> const_obj_decl; // The name (string) of each term
@@ -156,7 +156,7 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
             // Define the type and set object
             vs->type = _domain_wrapper->pddl_type_tab.find(t_name)->second;
             parameters->push_back(vs);
-            symtab->insert(std::make_pair(vname, vs));
+            symtab->insert(std::make_pair(new_vname, vs));
         }
 
         VAL::goal *precondition = toVALCondition(&it->second->precondition(), dom, var_name_ctr, var_decl,
@@ -179,21 +179,26 @@ VAL::goal * VALConversion::toVALCondition(const ppddl_parser::StateFormula *prec
                                           const ppddl_parser::Domain *dom,
                                           std::map<std::string, int> &var_name_ctr,
                                           std::map<ppddl_parser::Term, std::string> &var_decl,
-                                          const VALWrapper *valwrap) {
+                                          VALWrapper *valwrap) {
     const ppddl_parser::Atom* a = dynamic_cast<const ppddl_parser::Atom*>(precondition);
     if (a != nullptr) {
         VAL::pred_symbol* h;
         auto predit = valwrap->pred_tab.find(ppddl_parser::PredicateTable::name(a->predicate()));
         if (predit == valwrap->pred_tab.end()) {
             h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
+            valwrap->pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
         }
         else h = predit->second;
 
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            if (tlit->object()) sl->push_back(new VAL::const_symbol(var_decl[*tlit]));
-            else sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
+            if (tlit->object()) sl->push_back(valwrap->const_tab.find(var_decl[*tlit])->second);// FIXME? sl->push_back(new VAL::const_symbol(var_decl[*tlit]));
+            else {
+                VAL::var_symbol* varsym = new VAL::var_symbol(var_decl[*tlit]);
+                sl->push_back(varsym);
+                valwrap->var_list.push_back(varsym);
+            }
         }
 
         VAL::proposition* prop = new VAL::proposition(h, sl);
@@ -316,7 +321,7 @@ VAL::goal * VALConversion::toVALCondition(const ppddl_parser::StateFormula *prec
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
-                                                 const VALWrapper *valwrap) {
+                                                 VALWrapper *valwrap) {
     const ppddl_parser::Value* v = dynamic_cast<const ppddl_parser::Value*>(exp);
     if (v != 0) {
         return new VAL::float_expression(v->value().double_value());
@@ -369,7 +374,7 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, const ppddl_parser::Domain *dom,
                                                std::map<std::string, int> &var_name_ctr,
                                                std::map<ppddl_parser::Term, std::string> &var_decl,
-                                               const VALWrapper *valwrap) {
+                                               VALWrapper *valwrap) {
     VAL::effect_lists* ef = new VAL::effect_lists();
 
     const ppddl_parser::SimpleEffect* se = dynamic_cast<const ppddl_parser::SimpleEffect*>(e);
@@ -381,7 +386,11 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
             if (tlit->object()) sl->push_back(valwrap->const_tab.find(var_decl[*tlit])->second); // FIXME? new VAL::const_symbol(var_decl[*tlit]));
-            else sl->push_back(new VAL::var_symbol(var_decl[*tlit]));
+            else {
+                VAL::var_symbol* varsym = new VAL::var_symbol(var_decl[*tlit]);
+                sl->push_back(varsym);
+                valwrap->var_list.push_back(varsym);
+            }
         }
 
         VAL::proposition *prop = new VAL::proposition(h, sl);
@@ -459,7 +468,8 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
     throw std::runtime_error("Error: [toVALEffects] At least one condition should have been satisfied! Unrecognized Effect type.");
 }
 
-VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom, const VALWrapper *valwrap) {
+VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom,
+                                            VALWrapper *valwrap) {
 
     VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom, valwrap)); // As we pass a Fluent, it will return the correct func_term
     VAL::expression* exp = toVALExpression(&up->expression(), dom, valwrap);
@@ -553,7 +563,11 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
             if (tlit->object()) sl->push_back(ret.const_tab.find(const_obj_decl[*tlit])->second);//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
-            else sl->push_back(new VAL::var_symbol(const_obj_decl[*tlit]));
+            else {
+                VAL::var_symbol* varsym = new VAL::var_symbol(const_obj_decl[*tlit]);
+                sl->push_back(varsym);
+                ret.var_list.push_back(varsym);
+            }
         }
         problem->initial_state->add_effects.push_back(new VAL::simple_effect(new VAL::proposition(h, sl)));
         ret.pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
