@@ -18,6 +18,7 @@
 #include "ptree.h"
 #include "PrettyPrinter.h"
 #include <memory>
+
 // Domain class
 namespace PPDDLInterface {
 
@@ -121,7 +122,7 @@ namespace PPDDLInterface {
 
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 
-            VAL::domain getVALDomain();
+            //VALDomain getVALDomain();
 
             friend std::ostream &operator<<(std::ostream &output, const Domain &D) {
                 output << *D._dom;

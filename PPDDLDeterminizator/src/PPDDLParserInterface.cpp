@@ -29,7 +29,10 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
             //       preferred to modify as less as possible.
         }
     }
-    else std::cerr << "There were errors while parsing input file!" << std::endl;
+    else  {
+        std::cerr << "There were errors while parsing input file! Finishing the program." << std::endl;
+        exit(-1);
+    }
 }
 
 PPDDLInterface::Domain::~Domain() {
@@ -107,19 +110,22 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
     const_cast<PPDDLInterface::Action*>(&new_action)->releasePtr();
 }
 
-VAL::domain PPDDLInterface::Domain::getVALDomain() {
+/*VALDomain PPDDLInterface::Domain::getVALDomain() {
     if (determinized);// TODO
-    return VALConversion::toVALDomain(&*_dom);
-}
+    const ppddl_parser::Domain* p_domain = &*_dom;
+    return VALConversion::toVALDomain(p_domain);
+}*/
 
 void PPDDLInterface::Domain::printPDDL(ostream &o) {
-    VAL::domain val_d = getVALDomain();
+    //VAL::domain val_d = *getVALDomain().get();
+    VALDomain* wrapper = VALConversion::toVALDomain(&*_dom);
+    VAL::domain val_d = *wrapper->get();
     val_d.setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
     o << val_d;
     //VAL::PrettyPrinter printer;
     //printer.write_domain(o, &val_d);
     const ppddl_parser::Problem* p = ppddl_parser::Problem::begin()->second;
-    o << VALConversion::toVALProblem(p);
+    o << VALConversion::toVALProblem(p).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
