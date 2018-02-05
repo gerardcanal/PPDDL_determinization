@@ -125,7 +125,7 @@ void PPDDLInterface::Domain::printPDDL(ostream &o) {
     //VAL::PrettyPrinter printer;
     //printer.write_domain(o, &val_d);
     const ppddl_parser::Problem* p = ppddl_parser::Problem::begin()->second;
-    o << VALConversion::toVALProblem(p).get();
+    o << *VALConversion::toVALProblem(p, nullptr).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

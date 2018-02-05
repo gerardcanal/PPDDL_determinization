@@ -20,6 +20,7 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     for (auto it = names.begin(); it != names.end(); ++it) {
         VAL::pddl_type* t = new VAL::pddl_type(*it);
         d->types->push_back(t);
+        _domain_wrapper->pddl_type_tab.insert(std::make_pair(*it, t));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +487,7 @@ VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, cons
     return new VAL::assignment(ft, op, exp);
 }
 
-VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
+VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VALDomain *domainwrap) {
     VAL::problem* problem = new VAL::problem();
     VALProblem ret(problem);
 
@@ -513,6 +514,16 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p) {
         problem->types->push_back(t);
         ret.pddl_type_tab.insert(std::make_pair(ttable.names()[i], t));
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //// Copy functions from domain
+    std::vector<std::string> names = p->domain().functions().names();
+    std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
+    for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
+        VAL::func_symbol *fs = new VAL::func_symbol(*it);
+        ret.func_tab.insert(std::make_pair(*it, fs));
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // OBJECTS

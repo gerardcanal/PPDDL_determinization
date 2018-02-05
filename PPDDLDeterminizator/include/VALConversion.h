@@ -47,7 +47,7 @@ private:
 class VALConversion {
 public:
     static VALDomain* toVALDomain(const ppddl_parser::Domain* dom);
-    static VALProblem toVALProblem(const ppddl_parser::Problem *p);
+    static VALProblem toVALProblem(const ppddl_parser::Problem *p, const VALDomain *domainwrap);
 private:
     static VAL::goal *toVALCondition(const ppddl_parser::StateFormula *formula, const ppddl_parser::Domain *dom,
                                      std::map<std::string, int> &var_name_ctr,
