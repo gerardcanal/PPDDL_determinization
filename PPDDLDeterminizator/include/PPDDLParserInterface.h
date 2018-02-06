@@ -36,11 +36,19 @@ namespace PPDDLInterface {
 
 // Classes
     //Generic class Effect
+   /*!
+    * \class Effect
+    * \brief Wrapper class for the pddl_parser::Effect class. It handles the memory and ensures there are no errors nor memory leaks.
+    */
    class Effect {
        friend class Action;
        friend class ConjunctiveEffect;
        friend class ProabbilisticEffect;
     public:
+        /*!
+         *
+         * @param e
+         */
         Effect(const p_Effect* e);
         Effect(const Effect& e);
 
@@ -56,6 +64,10 @@ namespace PPDDLInterface {
        void releasePtr();
    };
 
+    /*!
+     * \class ConjunctiveEffect
+     * \brief Wrapper class for the pddl_parser::ConjunctiveEffect class. It handles the memory and ensures there are no errors nor memory leaks.
+     */
     class ConjunctiveEffect : public Effect {
     public:
         ConjunctiveEffect(const p_ConjunctiveEffect* e);
@@ -70,6 +82,10 @@ namespace PPDDLInterface {
 
     };
 
+    /*!
+     * \class ProbabilisticEffect
+     * \brief Wrapper class for the pddl_parser::ProbabilisticEffect class. It handles the memory and ensures there are no errors nor memory leaks.
+     */
     class ProbabilisticEffect : public Effect {
     public:
         ProbabilisticEffect(const p_ProbabilisticEffect* e);
@@ -83,6 +99,10 @@ namespace PPDDLInterface {
 
 
     //class Action
+    /*!
+     * \class Action
+     * \brief Wrapper class for the pddl_parser::ActionSchema class. It handles the memory and ensures there are no errors nor memory leaks.
+     */
     class Action { // TODO should allow r/w access to preconditions...?
         friend class Domain;
     public:
@@ -107,12 +127,16 @@ namespace PPDDLInterface {
 
 
     // Domain class
+    /*!
+     * \class Domain
+     * \brief Wrapper class for the pddl_parser::Domain class. It handles the memory and ensures there are no errors nor memory leaks.
+     */
     class Domain {
         public:
             typedef std::vector<PPDDLInterface::Action>::iterator action_iterator;
 
             explicit Domain(const std::string& domain_path); // Read domain
-            Domain(const PPDDLInterface::Domain& p); // Copy constructor -from a PPDDL domain-
+            Domain(const PPDDLInterface::Domain &p, const std::string &name_suffix = "copy"); // Copy constructor -from a PPDDL domain-
             ~Domain();
 
             PPDDLInterface::Action getAction(const std::string& name);

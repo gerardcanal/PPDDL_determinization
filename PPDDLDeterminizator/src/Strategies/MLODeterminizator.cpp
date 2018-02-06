@@ -23,7 +23,7 @@
 //using namespace PPDDLInterface;
 
 PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
-    PPDDLInterface::Domain d_det(d); // Copy the domain
+    PPDDLInterface::Domain d_det(d, "det"); // Copy the domain
 
     std::vector<PPDDLInterface::Action> actions = d_det.getActions();
     for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
@@ -131,6 +131,6 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 
-        determinized.printPDDL("/home/gcanal/Desktop/");
+        determinized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
         return 19;
     }

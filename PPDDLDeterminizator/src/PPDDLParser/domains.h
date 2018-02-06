@@ -45,6 +45,7 @@ namespace ppddl_parser {
     struct Domain {
         /* Table of domain definitions. */
         struct DomainMap : public std::map<std::string, const Domain *> {
+            DomainMap() {}
         };
 
         /* Requirements for this domain. */

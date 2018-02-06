@@ -10,6 +10,10 @@
 #include "PPDDLParser/problems.h"
 #include "ptree.h"
 
+/*!
+ * \class VALWrapper
+ * \brief Generic wrapper class for the VAL structures. It stores symbol tables to keep the pointer values and delete them in the correct way.
+ */
 class VALWrapper { // handles the symbol tables so it ensures their deletion, preventing memory leaks
 public:
     virtual ~VALWrapper() {
@@ -17,17 +21,21 @@ public:
     };
     VALWrapper() = default;
 protected:
-    VAL::const_symbol_table     const_tab;
-    VAL::var_symbol_list        var_list;
-    VAL::pddl_type_symbol_table pddl_type_tab;
-    VAL::pred_symbol_table	    pred_tab;
-    VAL::func_symbol_table      func_tab;
-    VAL::operator_symbol_table  op_tab;
+    VAL::const_symbol_table     const_tab; //!< Constant symbols table
+    VAL::var_symbol_list        var_list; //!< Variable symbols list (it stores all the variables defined)
+    VAL::pddl_type_symbol_table pddl_type_tab; //!< PDDL types table
+    VAL::pred_symbol_table	    pred_tab; //!< Predicate symbols table
+    VAL::func_symbol_table      func_tab; //!< Function symbols table
+    VAL::operator_symbol_table  op_tab; //!< Operators -actions- symbols table
     friend class VALConversion;
 };
 
+/*!
+ * \class VALDomain
+ * \brief Wrapper class for the VAL::domain class. Can only be created through the VALConversion::toVALDomain() static method.
+ */
 class VALDomain : public VALWrapper {
-    // Wrapper for a VALDomain
+    // Wrapper for a VAL::domain
 public:
     const VAL::domain* get() { return _domain;}
     ~VALDomain() { delete _domain; };
@@ -37,8 +45,12 @@ private:
     friend class VALConversion;
 };
 
+/*!
+ * \class VALProblem
+ * \brief Wrapper class for the VAL::problem class. Can only be created through the VALConversion::toVALProblem() static method.
+ */
 class VALProblem : public VALWrapper {
-    // Wrapper for a VALDomain
+    // Wrapper for a VAL::problem
 public:
     const VAL::problem* get() {return _problem;}
     ~VALProblem() { delete _problem; };
@@ -48,6 +60,11 @@ private:
     friend class VALConversion;
 };
 
+/*!
+ * \class VALConversion
+ * \brief Class to convert from ppddl_parser structures to VAL PDDL structures. The input domain must be determinized
+ * (i.e. can't contain Proababilistic effects).
+ */
 class VALConversion {
 public:
     static std::shared_ptr<VALDomain> toVALDomain(const ppddl_parser::Domain* dom);

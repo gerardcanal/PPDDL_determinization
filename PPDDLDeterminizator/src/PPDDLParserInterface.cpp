@@ -39,9 +39,9 @@ PPDDLInterface::Domain::~Domain() {
 }
 
 
-PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain& d) {
+PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain &d, const std::string &name_suffix) {
     const std::shared_ptr<p_Domain> p = d._dom;
-    _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_det"));
+    _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_" + name_suffix));
 
     /* Domain types. */
     ppddl_parser::TypeTable types_ = p->types(); // A copy is made here
@@ -131,7 +131,7 @@ void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(ppddl_parser::Problem::begin()->second, wrapper);
     const VAL::problem* val_p = p->get();
     val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
-    o = std::ofstream(output_folder_path + "/" + val_d->name + "__" + val_p->name + "_problem.pddl");
+    o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
     o << *val_p;
     o.close();
 }
