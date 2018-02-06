@@ -122,7 +122,7 @@ void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     //VAL::domain val_d = *getVALDomain().get();
     std::shared_ptr<VALDomain> wrapper = getVALDomain();
     const VAL::domain* val_d = wrapper->get();
-    val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
+    val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PDDLPrinter));
 
     std::ofstream o(output_folder_path + "/" + val_d->name + "_domain.pddl");
     o << *val_d;

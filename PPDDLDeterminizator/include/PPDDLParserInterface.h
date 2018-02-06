@@ -16,7 +16,7 @@
 #include "PPDDLParser/problems.h"
 #include "VALConversion.h"
 #include "ptree.h"
-#include "PrettyPrinter.h"
+#include "PDDLPrinter.h"
 #include <memory>
 #include <fstream>
 
