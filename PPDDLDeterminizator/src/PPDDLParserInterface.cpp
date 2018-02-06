@@ -110,23 +110,22 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
     const_cast<PPDDLInterface::Action*>(&new_action)->releasePtr();
 }
 
-/*VALDomain PPDDLInterface::Domain::getVALDomain() {
+std::shared_ptr<VALDomain> PPDDLInterface::Domain::getVALDomain() {
     if (determinized);// TODO
     const ppddl_parser::Domain* p_domain = &*_dom;
     return VALConversion::toVALDomain(p_domain);
-}*/
+}
 
 void PPDDLInterface::Domain::printPDDL(ostream &o) {
     //VAL::domain val_d = *getVALDomain().get();
-    VALDomain* wrapper = VALConversion::toVALDomain(&*_dom);
+    std::shared_ptr<VALDomain> wrapper = VALConversion::toVALDomain(&*_dom);
     const VAL::domain* val_d = wrapper->get();
     val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
     o << *val_d;
     //VAL::PrettyPrinter printer;
     //printer.write_domain(o, &val_d);
-    const ppddl_parser::Problem* p = ppddl_parser::Problem::begin()->second;
-    o << *VALConversion::toVALProblem(p, nullptr).get();
-    delete wrapper;
+    std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(ppddl_parser::Problem::begin()->second, wrapper);
+    o << *p->get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,9 +5,9 @@
 #include <cstring>
 #include "VALConversion.h"
 
-VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
+std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     VAL::domain* d = new VAL::domain(new VAL::structure_store()); // The pointer is deleted inside the constructor
-    VALDomain* _domain_wrapper = new VALDomain(d);
+    std::shared_ptr<VALDomain> _domain_wrapper(new VALDomain(d));
 
     d->name = dom->name();
 
@@ -175,11 +175,11 @@ VALDomain* VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
 }
 
 
-VAL::goal * VALConversion::toVALCondition(const ppddl_parser::StateFormula *precondition,
+VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *precondition,
                                           const ppddl_parser::Domain *dom,
                                           std::map<std::string, int> &var_name_ctr,
                                           std::map<ppddl_parser::Term, std::string> &var_decl,
-                                          VALWrapper *valwrap) {
+                                          std::shared_ptr<VALWrapper> valwrap) {
     const ppddl_parser::Atom* a = dynamic_cast<const ppddl_parser::Atom*>(precondition);
     if (a != nullptr) {
         VAL::pred_symbol* h;
@@ -321,7 +321,7 @@ VAL::goal * VALConversion::toVALCondition(const ppddl_parser::StateFormula *prec
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
-                                                 VALWrapper *valwrap) {
+                                                 std::shared_ptr<VALWrapper> valwrap) {
     const ppddl_parser::Value* v = dynamic_cast<const ppddl_parser::Value*>(exp);
     if (v != 0) {
         return new VAL::float_expression(v->value().double_value());
@@ -374,7 +374,7 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, const ppddl_parser::Domain *dom,
                                                std::map<std::string, int> &var_name_ctr,
                                                std::map<ppddl_parser::Term, std::string> &var_decl,
-                                               VALWrapper *valwrap) {
+                                               std::shared_ptr<VALWrapper> valwrap) {
     VAL::effect_lists* ef = new VAL::effect_lists();
 
     const ppddl_parser::SimpleEffect* se = dynamic_cast<const ppddl_parser::SimpleEffect*>(e);
@@ -469,7 +469,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
 }
 
 VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom,
-                                            VALWrapper *valwrap) {
+                                            std::shared_ptr<VALWrapper> valwrap) {
 
     VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom, valwrap)); // As we pass a Fluent, it will return the correct func_term
     VAL::expression* exp = toVALExpression(&up->expression(), dom, valwrap);
@@ -497,9 +497,10 @@ VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, cons
     return new VAL::assignment(ft, op, exp);
 }
 
-VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VALDomain *domainwrap) {
+std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Problem *p,
+                                                        const std::shared_ptr<VALDomain> domainwrap) {
     VAL::problem* problem = new VAL::problem();
-    VALProblem ret(problem);
+    std::shared_ptr<VALProblem> ret(new VALProblem(problem));
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PROBLEM NAME
@@ -522,7 +523,7 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
     for (size_t i = 0; i < ttable.names().size(); ++i) {
         VAL::pddl_type* t = new VAL::pddl_type(ttable.names()[i]);
         problem->types->push_back(t);
-        ret.pddl_type_tab.insert(std::make_pair(ttable.names()[i], t));
+        ret->pddl_type_tab.insert(std::make_pair(ttable.names()[i], t));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -531,7 +532,7 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
     std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
     for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
         VAL::func_symbol *fs = new VAL::func_symbol(*it);
-        ret.func_tab.insert(std::make_pair(*it, fs));
+        ret->func_tab.insert(std::make_pair(*it, fs));
     }
 
 
@@ -547,9 +548,9 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
         if (obj != nullptr) {
             const_obj_decl[*obj] = *oit;
             VAL::const_symbol* sym = new VAL::const_symbol(*oit);
-            sym->type =  ret.pddl_type_tab.find(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))))->second; // FIXME? new VAL::pddl_type(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))));
+            sym->type =  ret->pddl_type_tab.find(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))))->second; // FIXME? new VAL::pddl_type(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))));
             problem->objects->push_back(sym);
-            ret.const_tab.insert(std::make_pair(*oit, sym));
+            ret->const_tab.insert(std::make_pair(*oit, sym));
         }
     }
 
@@ -562,27 +563,27 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            if (tlit->object()) sl->push_back(ret.const_tab.find(const_obj_decl[*tlit])->second);//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
+            if (tlit->object()) sl->push_back(ret->const_tab.find(const_obj_decl[*tlit])->second);//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
             else {
                 VAL::var_symbol* varsym = new VAL::var_symbol(const_obj_decl[*tlit]);
                 sl->push_back(varsym);
-                ret.var_list.push_back(varsym);
+                ret->var_list.push_back(varsym);
             }
         }
         problem->initial_state->add_effects.push_back(new VAL::simple_effect(new VAL::proposition(h, sl)));
-        ret.pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
+        ret->pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
     }
 
     // Add the rest
     for (auto eit = p->init_effects().begin(); eit != p->init_effects().end(); ++eit) {
-        VAL::effect_lists* init_eff = toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl, &ret);
+        VAL::effect_lists* init_eff = toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl, ret);
         problem->initial_state->append_effects(init_eff);
         delete init_eff; // As we appended them to the problem, they were copied and the pointer is lost
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // GOAL
-    problem->the_goal = toVALCondition(&p->goal(), &p->domain(), var_name_ctr, const_obj_decl, &ret); // goal*
+    problem->the_goal = toVALCondition(&p->goal(), &p->domain(), var_name_ctr, const_obj_decl, ret); // goal*
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CONSTRAINTS
@@ -603,7 +604,7 @@ VALProblem VALConversion::toVALProblem(const ppddl_parser::Problem *p, const VAL
         }
 
     }
-    problem->metric = new VAL::metric_spec(op, toVALExpression(metric, &p->domain(), &ret)); // metric_spec*
+    problem->metric = new VAL::metric_spec(op, toVALExpression(metric, &p->domain(), ret)); // metric_spec*
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // LENGTH

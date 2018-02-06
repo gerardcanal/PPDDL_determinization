@@ -25,10 +25,10 @@ protected:
     friend class VALConversion;
 };
 
-class VALDomain : VALWrapper {
+class VALDomain : public VALWrapper {
     // Wrapper for a VALDomain
 public:
-    const VAL::domain* get() {return _domain;}
+    const VAL::domain* get() { return _domain;}
     ~VALDomain() { delete _domain; };
 private:
     explicit VALDomain(const VAL::domain* d) : _domain(d) {};
@@ -36,7 +36,7 @@ private:
     friend class VALConversion;
 };
 
-class VALProblem : VALWrapper {
+class VALProblem : public VALWrapper {
     // Wrapper for a VALDomain
 public:
     const VAL::problem* get() {return _problem;}
@@ -49,22 +49,23 @@ private:
 
 class VALConversion {
 public:
-    static VALDomain* toVALDomain(const ppddl_parser::Domain* dom);
-    static VALProblem toVALProblem(const ppddl_parser::Problem *p, const VALDomain *domainwrap);
+    static std::shared_ptr<VALDomain> toVALDomain(const ppddl_parser::Domain* dom);
+    static std::shared_ptr<VALProblem> toVALProblem(const ppddl_parser::Problem *p,
+                                                    const std::shared_ptr<VALDomain> domainwrap);
 private:
     static VAL::goal *toVALCondition(const ppddl_parser::StateFormula *formula, const ppddl_parser::Domain *dom,
                                      std::map<std::string, int> &var_name_ctr,
                                      std::map<ppddl_parser::Term, std::string> &var_decl,
-                                     VALWrapper *valwrap);
+                                     std::shared_ptr<VALWrapper> valwrap);
     static VAL::expression *toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
-                                            VALWrapper *valwrap);
+                                            std::shared_ptr<VALWrapper> valwrap);
     static VAL::effect_lists *toVALEffects(const ppddl_parser::Effect *e, const ppddl_parser::Domain *dom,
                                            std::map<std::string, int> &var_name_ctr,
                                            std::map<ppddl_parser::Term, std::string> &var_decl,
-                                           VALWrapper *valwrap);
+                                           std::shared_ptr<VALWrapper> valwrap);
 
     static VAL::assignment *
-    toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom, VALWrapper *valwrap);
+    toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom, std::shared_ptr<VALWrapper> valwrap);
 
     static VAL::pddl_req_flag toVALRequirements(const ppddl_parser::Requirements *req);
 };

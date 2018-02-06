@@ -20,6 +20,7 @@
 #include <memory>
 
 // Domain class
+class VALDomain;
 namespace PPDDLInterface {
 
 // Typedefs
@@ -122,7 +123,7 @@ namespace PPDDLInterface {
 
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 
-            //VALDomain getVALDomain();
+            std::shared_ptr<VALDomain> getVALDomain();
 
             friend std::ostream &operator<<(std::ostream &output, const Domain &D) {
                 output << *D._dom;
