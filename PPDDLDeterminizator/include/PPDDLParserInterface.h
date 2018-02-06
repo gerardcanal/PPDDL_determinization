@@ -18,6 +18,7 @@
 #include "ptree.h"
 #include "PrettyPrinter.h"
 #include <memory>
+#include <fstream>
 
 namespace PPDDLInterface {
 // Typedefs
@@ -46,11 +47,14 @@ namespace PPDDLInterface {
         virtual ~Effect();
         const p_Effect* getEffect() const;
         virtual Effect & operator= (const Effect & other);
+
+       static bool determinized(const ppddl_parser::Effect &effect);
+
    protected:
        const p_Effect* _eff;
        bool _delete_ptr;
        void releasePtr();
-    };
+   };
 
     class ConjunctiveEffect : public Effect {
     public:
@@ -101,6 +105,7 @@ namespace PPDDLInterface {
         void initFrom(const p_actionSchema* as);
     };
 
+
     // Domain class
     class Domain {
         public:
@@ -114,10 +119,10 @@ namespace PPDDLInterface {
             std::vector<PPDDLInterface::Action> getActions() const;
 
             void setAction(const PPDDLInterface::Action& action);
-            void printPDDL(std::ostream & o=std::cout);
+            void printPDDL(const string &output_folder_path);
         private:
-             std::shared_ptr<p_Domain> _dom;
-            bool determinized; // FIXME initialize somehow
+            std::shared_ptr<p_Domain> _dom;
+            bool determinized(); // FIXME initialize somehow
 
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 

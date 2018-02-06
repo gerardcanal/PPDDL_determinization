@@ -111,21 +111,39 @@ void PPDDLInterface::Domain::setAction(const PPDDLInterface::Action& new_action)
 }
 
 std::shared_ptr<VALDomain> PPDDLInterface::Domain::getVALDomain() {
-    if (determinized);// TODO
-    const ppddl_parser::Domain* p_domain = &*_dom;
-    return VALConversion::toVALDomain(p_domain);
+    if (determinized()) {// TODO
+        const p_Domain *p_domain = &*_dom;
+        return VALConversion::toVALDomain(p_domain);
+    }
+    else throw std::runtime_error("ERROR! Non determinized domain can't be converted to (non-stochastic) PDDL!");
 }
 
-void PPDDLInterface::Domain::printPDDL(ostream &o) {
+void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     //VAL::domain val_d = *getVALDomain().get();
-    std::shared_ptr<VALDomain> wrapper = VALConversion::toVALDomain(&*_dom);
+    std::shared_ptr<VALDomain> wrapper = getVALDomain();
     const VAL::domain* val_d = wrapper->get();
     val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PrettyPrinter));
+
+    std::ofstream o(output_folder_path + "/" + val_d->name + "_domain.pddl");
     o << *val_d;
-    //VAL::PrettyPrinter printer;
-    //printer.write_domain(o, &val_d);
+    o.close();
+
     std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(ppddl_parser::Problem::begin()->second, wrapper);
-    o << *p->get();
+    const VAL::problem* val_p = p->get();
+    val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
+    o = std::ofstream(output_folder_path + "/" + val_d->name + "__" + val_p->name + "_problem.pddl");
+    o << *val_p;
+    o.close();
+}
+
+bool PPDDLInterface::Domain::determinized() {
+    bool determ = true;
+    for (ppddl_parser::ActionSchemaMap::const_iterator ai = _dom->actions().begin();
+         ai != _dom->actions().end() && determ;
+         ai++) {
+        determ &= Effect::determinized(ai->second->effect());
+    }
+    return determ;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,4 +329,23 @@ void PPDDLInterface::Effect::releasePtr() {
     _delete_ptr = false;
     RCObject::deref(_eff); // As we are releasing the pointer, it's like we're losing one reference as there won't be a delete in this case
 
+}
+
+bool PPDDLInterface::Effect::determinized(const p_Effect &effect) {
+    bool result = true;
+
+    const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(&effect);
+    if (pe != nullptr) {
+        return false;
+    }
+
+    const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect*>(&effect);
+    if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+
+        for (auto it = ce->conjuncts().begin(); it != ce->conjuncts().end(); ++it) {
+            result &= Effect::determinized(**it);
+        }
+    }
+
+    return result;
 }

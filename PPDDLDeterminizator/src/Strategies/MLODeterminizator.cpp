@@ -19,7 +19,6 @@
 
 #include "MLODeterminizator.h"
 #include "PPDDLParserInterface.h"
-#include <typeinfo>
 
 //using namespace PPDDLInterface;
 
@@ -132,8 +131,6 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 
-        std::ofstream o("/home/gcanal/Desktop/domain_test.pddl");
-        determinized.printPDDL(o);
-        o.close();
+        determinized.printPDDL("/home/gcanal/Desktop/");
         return 19;
     }
