@@ -86,6 +86,7 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
     names = dom->functions().names();
     std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
     for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
+        if (*it == "total-time") continue;
         VAL::func_symbol* fs = new VAL::func_symbol(*it);
         _domain_wrapper->func_tab.insert(std::make_pair(*it, fs));
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
@@ -509,8 +510,8 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // DOMAIN NAME
-    problem->domain_name =  new char[p->domain().name().size()+1];
-    strcpy(problem->domain_name, p->domain().name().c_str());
+    problem->domain_name =  new char[domainwrap->get()->name.size()+1];
+    strcpy(problem->domain_name, domainwrap->get()->name.c_str());
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // PDDL REQUIREMENTS
