@@ -19,10 +19,7 @@
 #include "PrettyPrinter.h"
 #include <memory>
 
-// Domain class
-class VALDomain;
 namespace PPDDLInterface {
-
 // Typedefs
     typedef ppddl_parser::Domain p_Domain; // The ::Domain syntax makes it reference to the upper scope namespace i.e. to the MDPSim parser one in this case
     typedef ppddl_parser::Effect p_Effect;
@@ -104,6 +101,7 @@ namespace PPDDLInterface {
         void initFrom(const p_actionSchema* as);
     };
 
+    // Domain class
     class Domain {
         public:
             typedef std::vector<PPDDLInterface::Action>::iterator action_iterator;

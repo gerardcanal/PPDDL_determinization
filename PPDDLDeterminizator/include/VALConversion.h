@@ -6,7 +6,8 @@
 #define ROSPLAN_PLANNING_SYSTEM_VALCONVERSION_H
 
 
-#include "PPDDLParserInterface.h"
+#include "PPDDLParser/domains.h"
+#include "PPDDLParser/problems.h"
 #include "ptree.h"
 
 class VALWrapper { // handles the symbol tables so it ensures their deletion, preventing memory leaks
