@@ -45,23 +45,39 @@ namespace PPDDLInterface {
        friend class ConjunctiveEffect;
        friend class ProabbilisticEffect;
     public:
+
         /*!
-         *
-         * @param e
+         * Creates an Effect wrapper from a ppddl_parser::Effect
+         * @param e Effect to be wrapped
          */
         Effect(const p_Effect* e);
+
+        /*!
+         * Copy constructor
+         * @param e Effect to be copied
+         */
         Effect(const Effect& e);
 
         virtual ~Effect();
+
+        /*!
+         * Returns the wrapped effect.
+         * @return The wrapped Effect
+         */
         const p_Effect* getEffect() const;
         virtual Effect & operator= (const Effect & other);
 
+       /*!
+        * Checks if the effect is determinized (i.e. doesnot have any probabilistic effect).
+        * @param effect Effect to be checked
+        * @return True if the effect does not contain probabilistic effects, false otherwise
+        */
        static bool determinized(const ppddl_parser::Effect &effect);
 
    protected:
-       const p_Effect* _eff;
-       bool _delete_ptr;
-       void releasePtr();
+       const p_Effect* _eff; //!< Wrapped effect
+       bool _delete_ptr; //!< if true, the pointer will be deleted.
+       void releasePtr(); //!< Releases the pointer, thus not deleting it (setting _delete_ptr to false).
    };
 
     /*!
@@ -70,15 +86,30 @@ namespace PPDDLInterface {
      */
     class ConjunctiveEffect : public Effect {
     public:
+        /*!
+         * Creates an Effect wrapper from a ppddl_parser::ConjunctiveEffect
+         * @param e Effect to be wrapped
+         */
         ConjunctiveEffect(const p_ConjunctiveEffect* e);
+
+        /*!
+         * Copy constructor for a ConjunctiveEffect
+         * @param e Effect to be copied
+         */
         ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect& e);
 
-        size_t size() const;
-        std::shared_ptr<Effect> getConjunct(size_t i) const;
+        size_t size() const; //!< Number of conjuncts of the effect
+        std::shared_ptr<Effect> getConjunct(size_t i) const; //!< Returns the conjunct at the position i
+
+        /*!
+         * Changes the conjunct at position i by the cjct parameter
+         * @param cjct Conjunct to be added
+         * @param i Position at whihc the conjunct will be inserted (*replacing* the existing one)
+         */
         void changeConjunct(const Effect& cjct, size_t i);
     private:
-        inline const p_ConjunctiveEffect* constEffect() const;
-        inline p_ConjunctiveEffect* modificableEffect() const;
+        inline const p_ConjunctiveEffect* constEffect() const; //!< Returns the conjunctive effect (const*)
+        inline p_ConjunctiveEffect* modificableEffect() const; //!< Returns the conjunctive effect (non-const raw pointer, modifiable).
 
     };
 
@@ -88,13 +119,17 @@ namespace PPDDLInterface {
      */
     class ProbabilisticEffect : public Effect {
     public:
+        /*!
+         * Creates the wrapper to the ppddl_parser::ProbabilisticEffect
+         * @param e Effect to be wraped.
+         */
         ProbabilisticEffect(const p_ProbabilisticEffect* e);
 
-        size_t size() const;
-        double getProbability(size_t i) const;
-        Effect getEffect(size_t i) const;
+        size_t size() const; //!< Returns the number of probabilistic entries of the effect
+        double getProbability(size_t i) const; //!< Returns the probability of the ith effect
+        Effect getEffect(size_t i) const; //!< Returns the ith effect
     private:
-        inline const p_ProbabilisticEffect* constEffect() const;
+        inline const p_ProbabilisticEffect* constEffect() const; //!< Returns the unwrapped effect (const*)
     };
 
 
@@ -106,23 +141,36 @@ namespace PPDDLInterface {
     class Action { // TODO should allow r/w access to preconditions...?
         friend class Domain;
     public:
+        /*!
+         * Creates a ppddl_parser::ActionSchema wrapper
+         * @param as Wrapped ActionSchema
+         */
         explicit Action(const p_actionSchema* as);
+
+        /*!
+         * Copy constructor
+         * @param a Action to be copied
+         */
         Action(const Action& a);
         Action();
         ~Action();
 
+        /*!
+         * Returns the effect.
+         * @return Effect of the Action
+         */
         std::shared_ptr<Effect> getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
-        void setEffect(const PPDDLInterface::Effect& e);
-        std::string getName() const;
+        void setEffect(const PPDDLInterface::Effect& e); //!< Sets the effect
+        std::string getName() const; //!< Returns the name of the action
         Action & operator= (const Action & other);
     private:
         p_actionSchema* _as; // Wrapped actionSchema
-        bool _delete_actionschema;
-        std::shared_ptr<PPDDLInterface::Effect> _action_effect; // Effect of the _as actionSchema.
+        bool _delete_actionschema; //!< True if the pointer needs to be deleted, false otherwise
+        std::shared_ptr<PPDDLInterface::Effect> _action_effect; //!< Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
         void setRawEffectPtr(const p_Effect *e);
-        void releasePtr();
-        void initFrom(const p_actionSchema* as);
+        void releasePtr(); //!< Releases the pointer - sets the delete to false.
+        void initFrom(const p_actionSchema* as); //!< Initializes this action from the parameter
     };
 
 
@@ -135,22 +183,59 @@ namespace PPDDLInterface {
         public:
             typedef std::vector<PPDDLInterface::Action>::iterator action_iterator;
 
+            /*!
+             * Creates a domain from the PPDDL file found in domain_path.
+             * @param domain_path  Path to the PPDDL file top be read.
+             */
             explicit Domain(const std::string& domain_path); // Read domain
+
+            /*!
+             * Copy constructor
+             * @param p Domain to be copied
+             * @param name_suffix Suffix that is added to the domain name (as there can not be two domains with the same name in memory)
+             */
             Domain(const PPDDLInterface::Domain &p, const std::string &name_suffix = "copy"); // Copy constructor -from a PPDDL domain-
             ~Domain();
 
+            /*!
+             * Get an action from the domain
+             * @param name Action name
+             * @return The action from the domain
+             */
             PPDDLInterface::Action getAction(const std::string& name);
+
+            /*!
+             * Get *all* the actions from the domain.
+             * @return The list of actions.
+             */
             std::vector<PPDDLInterface::Action> getActions() const;
 
+            /*!
+             * Set an action to the domain.
+             * @param action Action to be set.
+             */
             void setAction(const PPDDLInterface::Action& action);
-            void printPDDL(const string &output_folder_path);
-        private:
-            std::shared_ptr<p_Domain> _dom;
-            bool determinized(); // FIXME initialize somehow
 
+            /*!
+             * Prints the domain in PDDL. It must be determinized (i.e. can't contain proabilistic actions) before calling it.
+             * @param output_folder_path Folder in which the domain and problem files will be written.
+             */
+            void printPDDL(const string &output_folder_path);
+
+        private:
+            std::shared_ptr<p_Domain> _dom; //!> Pointer to the domain element.
+            bool determinized(); //!> Returns true it the domain is determinized
+
+            /*!
+             * Parses the domain
+             * @param domain_path Path to the domain file.
+             * @param verbosity  Verbosity level of the parser
+             * @param warning_level Warning level of the parser
+             * @return True if the domain was parser correctly without errors
+             */
             bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
 
-            std::shared_ptr<VALDomain> getVALDomain();
+            std::shared_ptr<VALDomain> getVALDomain(); //!>Returns the VALDomain wrapper of the deterministic version of the domain
 
             friend std::ostream &operator<<(std::ostream &output, const Domain &D) {
                 output << *D._dom;

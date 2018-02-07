@@ -121,7 +121,7 @@ std::shared_ptr<VALDomain> PPDDLInterface::Domain::getVALDomain() {
 void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     //VAL::domain val_d = *getVALDomain().get();
     std::shared_ptr<VALDomain> wrapper = getVALDomain();
-    const VAL::domain* val_d = wrapper->get();
+    const std::shared_ptr<VAL::domain> val_d = wrapper->get();
     val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PDDLPrinter));
 
     std::ofstream o(output_folder_path + "/" + val_d->name + "_domain.pddl");
@@ -129,7 +129,7 @@ void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     o.close();
 
     std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(ppddl_parser::Problem::begin()->second, wrapper);
-    const VAL::problem* val_p = p->get();
+    const std::shared_ptr<VAL::problem> val_p = p->get();
     val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
     o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
     o << *val_p;

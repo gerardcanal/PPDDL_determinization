@@ -37,11 +37,19 @@ protected:
 class VALDomain : public VALWrapper {
     // Wrapper for a VAL::domain
 public:
-    const VAL::domain* get() { return _domain;}
-    ~VALDomain() { delete _domain; };
+    /*!
+     * Returns the wrapped VAL::domain object.
+     * @return Weapped VAL::domain.
+     */
+    const std::shared_ptr<VAL::domain> get() { return _domain;}
+    ~VALDomain() {};
 private:
-    explicit VALDomain(const VAL::domain* d) : _domain(d) {};
-    const VAL::domain* _domain;
+    /*!
+     * Private constructor, as it shall only be created by the VALConversion class.
+     * @param d Domain to be wrapped
+     */
+    explicit VALDomain(VAL::domain* d) : _domain(std::shared_ptr<VAL::domain>(d)) {};
+    std::shared_ptr<VAL::domain> _domain; //!< Pointer to the wrapped domain
     friend class VALConversion;
 };
 
@@ -52,11 +60,19 @@ private:
 class VALProblem : public VALWrapper {
     // Wrapper for a VAL::problem
 public:
-    const VAL::problem* get() {return _problem;}
-    ~VALProblem() { delete _problem; };
+    /*!
+     * Returns the wrapped VAL::problem object.
+     * @return The wrapped object
+     */
+    const std::shared_ptr<VAL::problem> get() { return _problem;}
+    ~VALProblem() {};
 private:
+    /*!
+     * Private constructor, as it shall only be created by the VALConversion class.
+     * @param p Problem to be wrapped
+     */
     explicit VALProblem(VAL::problem* p) : _problem(p) {};
-    const VAL::problem* _problem;
+    std::shared_ptr<VAL::problem> _problem;
     friend class VALConversion;
 };
 
@@ -67,7 +83,19 @@ private:
  */
 class VALConversion {
 public:
+    /*!
+     * Converts a ppddl_parser::Domain to a VAL::domain.
+     * @param dom Domain to be converted
+     * @return The converted domain
+     */
     static std::shared_ptr<VALDomain> toVALDomain(const ppddl_parser::Domain* dom);
+
+    /*!
+     * Converts a ppddl_parser::Problem to a VAL::problem.
+     * @param p Problem to be converted.
+     * @param domainwrap Wrapped VAL::domain of this problem
+     * @return The converted problem
+     */
     static std::shared_ptr<VALProblem> toVALProblem(const ppddl_parser::Problem *p,
                                                     const std::shared_ptr<VALDomain> domainwrap);
 private:
