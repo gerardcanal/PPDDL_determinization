@@ -113,6 +113,7 @@ namespace ppddl_parser {
         /* Returns the actions of this domain. */
         const ActionSchemaMap &actions() const { return actions_; }
 
+        /* Writes the PPDDL to the output stream */
         void writePPDDL(std::ostream& o) const;
 
     private:

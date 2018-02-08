@@ -168,7 +168,7 @@ namespace ppddl_parser {
         }
         for (std::map<std::string, Object>::const_iterator oi = objects_.begin(); oi != objects_.end(); oi++) {
             const Object &obj = (*oi).second;
-            o << "  " << obj;
+            o << " " << obj;
             o << " - " << TermTable::type(obj);
         }
     }

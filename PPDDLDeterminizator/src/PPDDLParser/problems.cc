@@ -199,6 +199,63 @@ namespace ppddl_parser {
       }
     }
 
+    void Problem::writePPDDL(std::ostream &o, const std::string &domain_name) const {
+        o << "(define (problem " << name_ << ")" << std::endl;
+        o << "\t(:domain " << domain_name << ")" << std::endl;
+        o << "\t(:objects"; terms_.writePPDDL(o); o << ")" << std::endl;
+        o << "\t(:init";
+        for (AtomSet::const_iterator ai = init_atoms_.begin();ai != init_atoms_.end(); ai++) {
+            o << std::endl << "\t\t"; (*ai)->writePPDDL(o);
+        }
+        for (ValueMap::const_iterator vi = init_values_.begin(); vi != init_values_.end(); vi++) {
+            o << std::endl << "\t\t(= "; (*vi).first->writePPDDL(o); o << ' ' << (*vi).second.double_value() << ")";
+        }
+        for (EffectList::const_iterator ei = init_effects_.begin(); ei != init_effects_.end(); ei++) {
+            const UpdateEffect* ue = dynamic_cast<const UpdateEffect*>(*ei);
+            if (ue != nullptr) {
+                const Assign* assign = dynamic_cast<const Assign*>(&ue->update());
+                if (assign != nullptr) {
+                    std::string fluent_name = FunctionTable::name(assign->fluent().function());
+                    if (fluent_name == "goal-achieved" || fluent_name == "reward" || fluent_name == "total-time") continue;
+                }
+            }
+            o << std::endl << "\t\t";  (*ei)->writePPDDL(o);
+        }
+        o << ")" << std::endl;
+
+        o << "\t(:goal ";goal_->writePPDDL(o); o << ")" << std::endl;
+        if (goal_reward_ != 0) {
+            o << "\t(:goal-reward "; goal_reward_->expression().writePPDDL(o); o << ")" << std::endl;
+        }
+
+        o << "\t(:metric ";
+        const ppddl_parser::Subtraction* sub = dynamic_cast<const ppddl_parser::Subtraction*>(metric_);
+        if (sub != nullptr) {
+            // The ppddl_parser always maximizes, and represents the minimization of X as maximize (- 0 X), so we check if it's a 0-X case
+            const ppddl_parser::Value *op1 = dynamic_cast<const ppddl_parser::Value *>(&sub->operand1());
+            if (op1 != nullptr && op1->value().double_value() == 0) {
+                // It is a 0-X case, so the metric is minimizing, and the value is the operand2.
+                o << "minimize ";
+                sub->operand2().writePPDDL(o);
+            } else {
+                o << "maximize ";
+                metric_->writePPDDL(o);
+            }
+        }
+        else {
+            o << "maximize ";
+            metric_->writePPDDL(o);
+        }
+        o << ")" << std::endl;
+
+        /* Nor ptinting instantiated actions in the domain!
+         o << std::endl << "actions:";
+        for (ActionSet::const_iterator ai = actions_.begin();  ai != actions_.end(); ai++) {
+            o << std::endl << "  " << **ai;
+        }*/
+        o << ")" << std::endl;
+    }
+
 
 /* Output operator for problems. */
     std::ostream &operator<<(std::ostream &os, const Problem &p) {

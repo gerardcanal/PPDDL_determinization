@@ -131,12 +131,14 @@ void PPDDLInterface::Domain::printPDDL(const string &output_folder_path) {
     o << *val_d;
     o.close();
 
-    std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(ppddl_parser::Problem::begin()->second, wrapper);
-    const std::shared_ptr<VAL::problem> val_p = p->get();
-    val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
-    o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
-    o << *val_p;
-    o.close();
+    for (auto prit = ppddl_parser::Problem::begin(); prit != ppddl_parser::Problem::end(); ++prit) {
+        std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(prit->second, wrapper);
+        const std::shared_ptr<VAL::problem> val_p = p->get();
+        val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
+        o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
+        o << *val_p;
+        o.close();
+    }
 }
 
 bool PPDDLInterface::Domain::determinized() {
@@ -153,6 +155,12 @@ void PPDDLInterface::Domain::printPPDDL(const string &output_folder_path) {
     std::ofstream o(output_folder_path + "/" + _dom->name() + "_probabilistic_domain.pddl");
     _dom->writePPDDL(o);
     o.close();
+
+    for (auto prit = ppddl_parser::Problem::begin(); prit != ppddl_parser::Problem::end(); ++prit) {
+        o = std::ofstream(output_folder_path + "/" + _dom->name() + "_probabilistic_" + prit->second->name() + "_problem.pddl.pddl");
+        prit->second->writePPDDL(o, _dom->name());
+        o.close();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

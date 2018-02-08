@@ -128,6 +128,8 @@ namespace ppddl_parser {
         void enabled_actions(ActionList &actions, const AtomSet &atoms,
                              const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o, const std::string& domain_name) const;
     private:
         /* Table of defined problems. */
         static ProblemMap problems;
