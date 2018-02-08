@@ -14,9 +14,10 @@ std::string current_file;
 /* Level of warnings. */
 int warning_level;
 
-PPDDLInterface::Domain::Domain(const std::string &path) {
-    if (readDomain(path)) {
-        std::cout << "Domain file " << path << " parsed correctly." << std::endl;
+PPDDLInterface::Domain::Domain(const std::string &domain_path, const std::vector<std::string> &problem_paths) {
+    // Get the domain
+    if (readPPDDLFile(domain_path)) {
+        std::cout << "Domain file " << domain_path << " parsed correctly." << std::endl;
         int i = 0;
         for (p_Domain::DomainMap::const_iterator di = p_Domain::begin(); di != p_Domain::end(); di++, ++i) {
             if (i > 0) { // Ensures only one iteration
@@ -32,6 +33,16 @@ PPDDLInterface::Domain::Domain(const std::string &path) {
     else  {
         std::cerr << "There were errors while parsing input file! Finishing the program." << std::endl;
         exit(-1);
+    }
+
+    for (auto ppath = problem_paths.begin(); ppath != problem_paths.end(); ++ppath) {
+        if (readPPDDLFile(*ppath)) {
+            std::cout << "Problem file " << *ppath << " parsed correctly." << std::endl;
+        }
+        else {
+            std::cerr << "There were errors while parsing input file! Finishing the program." << std::endl;
+            exit(-1);
+        }
     }
 }
 
@@ -76,13 +87,13 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain &d, const std::strin
     }
 }
 
-bool PPDDLInterface::Domain::readDomain(const std::string &domain_path, int new_verbosity, int new_warning_level) {
+bool PPDDLInterface::Domain::readPPDDLFile(const std::string &domain_path, int new_verbosity, int new_warning_level) {
     warning_level = new_warning_level;
 
     /* Parses the given file, and returns true on success. */
     ppddl_in = fopen(domain_path.c_str(), "r");
     if (ppddl_in == nullptr) {
-        std::cerr << "mdpclient:" << domain_path << ": " << strerror(errno)
+        std::cerr << "PPDDLParserInterface: " << domain_path << ": " << strerror(errno)
                   << std::endl;
         return false;
     } else {
@@ -157,10 +168,14 @@ void PPDDLInterface::Domain::printPPDDL(const string &output_folder_path) {
     o.close();
 
     for (auto prit = ppddl_parser::Problem::begin(); prit != ppddl_parser::Problem::end(); ++prit) {
-        o = std::ofstream(output_folder_path + "/" + _dom->name() + "_probabilistic_" + prit->second->name() + "_problem.pddl.pddl");
+        o = std::ofstream(output_folder_path + "/" + _dom->name() + "_probabilistic_" + prit->second->name() + "_problem.pddl");
         prit->second->writePPDDL(o, _dom->name());
         o.close();
     }
+}
+
+void PPDDLInterface::Domain::loadProblems(const std::vector<std::string>& problem_paths) {
+    for (auto it = problem_paths.begin(); it != problem_paths.end(); ++it) readPPDDLFile(*it);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

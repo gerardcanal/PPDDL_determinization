@@ -185,9 +185,10 @@ namespace PPDDLInterface {
 
             /*!
              * Creates a domain from the PPDDL file found in domain_path.
-             * @param domain_path  Path to the PPDDL file top be read.
+             * @param domain_path  Path to the PPDDL file to be read.
+             * @param problem_paths Paths to PPDDL problems to be read.
              */
-            explicit Domain(const std::string& domain_path); // Read domain
+            explicit Domain(const std::string &domain_path, const std::vector<std::string> &problem_paths = std::vector<std::string>()); // Read domain
 
             /*!
              * Copy constructor
@@ -196,6 +197,12 @@ namespace PPDDLInterface {
              */
             Domain(const PPDDLInterface::Domain &p, const std::string &name_suffix = "copy"); // Copy constructor -from a PPDDL domain-
             ~Domain();
+
+            /*!
+             * Loads all the problems in the defined paths.
+             * @param problem_paths Problems to be read
+             */
+            void loadProblems(const std::vector<std::string>& problem_paths);
 
             /*!
              * Get an action from the domain
@@ -234,13 +241,13 @@ namespace PPDDLInterface {
             bool determinized(); //!> Returns true it the domain is determinized
 
             /*!
-             * Parses the domain
-             * @param domain_path Path to the domain file.
+             * Parses a PPDDL file
+             * @param path Path to the domain or problem file.
              * @param verbosity  Verbosity level of the parser
              * @param warning_level Warning level of the parser
              * @return True if the domain was parser correctly without errors
              */
-            bool readDomain(const std::string &domain_path, int verbosity=2, int warning_level=1);
+            bool readPPDDLFile(const std::string &path, int verbosity = 2, int warning_level = 1);
 
             std::shared_ptr<VALDomain> getVALDomain(); //!>Returns the VALDomain wrapper of the deterministic version of the domain
 

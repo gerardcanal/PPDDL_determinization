@@ -118,6 +118,8 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
             exit(-1);
         }
 
+        //std::vector<std::string> ppaths; ppaths.push_back(argv[2]);
+        //PPDDLInterface::Domain d(argv[1], ppaths);
         PPDDLInterface::Domain d(argv[1]);
         PPDDLInterface::Domain d_copy(d);
         MLODeterminizator mld;
