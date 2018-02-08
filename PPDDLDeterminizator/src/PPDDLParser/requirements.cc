@@ -55,4 +55,18 @@ namespace ppddl_parser {
       probabilistic_effects = true;
       rewards = true;
     }
+
+    void Requirements::writePPDDL(std::ostream &o) const {
+        if (strips) o << " :strips";
+        if (typing) o << " :typing";
+        if (negative_preconditions) o << " :negative-preconditions";
+        if (disjunctive_preconditions) o << " :disjunctive-preconditions";
+        if (equality) o << " :equality";
+        if (existential_preconditions) o << " :existential-preconditions";
+        if (universal_preconditions) o << " :universal-preconditions";
+        if (conditional_effects) o << " :conditional-effects";
+        if (fluents) o << " :fluents";
+        if (probabilistic_effects) o << " :probabilistic-effects";
+        if (rewards) o << " :rewards";
+    }
 }

@@ -87,6 +87,9 @@ namespace ppddl_parser {
                                     const ValueMap &values,
                                     const StateFormula &precond) const;
 
+        /* Writes the PPDDL to the output stream */
+        void write_PPDDL(std::ostream &o) const;
+
     private:
         /* Action name. */
         std::string name_;

@@ -153,6 +153,20 @@ namespace ppddl_parser {
       return *action;
     }
 
+    void ActionSchema::write_PPDDL(std::ostream& o) const {
+      o << "\t(:action " << name_ << std::endl;
+
+      o << "\t\t:parameters (";
+      bool first = true;
+      for (VariableList::const_iterator vi = parameters_.begin(); vi != parameters_.end(); vi++) {
+          if (first) first = false;
+          else o << ' ';
+          o << *vi << " - " << ppddl_parser::TermTable::type(*vi);
+      }
+      o << ")" << std::endl << "\t\t:precondition "; precondition_->writePPDDL(o);
+      o << std::endl << "\t\t:effect "; effect_->writePPDDL(o);
+      o << ")" << std::endl;
+    }
 
 /* Output operator for action schemas. */
     std::ostream &operator<<(std::ostream &os, const ActionSchema &a) {

@@ -113,6 +113,8 @@ namespace ppddl_parser {
         /* Returns the actions of this domain. */
         const ActionSchemaMap &actions() const { return actions_; }
 
+        void writePPDDL(std::ostream& o) const;
+
     private:
         /* Table of all defined domains. */
         static DomainMap domains;

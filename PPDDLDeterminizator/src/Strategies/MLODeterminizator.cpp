@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2017 Institut de Robotica i Informatica Industrial, CSIC-UPC.
+// Copyright (C) 2010-2018 Institut de Robotica i Informatica Industrial, CSIC-UPC.
 // Gerard Canal <gcanal@iri.upc.edu> - github.com/gerardcanal
 // All rights reserved.
 //
@@ -131,6 +131,7 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
 
+        d.printPPDDL("/home/gcanal/Desktop/domain_gen_tests");
         determinized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
         return 19;
     }

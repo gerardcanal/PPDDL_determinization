@@ -48,6 +48,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const = 0;
 
+        /* Writes the PPDDL to the output stream */
+        virtual void writePPDDL(std::ostream& o) const = 0;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const = 0;
@@ -79,6 +81,8 @@ namespace ppddl_parser {
         virtual const Value &instantiation(const SubstitutionMap &subst,
                                            const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -118,6 +122,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -196,6 +202,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -225,6 +233,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -254,6 +264,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -283,6 +295,8 @@ namespace ppddl_parser {
         virtual const Expression &instantiation(const SubstitutionMap &subst,
                                                 const ValueMap &values) const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;

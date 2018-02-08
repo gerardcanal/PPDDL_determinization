@@ -116,4 +116,17 @@ namespace ppddl_parser {
       }
       return os;
     }
+
+    void PredicateTable::writePPDDL(std::ostream &o) const {
+        for (std::map<std::string, Predicate>::const_iterator pi = predicates_.begin(); pi != predicates_.end(); pi++) {
+            const Predicate &p = (*pi).second;
+            o << "  (" << p;
+            const TypeList &types = PredicateTable::parameters(p);
+            int i = 0;
+            for (TypeList::const_iterator ti = types.begin(); ti != types.end(); ti++) {
+                o << " ?v" << ++i << " - " << *ti;
+            }
+            o << ")";
+        }
+    }
 }

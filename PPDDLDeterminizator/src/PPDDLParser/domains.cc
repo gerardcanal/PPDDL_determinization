@@ -99,6 +99,21 @@ namespace ppddl_parser {
       return (ai != actions_.end()) ? (*ai).second : 0;
     }
 
+    void Domain::writePPDDL(std::ostream &o) const {
+        o << "(define (domain " << name_ << ")\n";
+        o << "\t(:requirements"; requirements.writePPDDL(o); o << ")\n";
+        o << "\t(:types"; types_.writePPDDL(o); o << ")\n";
+        o << "\t(:constants "; terms_.writePPDDL(o); o << ")\n";
+        o << "\t(:predicates"; predicates_.writePPDDL(o); o << ")\n";
+        functions_.writePPDDL(o);
+        //o << "(:actions:"; actions_.writePPDDL(o); o << ")\n";
+        for (ActionSchemaMap::const_iterator ai = actions_.begin(); ai != actions_.end(); ai++) {
+            (*ai).second->write_PPDDL(o);
+        }
+
+        o << ")\n";
+    }
+
 
 /* Output operator for domains. */
     std::ostream &operator<<(std::ostream &os, const Domain &d) {

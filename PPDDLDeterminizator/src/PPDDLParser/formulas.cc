@@ -47,12 +47,15 @@ namespace ppddl_parser {
           return *new Constant(value_);
         }
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override  {
+            o << (value_ ? "(and)" : "(or)");
+        }
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const {
           os << (value_ ? "(and)" : "(or)");
         }
-
     private:
         /* Constant representing true. */
         static const Constant TRUE_;
@@ -340,6 +343,14 @@ namespace ppddl_parser {
       return Atom::make(this->predicate(), this->terms()); // It makes a copy!
     }
 
+    void Atom::writePPDDL(std::ostream &o) const {
+      o << '(' << predicate();
+      for (TermList::const_iterator ti = terms().begin(); ti != terms().end(); ti++) {
+        o << ' ' << *ti;
+      }
+      o << ')';
+    }
+
 
 /* ====================================================================== */
 /* Equality */
@@ -400,6 +411,10 @@ namespace ppddl_parser {
 
     const StateFormula &Equality::clone() const {
       return Equality::make(this->term1(), this->term2()); // It makes a copy
+    }
+
+    void Equality::writePPDDL(std::ostream &o) const {
+        o << "(= " << term1() << ' ' << term2() << ")";
     }
 
 
@@ -475,6 +490,10 @@ namespace ppddl_parser {
       return LessThan::make(this->expr1(), this->expr2());
     }
 
+    void LessThan::writePPDDL(std::ostream &o) const {
+        o << "(< "; expr1().writePPDDL(o); o << ' '; expr2().writePPDDL(o); o << ")";
+    }
+
 
 /* ====================================================================== */
 /* LessThanOrEqualTo */
@@ -532,6 +551,10 @@ namespace ppddl_parser {
       return LessThanOrEqualTo::make(this->expr1(), this->expr2());
     }
 
+    void LessThanOrEqualTo::writePPDDL(std::ostream &o) const {
+        o << "(<= "; expr1().writePPDDL(o); o  << ' '; expr2().writePPDDL(o); o  << ")";
+    }
+
 
 /* ====================================================================== */
 /* EqualTo */
@@ -585,6 +608,10 @@ namespace ppddl_parser {
 
     const StateFormula &EqualTo::clone() const {
       return EqualTo::make(this->expr1(), this->expr2());
+    }
+
+    void EqualTo::writePPDDL(std::ostream &o) const {
+        o << "(= "; expr1().writePPDDL(o); o  << ' '; expr2().writePPDDL(o); o  << ")";
     }
 
 
@@ -644,6 +671,10 @@ namespace ppddl_parser {
       return GreaterThanOrEqualTo::make(this->expr1(), this->expr2());
     }
 
+    void GreaterThanOrEqualTo::writePPDDL(std::ostream &o) const {
+        o << "(>= "; expr1().writePPDDL(o); o << ' '; expr2().writePPDDL(o); o << ")";
+    }
+
 
 /* ====================================================================== */
 /* GreaterThan */
@@ -697,6 +728,10 @@ namespace ppddl_parser {
 
     const StateFormula &GreaterThan::clone() const {
       return GreaterThan::make(this->expr1(), this->expr2());
+    }
+
+    void GreaterThan::writePPDDL(std::ostream &o) const {
+        o << "(> "; expr1().writePPDDL(o); o << ' '; expr2().writePPDDL(o); o << ")";
     }
 
 
@@ -758,6 +793,10 @@ namespace ppddl_parser {
 
     const StateFormula &Negation::clone() const {
       return Negation::make(negand_->clone());
+    }
+
+    void Negation::writePPDDL(std::ostream &o) const {
+        o << "(not "; negand().writePPDDL(o); o << ")";
     }
 
 
@@ -836,6 +875,14 @@ namespace ppddl_parser {
       return *cj;
     }
 
+    void Conjunction::writePPDDL(std::ostream &o) const {
+      o << "(and";
+      for (FormulaList::const_iterator fi = conjuncts().begin(); fi != conjuncts().end(); fi++) {
+        o << ' '; (*fi)->writePPDDL(o);
+      }
+      o << ")";
+    }
+
 
 /* ====================================================================== */
 /* Disjunction. */
@@ -910,6 +957,14 @@ namespace ppddl_parser {
         dj->add_disjunct((**fi).clone());
       }
       return *dj;
+    }
+
+    void Disjunction::writePPDDL(std::ostream &o) const {
+      o << "(or";
+      for (FormulaList::const_iterator fi = disjuncts().begin();  fi != disjuncts().end(); fi++) {
+        o << ' '; (*fi)->writePPDDL(o);
+      }
+      o << ")";
     }
 
 
@@ -1039,6 +1094,15 @@ namespace ppddl_parser {
       return Exists::make(this->parameters(), this->body().clone());
     }
 
+    void Exists::writePPDDL(std::ostream &o) const {
+        VariableList::const_iterator vi = parameters().begin();
+        o << "(exists (" << *vi << " - " << ppddl_parser::TermTable::type(*vi);
+        for (vi++; vi != parameters().end(); vi++) {
+            o << ' ' << *vi << " - " << ppddl_parser::TermTable::type(*vi);
+        }
+        o << ") " << body() << ")";
+    }
+
 
 /* ====================================================================== */
 /* Forall */
@@ -1144,5 +1208,14 @@ namespace ppddl_parser {
     const StateFormula &Forall::clone() const {
       return Forall::make(this->parameters(), this->body().clone());
 
+    }
+
+    void Forall::writePPDDL(std::ostream &o) const {
+        VariableList::const_iterator vi = parameters().begin();
+        o << "(forall (" << *vi << " - " << ppddl_parser::TermTable::type(*vi);
+        for (vi++; vi != parameters().end(); vi++) {
+            o << ' ' << *vi << " - " << ppddl_parser::TermTable::type(*vi);
+        }
+        o << ") " << body() << ")";
     }
 }

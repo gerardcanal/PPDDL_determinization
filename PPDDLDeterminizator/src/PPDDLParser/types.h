@@ -130,6 +130,9 @@ namespace ppddl_parser {
         /* Returns the type name of the given type */
         static const std::string typestring(const Type& t) ;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const;
+
     private:
         /* Type names. */
         static std::vector<std::string> names_;

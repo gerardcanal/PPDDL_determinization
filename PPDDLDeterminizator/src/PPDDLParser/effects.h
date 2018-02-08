@@ -56,6 +56,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const = 0;
 
+        /* Writes the PPDDL to the output stream */
+        virtual void writePPDDL(std::ostream &ostream) const =0;
     protected:
         /* Constructs an update. */
         Update(const Fluent &fluent, const Expression &expr);
@@ -106,6 +108,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -132,6 +136,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -158,6 +164,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -184,6 +192,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -210,6 +220,8 @@ namespace ppddl_parser {
 
         virtual const Update &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -244,6 +256,9 @@ namespace ppddl_parser {
                                             const ValueMap &values) const = 0;
 
         virtual const Effect &clone() const = 0;
+
+        /* Writes the PPDDL to the output stream */
+        virtual void writePPDDL(std::ostream &ostream) const;
 
     protected:
         /* Prints this object on the given stream. */
@@ -287,7 +302,6 @@ namespace ppddl_parser {
     protected:
         /* Constructs a simple effect. */
         explicit SimpleEffect(const Atom &atom);
-
     private:
         /* Atom added by this effect. */
         const Atom *atom_;
@@ -320,6 +334,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -352,6 +368,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -390,6 +408,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -435,6 +455,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -489,6 +511,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -545,6 +569,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -601,6 +627,8 @@ namespace ppddl_parser {
 
         virtual const Effect &clone() const;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &ostream) const override;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;

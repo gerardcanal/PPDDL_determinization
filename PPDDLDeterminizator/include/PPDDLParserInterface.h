@@ -222,6 +222,13 @@ namespace PPDDLInterface {
              */
             void printPDDL(const string &output_folder_path);
 
+
+            /*!
+             * Prints the domain in PPDDL.
+             * @param output_folder_path Folder in which the domain and problem files will be written.
+             */
+            void printPPDDL(const string &output_folder_path);
+
         private:
             std::shared_ptr<p_Domain> _dom; //!> Pointer to the domain element.
             bool determinized(); //!> Returns true it the domain is determinized

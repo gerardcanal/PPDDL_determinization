@@ -217,4 +217,22 @@ namespace ppddl_parser {
       }
       return names_[t.index_-1];
     }
+
+    void TypeTable::writePPDDL(std::ostream &o) const {
+      for (std::map<std::string, Type>::const_iterator ti = types_.begin(); ti != types_.end(); ti++) {
+        const Type &t1 = (*ti).second;
+        o << " " << t1;
+        bool first = true;
+        for (std::map<std::string, Type>::const_iterator tj = types_.begin(); tj != types_.end(); tj++) {
+          const Type &t2 = (*tj).second;
+          if (t1 != t2 && TypeTable::subtype(t1, t2)) {
+            if (first) {
+              o << " -";
+              first = false;
+            }
+            o << ' ' << t2;
+          }
+        }
+      }
+    }
 }

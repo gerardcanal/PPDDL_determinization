@@ -37,7 +37,7 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
                 cs = new VAL::const_symbol(*it);
                 std::string t_name = dom->types().typestring(dom->terms().type(ppddl_parser::Term(*x)));
 
-                cs->type = _domain_wrapper->pddl_type_tab.find(t_name)->second;// FIXME? new VAL::pddl_type(t_name);
+                cs->type = _domain_wrapper->pddl_type_tab.find(t_name)->second;
                 _domain_wrapper->const_tab.insert(std::make_pair(*it, cs));
             }
             else cs = constit->second;
@@ -115,6 +115,7 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
     d->constraints = new VAL::con_goal; /* con_goal* -> not printed!? */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // ACTIONS
     //d->ops = the new is performed in the constructor of d /* operator_list* */
 
     // Add objects and constants as declared variables!
@@ -620,16 +621,16 @@ VAL::pddl_req_flag VALConversion::toVALRequirements(const ppddl_parser::Requirem
     VAL::pddl_req_flag reqflag = 0;
 
     if (req->strips) reqflag ^= VAL::pddl_req_attr::E_STRIPS;
-    else if (req->typing) reqflag ^= VAL::pddl_req_attr::E_TYPING;
-    else if (req->negative_preconditions) reqflag ^= VAL::pddl_req_attr::E_NEGATIVE_PRECONDITIONS;
-    else if (req->disjunctive_preconditions) reqflag ^= VAL::pddl_req_attr::E_DISJUNCTIVE_PRECONDS;
-    else if (req->equality) reqflag ^= VAL::pddl_req_attr::E_EQUALITY;
-    else if (req->existential_preconditions) reqflag ^= VAL::pddl_req_attr::E_EXT_PRECS;
-    else if (req->universal_preconditions) reqflag ^= VAL::pddl_req_attr::E_UNIV_PRECS;
-    else if (req->conditional_effects) reqflag ^= VAL::pddl_req_attr::E_COND_EFFS;
-    else if (req->fluents) reqflag ^= VAL::pddl_req_attr::E_NFLUENTS ^ VAL::pddl_req_attr::E_OFLUENTS;
-    //else if (req->probabilistic_effects) // Can't be possible in a deterministic domain!
-    else if (req->rewards) reqflag ^= VAL::pddl_req_attr::E_ACTIONCOSTS; // not sure if equivalent
+    if (req->typing) reqflag ^= VAL::pddl_req_attr::E_TYPING;
+    if (req->negative_preconditions) reqflag ^= VAL::pddl_req_attr::E_NEGATIVE_PRECONDITIONS;
+    if (req->disjunctive_preconditions) reqflag ^= VAL::pddl_req_attr::E_DISJUNCTIVE_PRECONDS;
+    if (req->equality) reqflag ^= VAL::pddl_req_attr::E_EQUALITY;
+    if (req->existential_preconditions) reqflag ^= VAL::pddl_req_attr::E_EXT_PRECS;
+    if (req->universal_preconditions) reqflag ^= VAL::pddl_req_attr::E_UNIV_PRECS;
+    if (req->conditional_effects) reqflag ^= VAL::pddl_req_attr::E_COND_EFFS;
+    if (req->fluents) reqflag ^= VAL::pddl_req_attr::E_NFLUENTS ^ VAL::pddl_req_attr::E_OFLUENTS;
+    //if (req->probabilistic_effects) // Can't be possible in a deterministic domain!
+    if (req->rewards) reqflag ^= VAL::pddl_req_attr::E_ACTIONCOSTS; // not sure if equivalent
 
     return reqflag;
 }

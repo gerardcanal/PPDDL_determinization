@@ -21,7 +21,7 @@
 #define REQUIREMENTS_H
 
 //#include <config.h>
-
+#include <fstream>
 
 /* ====================================================================== */
 /* Requirements */
@@ -68,6 +68,11 @@ namespace ppddl_parser {
 
         /* Enables MDP planning problems. */
         void mdp();
+
+
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream& o) const;
+
     };
 }
 

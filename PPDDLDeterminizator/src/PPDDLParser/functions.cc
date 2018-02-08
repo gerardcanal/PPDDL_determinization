@@ -115,4 +115,21 @@ namespace ppddl_parser {
       }
       return os;
     }
+
+    void FunctionTable::writePPDDL(std::ostream &o) const {
+        if (functions_.size() <= 3) return; // As it will be either goal-achieved, reward or total-time, which are automaticallya added by the parser
+        o << "\t(:functions";
+        for (std::map<std::string, Function>::const_iterator fi = functions_.begin(); fi != functions_.end(); fi++) {
+            const Function &f = (*fi).second;
+            std::string name = FunctionTable::names_[f.index_];
+            if (name == "goal-achieved" || name == "reward" || name == "total-time") continue;
+            o << "  (" << f;
+            const TypeList &types = FunctionTable::parameters(f);
+            for (TypeList::const_iterator ti = types.begin(); ti != types.end(); ti++) {
+                o << " ?v - " << *ti;
+            }
+            o << ")";
+        }
+        o << ")\n";
+    }
 }

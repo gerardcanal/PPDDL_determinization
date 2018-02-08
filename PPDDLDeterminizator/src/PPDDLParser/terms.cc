@@ -161,4 +161,15 @@ namespace ppddl_parser {
       }
       return os;
     }
+
+    void TermTable::writePPDDL(std::ostream &o) const {
+        if (parent_ != 0) {
+            parent_->writePPDDL(o);
+        }
+        for (std::map<std::string, Object>::const_iterator oi = objects_.begin(); oi != objects_.end(); oi++) {
+            const Object &obj = (*oi).second;
+            o << "  " << obj;
+            o << " - " << TermTable::type(obj);
+        }
+    }
 }

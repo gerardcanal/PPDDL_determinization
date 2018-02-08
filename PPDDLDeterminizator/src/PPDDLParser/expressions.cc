@@ -51,6 +51,10 @@ namespace ppddl_parser {
       os << value_;
     }
 
+    void Value::writePPDDL(std::ostream &o) const {
+        o << value_.double_value();
+    }
+
 
 /* ====================================================================== */
 /* Fluent */
@@ -204,6 +208,14 @@ namespace ppddl_parser {
       os << ')';
     }
 
+    void Fluent::writePPDDL(std::ostream &o) const {
+      o << '(' << function();
+      for (TermList::const_iterator ti = terms().begin(); ti != terms().end(); ti++) {
+        o << ' ' << *ti;
+      }
+      o << ')';
+    }
+
 
 /* ====================================================================== */
 /* Computation */
@@ -270,6 +282,10 @@ namespace ppddl_parser {
       os << "(+ " << operand1() << ' ' << operand2() << ")";
     }
 
+    void Addition::writePPDDL(std::ostream &o) const {
+      o << "(+ "; operand1().writePPDDL(o); o  << ' '; operand2().writePPDDL(o); o  << ")";
+    }
+
 
 /* ====================================================================== */
 /* Subtraction */
@@ -317,6 +333,10 @@ namespace ppddl_parser {
       os << "(- " << operand1() << ' ' << operand2() << ")";
     }
 
+    void Subtraction::writePPDDL(std::ostream &o) const {
+        o << "(- "; operand1().writePPDDL(o); o  << ' '; operand2().writePPDDL(o); o  << ")";
+    }
+
 
 /* ====================================================================== */
 /* Multiplication */
@@ -362,6 +382,10 @@ namespace ppddl_parser {
 /* Prints this object on the given stream. */
     void Multiplication::print(std::ostream &os) const {
       os << "(* " << operand1() << ' ' << operand2() << ")";
+    }
+
+    void Multiplication::writePPDDL(std::ostream &o) const {
+        o << "(* "; operand1().writePPDDL(o); o  << ' '; operand2().writePPDDL(o); o  << ")";
     }
 
 
@@ -412,6 +436,10 @@ namespace ppddl_parser {
 /* Prints this object on the given stream. */
     void Division::print(std::ostream &os) const {
       os << "(/ " << operand1() << ' ' << operand2() << ")";
+    }
+
+    void Division::writePPDDL(std::ostream &o) const {
+        o << "(/ "; operand1().writePPDDL(o); o << ' '; operand2().writePPDDL(o); o << ")";
     }
 
 }

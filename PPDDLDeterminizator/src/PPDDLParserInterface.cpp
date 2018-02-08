@@ -43,6 +43,9 @@ PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain &d, const std::strin
     const std::shared_ptr<p_Domain> p = d._dom;
     _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_" + name_suffix));
 
+    /* Requirements */
+    _dom->requirements = p->requirements;
+
     /* Domain types. */
     ppddl_parser::TypeTable types_ = p->types(); // A copy is made here
     _dom->types() = types_;
@@ -144,6 +147,12 @@ bool PPDDLInterface::Domain::determinized() {
         determ &= Effect::determinized(ai->second->effect());
     }
     return determ;
+}
+
+void PPDDLInterface::Domain::printPPDDL(const string &output_folder_path) {
+    std::ofstream o(output_folder_path + "/" + _dom->name() + "_probabilistic_domain.pddl");
+    _dom->writePPDDL(o);
+    o.close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

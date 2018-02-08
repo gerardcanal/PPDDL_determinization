@@ -74,6 +74,10 @@ namespace ppddl_parser {
         return *new Assign(fluent(), expression());
     }
 
+    void Assign::writePPDDL(std::ostream &o) const {
+        o << "(assign "; fluent().writePPDDL(o); o << ' '; expression().writePPDDL(o); o << ")";
+    }
+
 
 /* ====================================================================== */
 /* ScaleUp */
@@ -103,6 +107,10 @@ namespace ppddl_parser {
 
     const Update &ScaleUp::clone() const {
         return *new ScaleUp(fluent(), expression());
+    }
+
+    void ScaleUp::writePPDDL(std::ostream &o) const {
+        o << "(scale-up "; fluent().writePPDDL(o); o << ' '; expression().writePPDDL(o); o << ")";
     }
 
 
@@ -137,6 +145,10 @@ namespace ppddl_parser {
         return *new ScaleDown(fluent(), expression());
     }
 
+    void ScaleDown::writePPDDL(std::ostream &o) const {
+        o << "(scale-down "; fluent().writePPDDL(o); o << ' '; expression().writePPDDL(o); o << ")";
+    }
+
 
 /* ====================================================================== */
 /* Increase */
@@ -169,6 +181,10 @@ namespace ppddl_parser {
         return *new Increase(fluent(), expression());
     }
 
+    void Increase::writePPDDL(std::ostream &o) const {
+        o << "(increase "; fluent().writePPDDL(o); o << ' '; expression().writePPDDL(o); o << ")";
+    }
+
 
 /* ====================================================================== */
 /* Decrease */
@@ -199,6 +215,10 @@ namespace ppddl_parser {
 
     const Update &Decrease::clone() const {
         return *new Decrease(fluent(), expression());
+    }
+
+    void Decrease::writePPDDL(std::ostream &o) const {
+        o << "(decrease "; fluent().writePPDDL(o); o << ' '; expression().writePPDDL(o); o << ")";
     }
 
 
@@ -295,6 +315,10 @@ namespace ppddl_parser {
         return os;
     }
 
+    void Effect::writePPDDL(std::ostream &o) const {
+        o << *this;
+    }
+
 
 /* ====================================================================== */
 /* SimpleEffect */
@@ -349,6 +373,10 @@ namespace ppddl_parser {
         os << atom();
     }
 
+    void AddEffect::writePPDDL(std::ostream &o) const {
+        print(o);
+    }
+
 
 /* ====================================================================== */
 /* DeleteEffect */
@@ -386,6 +414,10 @@ namespace ppddl_parser {
 /* Prints this object on the given stream. */
     void DeleteEffect::print(std::ostream &os) const {
         os << "(not " << atom() << ")";
+    }
+
+    void DeleteEffect::writePPDDL(std::ostream &o) const {
+        print(o);
     }
 
 
@@ -445,6 +477,10 @@ namespace ppddl_parser {
 /* Prints this object on the given stream. */
     void UpdateEffect::print(std::ostream &os) const {
         os << update();
+    }
+
+    void UpdateEffect::writePPDDL(std::ostream &o) const {
+        update().writePPDDL(o);
     }
 
 
@@ -526,6 +562,14 @@ namespace ppddl_parser {
         os << ")";
     }
 
+    void ConjunctiveEffect::writePPDDL(std::ostream &o) const {
+        o << "(and";
+        for (EffectList::const_iterator ei = conjuncts().begin(); ei != conjuncts().end(); ei++) {
+            o << ' '; (*ei)->writePPDDL(o);
+        }
+        o << ")";
+    }
+
 
 /* ====================================================================== */
 /* ConditionalEffect */
@@ -595,6 +639,10 @@ namespace ppddl_parser {
 /* Prints this object on the given stream. */
     void ConditionalEffect::print(std::ostream &os) const {
         os << "(when " << condition() << ' ' << effect() << ")";
+    }
+
+    void ConditionalEffect::writePPDDL(std::ostream &o) const {
+        o << "(when " << condition() << ' '; effect().writePPDDL(o); o << ")";
     }
 
 
@@ -733,6 +781,21 @@ namespace ppddl_parser {
         }
     }
 
+    void ProbabilisticEffect::writePPDDL(std::ostream &o) const {
+        if (weight_sum_ == 0) {
+            o << "(and)";
+        } else if (weight_sum_ == weights_.back()) {
+            o << effect(0);
+        } else {
+            o << "(probabilistic";
+            size_t n = size();
+            for (size_t i = 0; i < n; i++) {
+                o << ' ' << probability(i).double_value() << ' ' << effect(i);
+            }
+            o << ")";
+        }
+    }
+
 
 /* ====================================================================== */
 /* QuantifiedEffect */
@@ -853,6 +916,19 @@ namespace ppddl_parser {
                 os << ' ' << *vi;
             }
             os << ") " << effect() << ")";
+        }
+    }
+
+    void QuantifiedEffect::writePPDDL(std::ostream &o) const {
+        if (parameters().empty()) {
+            effect().writePPDDL(o);
+        } else {
+            VariableList::const_iterator vi = parameters().begin();
+            o << "(forall (" << *vi;
+            for (vi++; vi != parameters().end(); vi++) {
+                o << ' ' << *vi;
+            }
+            o << ") "; effect().writePPDDL(o); o << ")";
         }
     }
 

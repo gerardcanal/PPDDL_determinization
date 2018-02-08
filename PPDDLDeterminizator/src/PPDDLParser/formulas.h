@@ -72,6 +72,9 @@ namespace ppddl_parser {
 
         virtual const StateFormula &clone() const =0;
 
+        /* Writes the PPDDL to the output stream */
+        virtual void writePPDDL(std::ostream &o) const = 0;
+
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const = 0;
@@ -135,6 +138,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -197,6 +202,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -231,6 +238,7 @@ namespace ppddl_parser {
 
         /* Clones this state formula. */
         virtual const StateFormula &clone() const =0;
+
 
     protected:
         /* Constructs a comparison. */
@@ -269,6 +277,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -305,6 +315,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -341,6 +353,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -377,6 +391,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -413,6 +429,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -454,6 +472,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -497,6 +517,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -546,6 +568,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -621,6 +645,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
@@ -657,6 +683,8 @@ namespace ppddl_parser {
         /* Clones this state formula. */
         const StateFormula &clone() const override;
 
+        /* Writes the PPDDL to the output stream */
+        void writePPDDL(std::ostream &o) const override ;
     protected:
         /* Prints this object on the given stream. */
         virtual void print(std::ostream &os) const;
