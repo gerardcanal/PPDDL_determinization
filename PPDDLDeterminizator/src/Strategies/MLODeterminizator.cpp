@@ -19,6 +19,7 @@
 
 #include "MLODeterminizator.h"
 #include "PPDDLParserInterface.h"
+#include "AODeterminization.h"
 
 //using namespace PPDDLInterface;
 
@@ -37,41 +38,40 @@ PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Doma
 
 PPDDLInterface::Action MLODeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
-
-    ret.setEffect(determinize(*as.getEffect()));
+    ret.setEffect(determinize(*as.getEffect(), as));
     return ret;
 }
 
 /*
  * MLO
  */
-const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::Effect &e) {
+ PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::Effect &e, const PPDDLInterface::Action& a) {
     // Check effect type
     const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
     if (pe != nullptr) { // Then it's probabilistic
-        return determinize(*pe);
+        return determinize(*pe, a);
     }
 
     const PPDDLInterface::ConjunctiveEffect* ce = dynamic_cast<const PPDDLInterface::ConjunctiveEffect*>(&e);
     if (ce != nullptr) { // It's a conjunctive effect which may have a probabilistic effect in the conjunction
-        return determinize(*ce);
+        return determinize(*ce, a);
     }
     return e;
 }
 
-const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
+PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce, const PPDDLInterface::Action& a) {
     PPDDLInterface::ConjunctiveEffect ret(ce);
     for (size_t i = 0; i < ce.size(); ++i) {
-        ret.changeConjunct(determinize(*ce.getConjunct(i)), i); // FIXME optimize copies in changeConjuncts
+        ret.changeConjunct(determinize(*ce.getConjunct(i), a), i); // FIXME optimize copies in changeConjuncts
     }
     return ret;
 }
 
-const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
+PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe, const PPDDLInterface::Action& a) {
     size_t n = pe.size();
     double max_pr = pe.getProbability(0);
     size_t max_i = 0;
-    // Find the
+    // Find the most likely outcome
     for (size_t o = 1; o < n; ++o) {
         if (pe.getProbability(o) > max_pr) {
             max_pr = pe.getProbability(o);
@@ -124,7 +124,7 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
         PPDDLInterface::Domain d_copy(d);
         MLODeterminizator mld;
         std::cout << "############################\nDeterminization\n###########################" <<std::endl;
-        PPDDLInterface::Domain determinized = mld.determinize(d_copy);
+        PPDDLInterface::Domain determinized = mld.determinize(d);
 
         std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
         std::cout << "WRAPPED DOMAIN: " << d << std::endl;
@@ -135,5 +135,7 @@ const PPDDLInterface::Effect MLODeterminizator::determinize(const PPDDLInterface
 
         d.printPPDDL("/home/gcanal/Desktop/domain_gen_tests");
         determinized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
+        AODeterminization aod;
+        aod.determinize(d);
         return 19;
     }

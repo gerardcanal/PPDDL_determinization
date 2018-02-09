@@ -52,7 +52,16 @@ PPDDLInterface::Domain::~Domain() {
 
 PPDDLInterface::Domain::Domain(const PPDDLInterface::Domain &d, const std::string &name_suffix) {
     const std::shared_ptr<p_Domain> p = d._dom;
-    _dom = std::shared_ptr<p_Domain>(new p_Domain(p->name()+ "_" + name_suffix));
+    std::string new_name = p->name()+ "_" + name_suffix;
+    if (p_Domain::find(new_name) != nullptr) { // Domain already exists! Change its name...
+        int id = 0;
+        if (isdigit(new_name[new_name.size()-1])) {
+            id = std::atoi(&new_name[new_name.size()-1]);
+            new_name = new_name.substr(0, new_name.size()-1);
+        }
+        new_name += std::to_string(++id);
+    }
+    _dom = std::shared_ptr<p_Domain>(new p_Domain(new_name));
 
     /* Requirements */
     _dom->requirements = p->requirements;
