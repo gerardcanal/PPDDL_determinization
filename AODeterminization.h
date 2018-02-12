@@ -13,9 +13,9 @@ public:
     using PPDDLDeterminizator::determinize;
     //PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d);
     //PPDDLInterface::Action determinize(const PPDDLInterface::Action& a);
-    //PPDDLInterface::Effect determinize(const PPDDLInterface::Effect& e, const PPDDLInterface::Action& a);
-    PPDDLInterface::Effect determinize(const PPDDLInterface::ConjunctiveEffect& ce, const PPDDLInterface::Action& a);
-    PPDDLInterface::Effect determinize(const PPDDLInterface::ProbabilisticEffect& pe, const PPDDLInterface::Action& a);
+    //PPDDLInterface::EffectPtr determinize(const PPDDLInterface::Effect& e, const PPDDLInterface::Action& a);
+    PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce, const PPDDLInterface::Action& a);
+    PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe, const PPDDLInterface::Action& a);
 };
 
 

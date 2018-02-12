@@ -14,21 +14,40 @@ PPDDLInterface::Domain PPDDLDeterminizator::determinize(const PPDDLInterface::Do
 
     std::vector<PPDDLInterface::Action> actions = d_det.getActions();
     for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
-        PPDDLInterface::Action det_action = determinize(*it);
-        d_det.setAction(det_action);
+        PPDDLInterface::ActionPtr det_action = determinize(*it);
+        PPDDLInterface::ActionList* al = dynamic_cast<PPDDLInterface::ActionList*>(det_action.get());
+        if (al != nullptr) {
+            d_det.deleteAction(*it);
+            for (size_t ai = 0 ; ai != al->size(); ++ai) {
+                d_det.setAction(*al->getAction(ai));
+            }
+        }
+        else d_det.setAction(*det_action);
     }
     //std::cout << "----------------------\n" << d_det << std::endl;
 
     return d_det;
 }
 
-PPDDLInterface::Action PPDDLDeterminizator::determinize(const PPDDLInterface::Action &as) {
+PPDDLInterface::ActionPtr PPDDLDeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
-    ret.setEffect(determinize(*as.getEffect(), as));
-    return ret;
+    PPDDLInterface::EffectPtr ep = determinize(*as.getEffect(), as);
+    PPDDLInterface::EffectList* el = dynamic_cast<PPDDLInterface::EffectList*>(ep.get());
+    if (el != nullptr) { // Then the effect got split in multiple effects.. thus we have to create an ActionList with each effect in a different action
+        PPDDLInterface::ActionList al(el->size());
+        for (size_t i = 0 ; i < el->size(); ++i) {
+            // create new action
+            PPDDLInterface::Action a(as, "_d"+std::to_string(i+1));
+            a.setEffect(*el->getEffect(i)); // TODO use weight!
+            al.addAction(a);
+        }
+        return makePtr(al);
+    }
+    else ret.setEffect(*ep);
+    return makePtr(ret);
 }
 
-PPDDLInterface::Effect
+PPDDLInterface::EffectPtr
 PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e, const PPDDLInterface::Action &a) {    // Check effect type
     const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
     if (pe != nullptr) { // Then it's probabilistic
@@ -39,5 +58,5 @@ PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e, const PPDDLInt
     if (ce != nullptr) { // It's a conjunctive effect which may have a probabilistic effect in the conjunction
         return determinize(*ce, a);
     }
-    return e;
+    return PPDDLInterface::makePtr(e);
 }

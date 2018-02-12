@@ -92,7 +92,17 @@ namespace ppddl_parser {
     }
 
 
-/* Returns a pointer to the action with the given name, or 0 if
+    void Domain::remove_action(const std::string &action_name) {
+        const ActionSchema *ai = find_action(action_name);
+        if (ai != nullptr) {
+            actions_.erase(action_name); // If not erased, the following insert does not insert the element!
+            delete ai;
+        }
+    }
+
+
+
+    /* Returns a pointer to the action with the given name, or 0 if
    there is no action with the given name. */
     const ActionSchema *Domain::find_action(const std::string &name) const {
       ActionSchemaMap::const_iterator ai = actions_.find(name);
@@ -113,7 +123,6 @@ namespace ppddl_parser {
 
         o << ")\n";
     }
-
 
 /* Output operator for domains. */
     std::ostream &operator<<(std::ostream &os, const Domain &d) {

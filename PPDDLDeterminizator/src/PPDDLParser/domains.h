@@ -106,6 +106,9 @@ namespace ppddl_parser {
         /* Adds the given action to this domain. */
         void add_action(const ActionSchema &action);
 
+        /* Removes the given action to this domain. */
+        void remove_action(const std::string &action_name);
+
         /* Returns a pointer to the action with the given name, or 0 if
            there is no action with the given name. */
         const ActionSchema *find_action(const std::string &name) const;

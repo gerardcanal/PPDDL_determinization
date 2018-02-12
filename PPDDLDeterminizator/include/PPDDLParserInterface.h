@@ -28,7 +28,7 @@ namespace PPDDLInterface {
     typedef ppddl_parser::ProbabilisticEffect p_ProbabilisticEffect;
     typedef ppddl_parser::ActionSchema p_actionSchema;
     typedef ppddl_parser::RCObject RCObject;
-    typedef ppddl_parser::EffectList EffectList;
+    typedef ppddl_parser::EffectList p_EffectList;
     /*typedef ppddl_parser::TypeTable TypeTable;
     typedef ppddl_parser::PredicateTable PredicateTable;
     typedef ppddl_parser::FunctionTable FunctionTable;
@@ -44,8 +44,7 @@ namespace PPDDLInterface {
        friend class Action;
        friend class ConjunctiveEffect;
        friend class ProabbilisticEffect;
-    public:
-
+   public:
         /*!
          * Creates an Effect wrapper from a ppddl_parser::Effect
          * @param e Effect to be wrapped
@@ -81,6 +80,12 @@ namespace PPDDLInterface {
    };
 
     /*!
+     * SharedPointer to Effect class
+     */
+    typedef std::shared_ptr<Effect> EffectPtr;
+    EffectPtr makePtr(const Effect& e);
+
+    /*!
      * \class ConjunctiveEffect
      * \brief Wrapper class for the pddl_parser::ConjunctiveEffect class. It handles the memory and ensures there are no errors nor memory leaks.
      */
@@ -112,6 +117,7 @@ namespace PPDDLInterface {
         inline p_ConjunctiveEffect* modificableEffect() const; //!< Returns the conjunctive effect (non-const raw pointer, modifiable).
 
     };
+    EffectPtr makePtr(const ConjunctiveEffect& e);
 
     /*!
      * \class ProbabilisticEffect
@@ -131,7 +137,38 @@ namespace PPDDLInterface {
     private:
         inline const p_ProbabilisticEffect* constEffect() const; //!< Returns the unwrapped effect (const*)
     };
+    EffectPtr makePtr(const ProbabilisticEffect& e);
 
+    /*!
+     * class EffectList
+     * \brief Encapsulates a list of effects and inherits from the Effect class. This way, the determinizer can return
+     * multiple effects which results of the determinization of one effect (which will be converted to multiple actions
+     * in the domain).
+     */
+    class EffectList : public Effect {
+    public:
+        EffectList();
+        EffectList(size_t n);
+        EffectList(const EffectList& ef);
+        EffectList(const ProbabilisticEffect& pe);
+        ~EffectList() = default;
+        //EffectList(const EffectList& pe);
+
+        /*!
+         * Adds an effect
+         * @param e Effect to be added
+         * @param w Weight of the effect
+         */
+        void addEffect(const Effect& e, double w=1.0);
+
+        std::shared_ptr<Effect> getEffect(size_t i) { return _effects[i]; };
+        double getWeight(size_t i) { return _weights[i]; };
+        size_t size() const ;
+    private:
+        std::vector<std::shared_ptr<Effect>> _effects; //!< List of effects
+        std::vector<double> _weights; //!< Weights associated with each efefct
+    };
+    EffectPtr makePtr(const EffectList& e);
 
     //class Action
     /*!
@@ -145,34 +182,65 @@ namespace PPDDLInterface {
          * Creates a ppddl_parser::ActionSchema wrapper
          * @param as Wrapped ActionSchema
          */
-        explicit Action(const p_actionSchema* as);
+        explicit Action(const p_actionSchema* as, const std::string& name_suffix="");
 
         /*!
          * Copy constructor
          * @param a Action to be copied
          */
-        Action(const Action& a);
+        Action(const Action& a, const std::string& name_suffix="");
         Action();
-        ~Action();
+        virtual ~Action();
 
         /*!
          * Returns the effect.
          * @return Effect of the Action
          */
         std::shared_ptr<Effect> getEffect() const; // Return a pointer because it'd truncate the class to the superclass.
+
+        /*!
+         * Sets the effect
+         * @param e Effect to set
+         */
         void setEffect(const PPDDLInterface::Effect& e); //!< Sets the effect
         std::string getName() const; //!< Returns the name of the action
         Action & operator= (const Action & other);
-    private:
+    protected:
         p_actionSchema* _as; // Wrapped actionSchema
         bool _delete_actionschema; //!< True if the pointer needs to be deleted, false otherwise
         std::shared_ptr<PPDDLInterface::Effect> _action_effect; //!< Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
         void setRawEffectPtr(const p_Effect *e);
         void releasePtr(); //!< Releases the pointer - sets the delete to false.
-        void initFrom(const p_actionSchema* as); //!< Initializes this action from the parameter
+        void initFrom(const p_actionSchema* as, const std::string& name_suffix=""); //!< Initializes - COPIES!- this action from the parameter
     };
 
+    /*!
+     * SharedPointer to Effect class
+     */
+    typedef std::shared_ptr<Action> ActionPtr;
+    ActionPtr makePtr(const Action& e);
+
+    class ActionList : public Action {
+    public:
+        ActionList();
+        ActionList(size_t n);
+        ActionList(const ActionList& al);
+
+        /*!
+         * Adds an effect
+         * @param e Effect to be added
+         * @param w Weight of the effect
+         */
+        void addAction(const Action& a);
+
+        std::shared_ptr<Action> getAction(size_t i) { return _actions[i]; };
+        //double getWeight(size_t i) { return _weights[i]; };
+        size_t size() const ;
+    private:
+        std::vector<std::shared_ptr<Action>> _actions; //!< List of actions
+    };
+    ActionPtr makePtr(const ActionList& e);
 
     // Domain class
     /*!
@@ -236,7 +304,9 @@ namespace PPDDLInterface {
              */
             void printPPDDL(const string &output_folder_path);
 
-        private:
+        void deleteAction(Action &action);
+
+    private:
             std::shared_ptr<p_Domain> _dom; //!> Pointer to the domain element.
             bool determinized(); //!> Returns true it the domain is determinized
 

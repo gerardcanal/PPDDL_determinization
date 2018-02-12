@@ -275,7 +275,7 @@ namespace ppddl_parser {
 
 
 /* ====================================================================== */
-/* EffectList */
+/* p_EffectList */
 
 /*
  * List of effects.
