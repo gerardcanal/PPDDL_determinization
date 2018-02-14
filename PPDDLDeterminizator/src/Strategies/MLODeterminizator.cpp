@@ -20,6 +20,7 @@
 #include "MLODeterminizator.h"
 #include "PPDDLParserInterface.h"
 #include "AODeterminization.h"
+#include "TLDeterminization.h"
 
 //using namespace PPDDLInterface;
 
@@ -38,36 +39,36 @@ PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Doma
 
 PPDDLInterface::ActionPtr MLODeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
-    ret.setEffect(*determinize(*as.getEffect(), as));
+    ret.setEffect(*determinize(*as.getEffect()));
     return makePtr(ret);
 }
 
 /*
  * MLO
  */
- PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::Effect &e, const PPDDLInterface::Action& a) {
+ PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::Effect &e) {
     // Check effect type
     const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
     if (pe != nullptr) { // Then it's probabilistic
-        return determinize(*pe, a);
+        return determinize(*pe);
     }
 
     const PPDDLInterface::ConjunctiveEffect* ce = dynamic_cast<const PPDDLInterface::ConjunctiveEffect*>(&e);
     if (ce != nullptr) { // It's a conjunctive effect which may have a probabilistic effect in the conjunction
-        return determinize(*ce, a);
+        return determinize(*ce);
     }
     return PPDDLInterface::makePtr(e);
 }
 
-PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce, const PPDDLInterface::Action& a) {
+PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
     PPDDLInterface::ConjunctiveEffect ret(ce);
     for (size_t i = 0; i < ce.size(); ++i) {
-        ret.changeConjunct(*determinize(*ce.getConjunct(i), a), i); // FIXME optimize copies in changeConjuncts
+        ret.changeConjunct(*determinize(*ce.getConjunct(i)), i); // FIXME optimize copies in changeConjuncts
     }
     return PPDDLInterface::makePtr(ret);
 }
 
-PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe, const PPDDLInterface::Action& a) {
+PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
     size_t n = pe.size();
     double max_pr = pe.getProbability(0);
     size_t max_i = 0;
@@ -138,5 +139,10 @@ PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::P
         AODeterminization aod;
         PPDDLInterface::Domain AODdeterminized = aod.determinize(d);
         AODdeterminized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
+
+
+        TLDeterminization tld;
+        PPDDLInterface::Domain TLDdeterminized = tld.determinize(d);
+        TLDdeterminized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
         return 19;
     }

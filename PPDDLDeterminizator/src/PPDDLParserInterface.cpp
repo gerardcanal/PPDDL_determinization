@@ -46,20 +46,19 @@ namespace PPDDLInterface {
         }
     }
 
-    Domain::~Domain() {
-    }
+    Domain::~Domain() {}
 
 
     Domain::Domain(const Domain &d, const std::string &name_suffix) {
         const std::shared_ptr<p_Domain> p = d._dom;
         std::string new_name = p->name() + "_" + name_suffix;
-        if (p_Domain::find(new_name) != nullptr) { // Domain already exists! Change its name...
+        while (p_Domain::find(new_name) != nullptr) { // Domain already exists! Change its name...
             int id = 0;
             if (isdigit(new_name[new_name.size() - 1])) {
                 id = std::atoi(&new_name[new_name.size() - 1]);
                 new_name = new_name.substr(0, new_name.size() - 1);
             }
-            new_name += std::to_string(++id);
+            new_name = p->name() + "_" + name_suffix + std::to_string(++id);
         }
         _dom = std::shared_ptr<p_Domain>(new p_Domain(new_name));
 
@@ -194,6 +193,33 @@ namespace PPDDLInterface {
         _dom->remove_action(action.getName());
     }
 
+    std::string Domain::getMetric() {
+        auto prit = ppddl_parser::Problem::begin();
+        if (prit != ppddl_parser::Problem::end()) {
+            std::string ret = "+";
+            const ppddl_parser::Expression* metric = &prit->second->metric();
+            const ppddl_parser::Subtraction* sub = dynamic_cast<const ppddl_parser::Subtraction*>(metric);
+            if (sub != nullptr) {
+                // The ppddl_parser always maximizes, and represents the minimization of X as maximize (- 0 X), so we check if it's a 0-X case
+                const ppddl_parser::Value* op1 = dynamic_cast<const ppddl_parser::Value*>(&sub->operand1());
+                if (op1 != nullptr && op1->value().double_value()==0) {
+                    // It is a 0-X case, so the metric is minimizing, and the value is the operand2.
+                    ret = "-"; //op = VAL::optimization::E_MINIMIZE;
+                    metric = &sub->operand2();
+                }
+
+            }
+            const ppddl_parser::Fluent* f = dynamic_cast<const ppddl_parser::Fluent*>(metric);
+            if (f == nullptr) throw std::runtime_error("Error: Expecting metric of type (:metric minimize/maximize (<cost_function_name>)");
+            return ret + ppddl_parser::FunctionTable::name(f->function());
+        }
+        return "";
+    }
+
+    std::string Domain::getName() {
+        return _dom->name();
+    }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Actions /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +300,15 @@ namespace PPDDLInterface {
 
         setRawEffectPtr(e);
     }
+
+    double Action::getCost(const string &metric) {
+        return _action_effect->getCost(metric);
+    }
+
+    void Action::setCost(double cost, const string &metric) {
+        return _action_effect->setCost(cost, metric);
+    }
+
 
     ActionList::ActionList() : Action(nullptr){
         _delete_actionschema = false;
@@ -422,7 +457,6 @@ namespace PPDDLInterface {
 
         const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect *>(&effect);
         if (pe != nullptr) {
-            std::cout << *pe << std::endl;
             return false;
         }
 
@@ -435,6 +469,93 @@ namespace PPDDLInterface {
         }
 
         return result;
+    }
+
+
+    double Effect::getCost(const string &metric) {
+        return getCost(*_eff, metric);
+    }
+
+    void Effect::setCost(double cost, const string &metric) {
+        setCost(*_eff, cost, metric);
+    }
+
+
+    double Effect::getCost(const p_Effect &effect, const string &metric) {
+        double cost = 0;
+        const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect*>(&effect);
+        if (pe != nullptr) {
+            for (size_t i = 0; i != pe->size(); ++i) {
+                cost += getCost(pe->effect(i), metric);
+            }
+            return cost;
+        }
+
+        const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect *>(&effect);
+        if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+
+            for (auto it = ce->conjuncts().begin(); it != ce->conjuncts().end(); ++it) {
+                cost += getCost(**it, metric);
+            }
+            return cost;
+        }
+
+        const ppddl_parser::UpdateEffect *ue = dynamic_cast<const ppddl_parser::UpdateEffect *>(&effect);
+        if (ue != nullptr) {
+            std::string metric_name = ppddl_parser::FunctionTable::name(ue->update().fluent().function());
+            if (metric == metric_name) {
+                const ppddl_parser::Value *val = dynamic_cast<const ppddl_parser::Value *>(&ue->update().expression());
+                if (val == nullptr)
+                    throw std::runtime_error("Error: Only simple value increase/decrease can be accessed.");
+                double d_val = val->value().double_value();
+                return d_val;
+            }
+        }
+        return 0;
+    }
+
+
+    void Effect::setCost(const p_Effect &effect, double cost, const string &metric) {
+        const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect*>(&effect);
+        if (pe != nullptr) {
+            for (size_t i = 0; i != pe->size(); ++i) {
+                setCost(pe->effect(i), cost, metric);
+            }
+        }
+
+        const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect *>(&effect);
+        if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+
+            for (auto it = ce->conjuncts().begin(); it != ce->conjuncts().end(); ++it) {
+                setCost(**it, cost, metric);
+            }
+        }
+
+        const ppddl_parser::UpdateEffect *ue = dynamic_cast<const ppddl_parser::UpdateEffect *>(&effect);
+        if (ue != nullptr) {
+            std::string metric_name = ppddl_parser::FunctionTable::name(ue->update().fluent().function());
+            if (metric == metric_name) {
+                // Rational value
+                int multiplier = 1000000;
+                ppddl_parser::Value* new_cost_val = new ppddl_parser::Value(ppddl_parser::Rational(cost * multiplier, multiplier));
+
+                ppddl_parser::Update* new_update; // Updated update
+                const ppddl_parser::Increase* inc = dynamic_cast<const ppddl_parser::Increase*>(&ue->update());
+                const ppddl_parser::Decrease* dec = dynamic_cast<const ppddl_parser::Decrease*>(&ue->update());
+                if (inc != nullptr) {
+                    new_update = new ppddl_parser::Increase(ue->update().fluent(), *new_cost_val);
+                    RCObject::destructive_deref(&ue->update().expression());
+                }
+                else if (dec != nullptr) {
+                    new_update = new ppddl_parser::Decrease(ue->update().fluent(), *new_cost_val);
+                    RCObject::destructive_deref(&ue->update().expression());
+                }
+                else throw std::runtime_error("Error: Only updates of type increase/decrease value can be modified.");
+
+                ppddl_parser::Update* edit_upd = const_cast<ppddl_parser::Update*>(&ue->update());
+                *edit_upd = *new_update; // (Safe) Const cast again to be able to modify it...
+            }
+        }
     }
 
     EffectList::EffectList() : Effect(nullptr) {

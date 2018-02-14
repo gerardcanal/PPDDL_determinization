@@ -2,13 +2,16 @@
 // Created by gcanal on 8/02/18.
 //
 
-#ifndef ROSPLAN_PLANNING_SYSTEM_AODETERMINIZATION_H
-#define ROSPLAN_PLANNING_SYSTEM_AODETERMINIZATION_H
+#ifndef ROSPLAN_PLANNING_SYSTEM_TLDETERMINIZATION_H
+#define ROSPLAN_PLANNING_SYSTEM_TLDETERMINIZATION_H
 
 
 #include "PPDDLDeterminizator.h"
+#include <cmath>
+#define ALPHA 1
 
-class AODeterminization : public PPDDLDeterminizator {
+//Transition-likelihood determinization from Kaelbling and Lozano-Pérez 2013
+class TLDeterminization : public PPDDLDeterminizator {
 public:
     using PPDDLDeterminizator::determinize;
     //PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d);
@@ -19,4 +22,4 @@ public:
 };
 
 
-#endif //ROSPLAN_PLANNING_SYSTEM_AODETERMINIZATION_H
+#endif //ROSPLAN_PLANNING_SYSTEM_TLDETERMINIZATION_H

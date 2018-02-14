@@ -15,13 +15,16 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/PPDDLParser/CMakeLists.txt)
 # Get VALFiles absolute paths
 foreach(ITEM ${VAL_SOURCES})
     get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
-    SET(VAL_ABSOLUTE_SOURCES ${VAL_ABSOLUTE_SOURCES} ${VAL_ABSOLUTE_SOURCE} PDDLPrinter.cpp PDDLPrinter.h AODeterminization.cpp AODeterminization.h PPDDLDeterminizator.cpp)
+    SET(VAL_ABSOLUTE_SOURCES ${VAL_ABSOLUTE_SOURCES} ${VAL_ABSOLUTE_SOURCE})
 endforeach()
 
 
 include_directories(${PPDDL_PARSER_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLDeterminization)
 add_executable(parser2 ${PPDDL_PARSER_ALL}
-        MLODeterminizator.cpp
-        MLODeterminizator.h
-        PPDDLDeterminizator.h PPDDLParserInterface.cpp PPDDLParserInterface.h
+        MLODeterminizator.cpp MLODeterminizator.h
+        PPDDLDeterminizator.h PPDDLDeterminizator.cpp
+        PPDDLParserInterface.cpp PPDDLParserInterface.h
+        PDDLPrinter.cpp PDDLPrinter.h
+        AODeterminization.cpp AODeterminization.h
+        TLDeterminization.h TLDeterminization.cpp
         ${VAL_ABSOLUTE_SOURCES} VALConversion.cpp VALConversion.h)

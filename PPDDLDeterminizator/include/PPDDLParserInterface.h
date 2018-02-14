@@ -71,8 +71,12 @@ namespace PPDDLInterface {
         * @param effect Effect to be checked
         * @return True if the effect does not contain probabilistic effects, false otherwise
         */
-       static bool determinized(const ppddl_parser::Effect &effect);
+       static bool determinized(const p_Effect &effect);
 
+       virtual double getCost(const std::string& metric="reward");
+       virtual void setCost(double cost, const string &metric);
+       static double getCost(const p_Effect &effect, const std::string& metric="reward");
+       static void setCost(const p_Effect &effect, double cost, const string &metric);
    protected:
        const p_Effect* _eff; //!< Wrapped effect
        bool _delete_ptr; //!< if true, the pointer will be deleted.
@@ -205,6 +209,9 @@ namespace PPDDLInterface {
         void setEffect(const PPDDLInterface::Effect& e); //!< Sets the effect
         std::string getName() const; //!< Returns the name of the action
         Action & operator= (const Action & other);
+
+        double getCost(const std::string& metric="reward");
+        void setCost(double cost, const string &metric="reward");
     protected:
         p_actionSchema* _as; // Wrapped actionSchema
         bool _delete_actionschema; //!< True if the pointer needs to be deleted, false otherwise
@@ -304,7 +311,16 @@ namespace PPDDLInterface {
              */
             void printPPDDL(const string &output_folder_path);
 
-        void deleteAction(Action &action);
+            void deleteAction(Action &action);
+
+            /*!
+             * Returns a string of type "+/-name". + means the metric is maximize, - minimize. The name represents the
+             * name of the cost functions. i.e. "+reward", "-total-cost". An empty string is returned if not found.
+             * @return The defined metric, empty string if not found. The metric is looked in the first parsed problem file.
+             */
+            static std::string getMetric();
+
+            std::string getName();
 
     private:
             std::shared_ptr<p_Domain> _dom; //!> Pointer to the domain element.

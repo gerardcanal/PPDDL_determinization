@@ -2,10 +2,10 @@
 // Created by gcanal on 8/02/18.
 //
 
-#include "AODeterminization.h"
+#include "TLDeterminization.h"
 
 PPDDLInterface::EffectPtr
-AODeterminization::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
+TLDeterminization::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
     for (size_t i = 0; i < ce.size(); ++i) {
         PPDDLInterface::EffectPtr ef = determinize(*ce.getConjunct(i));
         PPDDLInterface::EffectList* det_cjt_list = dynamic_cast<PPDDLInterface::EffectList*>(ef.get());
@@ -25,13 +25,13 @@ AODeterminization::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
 }
 
 PPDDLInterface::EffectPtr
-AODeterminization::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
+TLDeterminization::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
     PPDDLInterface::EffectList determinized_effects(pe);
     return PPDDLInterface::makePtr(determinized_effects);
 }
 
 
-PPDDLInterface::ActionPtr AODeterminization::determinize(const PPDDLInterface::Action &as) {
+PPDDLInterface::ActionPtr TLDeterminization::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
     PPDDLInterface::EffectPtr ep = determinize(*as.getEffect());
     PPDDLInterface::EffectList* el = dynamic_cast<PPDDLInterface::EffectList*>(ep.get());
@@ -40,7 +40,13 @@ PPDDLInterface::ActionPtr AODeterminization::determinize(const PPDDLInterface::A
         for (size_t i = 0 ; i < el->size(); ++i) {
             // create new action
             PPDDLInterface::Action a(as, "_d"+std::to_string(i+1));
-            a.setEffect(*el->getEffect(i));
+            a.setEffect(*el->getEffect(i)); // TODO use weight!
+
+            std::string metric = PPDDLInterface::Domain::getMetric();
+            bool maximize = metric[0] == '+';
+            metric = metric.substr(1);
+            a.setCost(ALPHA * a.getCost() - log(el->getWeight(i)));
+
             al.addAction(a);
        }
         return makePtr(al);

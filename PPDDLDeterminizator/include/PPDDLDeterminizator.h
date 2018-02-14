@@ -31,9 +31,9 @@ class PPDDLDeterminizator {
 public: // FIXME static?
     virtual PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d); // FIXME non pure virt, take from MLO?
     virtual PPDDLInterface::ActionPtr determinize(const PPDDLInterface::Action&);// FIXME non pure virt
-    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::Effect& e, const PPDDLInterface::Action& a);
-    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce, const PPDDLInterface::Action& a) =0;
-    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe, const PPDDLInterface::Action& a) =0;
+    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::Effect& e);
+    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce) =0;
+    virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe) =0;
 };
 
 

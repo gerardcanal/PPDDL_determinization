@@ -17,21 +17,20 @@ PPDDLInterface::Domain PPDDLDeterminizator::determinize(const PPDDLInterface::Do
         PPDDLInterface::ActionPtr det_action = determinize(*it);
         PPDDLInterface::ActionList* al = dynamic_cast<PPDDLInterface::ActionList*>(det_action.get());
         if (al != nullptr) {
-            d_det.deleteAction(*it);
+            d_det.deleteAction(*it); // Delete action as it has been converted to multiple new actions
             for (size_t ai = 0 ; ai != al->size(); ++ai) {
                 d_det.setAction(*al->getAction(ai));
             }
         }
         else d_det.setAction(*det_action);
     }
-    //std::cout << "----------------------\n" << d_det << std::endl;
 
     return d_det;
 }
 
 PPDDLInterface::ActionPtr PPDDLDeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
-    PPDDLInterface::EffectPtr ep = determinize(*as.getEffect(), as);
+    PPDDLInterface::EffectPtr ep = determinize(*as.getEffect());
     PPDDLInterface::EffectList* el = dynamic_cast<PPDDLInterface::EffectList*>(ep.get());
     if (el != nullptr) { // Then the effect got split in multiple effects.. thus we have to create an ActionList with each effect in a different action
         PPDDLInterface::ActionList al(el->size());
@@ -48,15 +47,15 @@ PPDDLInterface::ActionPtr PPDDLDeterminizator::determinize(const PPDDLInterface:
 }
 
 PPDDLInterface::EffectPtr
-PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e, const PPDDLInterface::Action &a) {    // Check effect type
+PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e) {    // Check effect type
     const PPDDLInterface::ProbabilisticEffect* pe = dynamic_cast<const PPDDLInterface::ProbabilisticEffect*>(&e);
     if (pe != nullptr) { // Then it's probabilistic
-        return determinize(*pe, a);
+        return determinize(*pe);
     }
 
     const PPDDLInterface::ConjunctiveEffect* ce = dynamic_cast<const PPDDLInterface::ConjunctiveEffect*>(&e);
     if (ce != nullptr) { // It's a conjunctive effect which may have a probabilistic effect in the conjunction
-        return determinize(*ce, a);
+        return determinize(*ce);
     }
     return PPDDLInterface::makePtr(e);
 }
