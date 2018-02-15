@@ -34,6 +34,14 @@ public: // FIXME static?
     virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::Effect& e);
     virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce) =0;
     virtual PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe) =0;
+
+    /*!
+     * Creates a determinizator
+     * @param method_suffix Suffix to the determinized domain name
+     */
+    PPDDLDeterminizator(std::string method_suffix="");
+private:
+    std::string _method_name_suffix;
 };
 
 

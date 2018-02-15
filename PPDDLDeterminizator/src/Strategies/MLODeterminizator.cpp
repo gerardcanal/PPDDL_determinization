@@ -24,19 +24,6 @@
 
 //using namespace PPDDLInterface;
 
-PPDDLInterface::Domain MLODeterminizator::determinize(const PPDDLInterface::Domain &d) {
-    PPDDLInterface::Domain d_det(d, "det"); // Copy the domain
-
-    std::vector<PPDDLInterface::Action> actions = d_det.getActions();
-    for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
-        PPDDLInterface::Action det_action = *determinize(*it);
-        d_det.setAction(det_action);
-    }
-    //std::cout << "----------------------\n" << d_det << std::endl;
-
-    return d_det;
-}
-
 PPDDLInterface::ActionPtr MLODeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
     ret.setEffect(*determinize(*as.getEffect()));
@@ -144,5 +131,14 @@ PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::P
         TLDeterminization tld;
         PPDDLInterface::Domain TLDdeterminized = tld.determinize(d);
         TLDdeterminized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
+
+        TLDeterminization tld1(0.5);
+        PPDDLInterface::Domain TLDdeterminized1 = tld1.determinize(d);
+        TLDdeterminized1.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
+
+        TLDeterminization tld2(1.5);
+        PPDDLInterface::Domain TLDdeterminized2 = tld2.determinize(d);
+        TLDdeterminized2.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
+
         return 19;
     }

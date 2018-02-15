@@ -16,6 +16,8 @@ public:
     //PPDDLInterface::EffectPtr determinize(const PPDDLInterface::Effect& e, const PPDDLInterface::Action& a);
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce);
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe);
+
+    AODeterminization() : PPDDLDeterminizator("ao") {};
 };
 
 

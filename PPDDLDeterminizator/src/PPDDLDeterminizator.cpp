@@ -10,7 +10,7 @@
 #endif //ROSPLAN_PLANNING_SYSTEM_PPDDLDETERMINIZATOR_CPP_H
 
 PPDDLInterface::Domain PPDDLDeterminizator::determinize(const PPDDLInterface::Domain &d) {
-    PPDDLInterface::Domain d_det(d, "det"); // Copy the domain
+    PPDDLInterface::Domain d_det(d, _method_name_suffix + "det"); // Copy the domain
 
     std::vector<PPDDLInterface::Action> actions = d_det.getActions();
     for (PPDDLInterface::Domain::action_iterator it = actions.begin(); it != actions.end(); ++it) {
@@ -59,3 +59,5 @@ PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e) {    // Check 
     }
     return PPDDLInterface::makePtr(e);
 }
+
+PPDDLDeterminizator::PPDDLDeterminizator(string method_suffix) : _method_name_suffix(method_suffix) {}
