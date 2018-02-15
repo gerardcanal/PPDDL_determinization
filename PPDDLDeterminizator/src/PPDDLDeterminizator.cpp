@@ -61,3 +61,6 @@ PPDDLDeterminizator::determinize(const PPDDLInterface::Effect &e) {    // Check 
 }
 
 PPDDLDeterminizator::PPDDLDeterminizator(string method_suffix) : _method_name_suffix(method_suffix) {}
+
+
+

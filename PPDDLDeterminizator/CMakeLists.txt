@@ -20,11 +20,12 @@ endforeach()
 
 
 include_directories(${PPDDL_PARSER_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLDeterminization)
-add_executable(parser2 ${PPDDL_PARSER_ALL}
+add_executable(ppddl_determinizer ${PPDDL_PARSER_ALL}
         MLODeterminizator.cpp MLODeterminizator.h
         PPDDLDeterminizator.h PPDDLDeterminizator.cpp
         PPDDLParserInterface.cpp PPDDLParserInterface.h
         PDDLPrinter.cpp PDDLPrinter.h
-        AODeterminization.cpp AODeterminization.h
-        TLDeterminization.h TLDeterminization.cpp
-        ${VAL_ABSOLUTE_SOURCES} VALConversion.cpp VALConversion.h)
+        AODeterminizator.cpp AODeterminizator.h
+        TLDeterminizator.h TLDeterminizator.cpp
+        ${VAL_ABSOLUTE_SOURCES} VALConversion.cpp VALConversion.h
+        ppddl_determinizer_main.cpp)

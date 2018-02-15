@@ -8,7 +8,7 @@
 
 #include "PPDDLDeterminizator.h"
 
-class AODeterminization : public PPDDLDeterminizator {
+class AODeterminizator : public PPDDLDeterminizator {
 public:
     using PPDDLDeterminizator::determinize;
     //PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d);
@@ -17,7 +17,7 @@ public:
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce);
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe);
 
-    AODeterminization() : PPDDLDeterminizator("ao") {};
+    AODeterminizator() : PPDDLDeterminizator("ao") {};
 };
 
 

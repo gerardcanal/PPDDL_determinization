@@ -11,7 +11,7 @@
 #define ALPHA 1
 
 //Transition-likelihood determinization from Kaelbling and Lozano-Pérez 2013
-class TLDeterminization : public PPDDLDeterminizator {
+class TLDeterminizator : public PPDDLDeterminizator {
 public:
     using PPDDLDeterminizator::determinize;
     //PPDDLInterface::Domain determinize(const PPDDLInterface::Domain& d);
@@ -20,7 +20,7 @@ public:
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce) override ;
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe) override;
 
-    TLDeterminization(double alpha = ALPHA);
+    TLDeterminizator(double alpha = ALPHA);
 private:
     double _alpha;
 };

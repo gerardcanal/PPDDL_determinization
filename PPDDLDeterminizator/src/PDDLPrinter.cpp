@@ -467,7 +467,14 @@ namespace VAL {
     void PDDLPrinter::write_action(ostream & o,const action * p)
     {
         o << "(:action " << p->name->getName() << "\n :parameters (";
-        p->parameters->var_symbol_list::write(o);
+        //p->parameters->var_symbol_list::write(o); To avoid writing a space in the first parameter
+        bool first=true;
+        for (var_symbol_list::const_iterator it = p->parameters->begin(); it != p->parameters->end(); ++it) {
+            if (first) first = false;
+            else o << " ";
+            (*it)->var_symbol::write(o);
+        }
+
         showType = false;
         o << ")\n :precondition\n\t(and ";
         if(conj_goal * cg = dynamic_cast<conj_goal*>(p->precondition))
@@ -582,9 +589,10 @@ namespace VAL {
     void PDDLPrinter::write_domain(ostream & o,const domain * p)
     {
         //string s = pddl_req_flags_string(p->req ^ E_DURATIVE_ACTIONS);  // FIXME shouldn't be enforced if the domain doesn't include it
-        string s = pddl_req_flags_string(p->req);
+        //string s = pddl_req_flags_string(p->req);
+        string s = custom_pddl_req_flags_string(p->req); // modified spaces
         //o << "(define (domain " << p->name << ")\n(:requirements " << s << ":continuous-effects)\n"; // FIXME shouldn't be enforced if the domain doesn't include it
-        o << "(define (domain " << p->name << ")\n(:requirements " << s << ")\n";
+        o << "(define (domain " << p->name << ")\n(:requirements" << s << ")\n";
         if(p->types)
         {
             o << "(:types " << *(p->types) << ")\n";
@@ -663,6 +671,32 @@ namespace VAL {
     void PDDLPrinter::write_plan_step(ostream & o,const plan_step * p)
     {
         cerr << "Type stripping is not an appropriate operation for plans!\n";
+    }
+
+    std::string PDDLPrinter::custom_pddl_req_flags_string(VAL::pddl_req_flag flags) {
+        string result;
+
+        if (flags & E_EQUALITY) result += " :equality";
+        if (flags & E_STRIPS) result += " :strips";
+        if (flags & E_TYPING) result += " :typing";
+        if (flags & E_DISJUNCTIVE_PRECONDS)
+            result += " :disjunctive-preconditions";
+        if (flags & E_EXT_PRECS) result += " :existential-preconditions";
+        if (flags & E_UNIV_PRECS) result += " :universal-preconditions";
+        if (flags & E_COND_EFFS) result += " :conditional-effects";
+        if (flags & E_NFLUENTS) result += " :number-fluents";
+        if (flags & E_OFLUENTS) result += " :object-fluents";
+        if (flags & E_ACTIONCOSTS) result += " :action-costs";
+        if (flags & E_DURATIVE_ACTIONS) result += " :durative-actions";
+        if (flags & E_DURATION_INEQUALITIES) result += " :duration-inequalities";
+        if (flags & E_CONTINUOUS_EFFECTS) result += " :continuous-effects";
+        if (flags & E_NEGATIVE_PRECONDITIONS) result += " :negative-preconditions";
+        if (flags & E_DERIVED_PREDICATES) result += " :derived-predicates";
+        if (flags & E_TIMED_INITIAL_LITERALS) result += " :timed-initial-literals";
+        if (flags & E_PREFERENCES) result += " :preferences";
+        if (flags & E_CONSTRAINTS) result += " :constraints";
+        if (flags & E_TIME) result += " :time";
+        return result;
     };
 
 

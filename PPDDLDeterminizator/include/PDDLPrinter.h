@@ -83,6 +83,7 @@ namespace VAL {
         virtual void write_length_spec(ostream & o,const length_spec *);
         virtual void write_problem(ostream & o,const problem *);
         virtual void write_plan_step(ostream & o,const plan_step *);
+        std::string custom_pddl_req_flags_string(VAL::pddl_req_flag flags);
     };
 
 };

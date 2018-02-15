@@ -19,8 +19,8 @@
 
 #include "MLODeterminizator.h"
 #include "PPDDLParserInterface.h"
-#include "AODeterminization.h"
-#include "TLDeterminization.h"
+#include "AODeterminizator.h"
+#include "TLDeterminizator.h"
 
 //using namespace PPDDLInterface;
 
@@ -68,77 +68,3 @@ PPDDLInterface::EffectPtr MLODeterminizator::determinize(const PPDDLInterface::P
     }
     return PPDDLInterface::makePtr(pe.getEffect(max_i));
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#include <cstring>
-#include <fstream>
-/* The parse function. */
-   // extern int ppddl_parse(); // FIXME namespace this variables!?
-/* File to parse. */
-   // extern FILE* yyin;
-/* Name of current file. */
-    extern std::string current_file;
-/* Level of warnings. */
-//    extern int warning_level;
-/* Verbosity level. */
-    //extern int verbosity;
-
-/* Parses the given file, and returns true on success. */
-    static bool read_file(const char* name) {
-    ppddl_in = fopen(name, "r");
-        if (ppddl_in == 0) {
-            std::cerr << "mdpclient:" << name << ": " << strerror(errno)
-                      << std::endl;
-            return false;
-        } else {
-            current_file = name;
-            bool success = (ppddl_parse() == 0);
-            fclose(ppddl_in);
-            return success;
-        }
-    }
-
-    int main(int argc, char **argv) {
-        if (argc < 2) {
-            std::cout << "Error: Wrong arguments. You must provide an argument with the path to the PPDDL file."
-                      << std::endl;
-            exit(-1);
-        }
-
-        //std::vector<std::string> ppaths; ppaths.push_back(argv[2]);
-        //PPDDLInterface::Domain d(argv[1], ppaths);
-        PPDDLInterface::Domain d(argv[1]);
-        PPDDLInterface::Domain d_copy(d);
-        MLODeterminizator mld;
-        std::cout << "############################\nDeterminization\n###########################" <<std::endl;
-        PPDDLInterface::Domain determinized = mld.determinize(d);
-
-        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        std::cout << "WRAPPED DOMAIN: " << d << std::endl;
-        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        std::cout << "COPIED DOMAIN: " << d_copy << std::endl;
-        std::cout << "#######################################################\n#######################################################\n#######################################################" <<std::endl;
-        std::cout << "DETERMINIZED DOMAIN: " << determinized << std::endl;
-
-        d.printPPDDL("/home/gcanal/Desktop/domain_gen_tests");
-        determinized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
-        AODeterminization aod;
-        PPDDLInterface::Domain AODdeterminized = aod.determinize(d);
-        AODdeterminized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
-
-
-        TLDeterminization tld;
-        PPDDLInterface::Domain TLDdeterminized = tld.determinize(d);
-        TLDdeterminized.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
-
-        TLDeterminization tld1(0.5);
-        PPDDLInterface::Domain TLDdeterminized1 = tld1.determinize(d);
-        TLDdeterminized1.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
-
-        TLDeterminization tld2(1.5);
-        PPDDLInterface::Domain TLDdeterminized2 = tld2.determinize(d);
-        TLDdeterminized2.printPDDL("/home/gcanal/Desktop/domain_gen_tests");
-
-        return 19;
-    }

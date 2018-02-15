@@ -2,10 +2,10 @@
 // Created by gcanal on 8/02/18.
 //
 
-#include "TLDeterminization.h"
+#include "TLDeterminizator.h"
 
 PPDDLInterface::EffectPtr
-TLDeterminization::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
+TLDeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
     for (size_t i = 0; i < ce.size(); ++i) {
         PPDDLInterface::EffectPtr ef = determinize(*ce.getConjunct(i));
         PPDDLInterface::EffectList* det_cjt_list = dynamic_cast<PPDDLInterface::EffectList*>(ef.get());
@@ -25,13 +25,13 @@ TLDeterminization::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
 }
 
 PPDDLInterface::EffectPtr
-TLDeterminization::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
+TLDeterminizator::determinize(const PPDDLInterface::ProbabilisticEffect &pe) {
     PPDDLInterface::EffectList determinized_effects(pe);
     return PPDDLInterface::makePtr(determinized_effects);
 }
 
 
-PPDDLInterface::ActionPtr TLDeterminization::determinize(const PPDDLInterface::Action &as) {
+PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Action &as) {
     PPDDLInterface::Action ret(as); // We copy all the action
     PPDDLInterface::EffectPtr ep = determinize(*as.getEffect());
     PPDDLInterface::EffectList* el = dynamic_cast<PPDDLInterface::EffectList*>(ep.get());
@@ -55,6 +55,6 @@ PPDDLInterface::ActionPtr TLDeterminization::determinize(const PPDDLInterface::A
     return makePtr(ret);
 }
 
-TLDeterminization::TLDeterminization(double alpha) : PPDDLDeterminizator("tl") {
+TLDeterminizator::TLDeterminizator(double alpha) : PPDDLDeterminizator("tl") {
     _alpha = alpha;
 }
