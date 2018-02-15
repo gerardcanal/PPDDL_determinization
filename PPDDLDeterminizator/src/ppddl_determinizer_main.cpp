@@ -9,7 +9,7 @@ void usage() {
     std::cout << "\t<strategy>: mlo (most-likely outcome), ao (all-outcome), tl (transition likelihood) or all for all of them" << std::endl;
     std::cout << "\t<st_parameters>: Parameters for the strategy. Now accepting alpha for the tl strategy" << std::endl;
     std::cout << "\t<domain_file>: Path to the domain file in PPDDL" << std::endl;
-    std::cout << "\t<problem_files>: List of paths to problem files for the domain. At least one should be prvoided (if separate from the domain file)" << std::endl;
+    std::cout << "\t<problem_files>: List of paths to problem files for the domain. At least one should be provided (if separate from the domain file)" << std::endl;
     std::cout << "\t<output_folder>: Path to the folder in which the output determinized files will be written." << std::endl;
 }
 
