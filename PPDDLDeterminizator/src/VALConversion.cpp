@@ -44,6 +44,10 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
             d->constants->push_back(cs);
         }
     }
+    if (d->constants->size() == 0) {
+        delete d->constants;
+        d->constants = nullptr;
+    }
 
     d->pred_vars = new VAL::var_symbol_table;  // Vars used in predicate declarations /* var_symbol_table* */
     // Not filling this one as it is not getting used by VAL.
