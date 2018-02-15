@@ -8,7 +8,8 @@
 
 #include "PPDDLDeterminizator.h"
 #include <cmath>
-#define ALPHA 1
+#define ALPHA 1.0
+#define BETA 1.0
 
 //Transition-likelihood determinization from Kaelbling and Lozano-Pérez 2013
 class TLDeterminizator : public PPDDLDeterminizator {
@@ -20,9 +21,10 @@ public:
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ConjunctiveEffect& ce) override ;
     PPDDLInterface::EffectPtr determinize(const PPDDLInterface::ProbabilisticEffect& pe) override;
 
-    TLDeterminizator(double alpha = ALPHA);
+    TLDeterminizator(double alpha = ALPHA, double beta = BETA);
 private:
     double _alpha;
+    double _beta;
 };
 
 

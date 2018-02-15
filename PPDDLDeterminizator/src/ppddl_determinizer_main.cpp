@@ -5,9 +5,9 @@
 #include "TLDeterminizator.h"
 
 void usage() {
-    std::cout << "Usage: ./ppddl_determinizer <strategy> <st_parameters> <domain_file> <problem_files> <output_folder>.\n where:" << std::endl;
+    std::cout << "Usage: ./ppddl_determinizer <strategy> <st_parameter1> <st_parameter2> <domain_file> <problem_files> <output_folder>.\n where:" << std::endl;
     std::cout << "\t<strategy>: mlo (most-likely outcome), ao (all-outcome), tl (transition likelihood) or all for all of them" << std::endl;
-    std::cout << "\t<st_parameters>: Parameters for the strategy. Now accepting alpha for the tl strategy" << std::endl;
+    std::cout << "\t<st_parameters>: Parameters for the strategy. Now accepting alpha and beta for the tl strategy" << std::endl;
     std::cout << "\t<domain_file>: Path to the domain file in PPDDL" << std::endl;
     std::cout << "\t<problem_files>: List of paths to problem files for the domain. At least one should be provided (if separate from the domain file)" << std::endl;
     std::cout << "\t<output_folder>: Path to the folder in which the output determinized files will be written." << std::endl;
@@ -28,11 +28,12 @@ int main(int argc, char **argv) {
     }
 
     std::string strategy(argv[1]);
-    double alpha = ALPHA;
+    double alpha = ALPHA, beta = BETA;
     int domain_idx = 2;
     try {
         alpha = std::stod(argv[2]);
-        domain_idx = 3;
+        beta = std::stod(argv[3]);
+        domain_idx = 4;
     }
     catch(...) {} // no alpha provided
 
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
         wrong_strategy = false;
     }
     if (strategy == "tl" || det_all) {
-        TLDeterminizator tld(alpha);
+        TLDeterminizator tld(alpha, beta);
         tld.determinize(d).printPDDL(output_path);
         wrong_strategy = false;
     }

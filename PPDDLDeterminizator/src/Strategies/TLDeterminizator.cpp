@@ -45,7 +45,7 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             std::string metric = PPDDLInterface::Domain::getMetric();
             bool maximize = metric[0] == '+';
             metric = metric.substr(1);
-            a.setCost(_alpha * a.getCost() - log(el->getWeight(i)));
+            a.setCost(_alpha * a.getCost() - _beta*log(el->getWeight(i)));
 
             al.addAction(a);
        }
@@ -55,6 +55,7 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
     return makePtr(ret);
 }
 
-TLDeterminizator::TLDeterminizator(double alpha) : PPDDLDeterminizator("tl") {
+TLDeterminizator::TLDeterminizator(double alpha, double beta) : PPDDLDeterminizator("tl") {
     _alpha = alpha;
+    _beta = beta;
 }
