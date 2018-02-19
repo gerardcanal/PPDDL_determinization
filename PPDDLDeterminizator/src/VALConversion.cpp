@@ -553,7 +553,10 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
         const ppddl_parser::Object* obj = p->terms().find_object(*oit);
         if (obj != nullptr) {
             const_obj_decl[*obj] = *oit;
-            VAL::const_symbol* sym = new VAL::const_symbol(*oit);
+            VAL::symbol_table<VAL::const_symbol>::iterator _symit = ret->const_tab.find(*oit);
+            VAL::const_symbol* sym;
+            if (_symit != ret->const_tab.end()) sym = _symit->second;
+            else sym = new VAL::const_symbol(*oit);
             sym->type =  ret->pddl_type_tab.find(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))))->second; // FIXME? new VAL::pddl_type(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))));
             problem->objects->push_back(sym);
             ret->const_tab.insert(std::make_pair(*oit, sym));

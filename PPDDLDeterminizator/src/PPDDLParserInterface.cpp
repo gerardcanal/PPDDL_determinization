@@ -554,6 +554,9 @@ namespace PPDDLInterface {
 
                 ppddl_parser::Update* edit_upd = const_cast<ppddl_parser::Update*>(&ue->update());
                 *edit_upd = *new_update; // (Safe) Const cast again to be able to modify it...
+                RCObject::ref(&new_update->expression()); // As the delete will destroy one reference
+                RCObject::ref(&new_update->fluent()); // As the delete will destroy one reference
+                delete new_update; // As its value has been copied, free the pointer
             }
         }
     }

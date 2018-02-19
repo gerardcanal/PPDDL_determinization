@@ -44,6 +44,11 @@ namespace ppddl_parser {
     struct Problem {
         /* Table of problem definitions. */
         struct ProblemMap : public std::map<std::string, const Problem *> {
+            ~ProblemMap() {
+                // deleting created problem instances here, as this destructor will be called when the program terminates
+                // and cleans the static variables.
+                Problem::clear();
+            }
         };
 
         /* Returns a const_iterator pointing to the first problem. */
