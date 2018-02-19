@@ -552,7 +552,12 @@ namespace PPDDLInterface {
                 }
                 else throw std::runtime_error("Error: Only updates of type increase/decrease value can be modified.");
 
+                // Modify the update. To do so, I get the editable pointer to the update and override it.
+                // references are updated accordingly, deleting those that will not be used anymore and updating the new
+                // ones.
                 ppddl_parser::Update* edit_upd = const_cast<ppddl_parser::Update*>(&ue->update());
+                RCObject::destructive_deref(&edit_upd->fluent());
+                //RCObject::destructive_deref(&edit_upd->expression()); // This one is not needed.
                 *edit_upd = *new_update; // (Safe) Const cast again to be able to modify it...
                 RCObject::ref(&new_update->expression()); // As the delete will destroy one reference
                 RCObject::ref(&new_update->fluent()); // As the delete will destroy one reference
