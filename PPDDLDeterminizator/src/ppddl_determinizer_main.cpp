@@ -67,6 +67,8 @@ int main(int argc, char **argv) {
         usage();
         exit(-1);
     }
+
+    std::cout << "All the provided domains have been processed." << std::endl;
     return 1;
 }
 

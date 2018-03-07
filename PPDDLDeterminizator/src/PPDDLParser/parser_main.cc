@@ -11,9 +11,9 @@
 using namespace ppddl_parser;
 
 /* The parse function. */
-extern int yyparse();
+extern int ppddl_parse();
 /* File to parse. */
-extern FILE* yyin;
+extern FILE* ppddl_in;
 /* Name of current file. */
 std::string current_file;
 /* Level of warnings. */
@@ -23,15 +23,15 @@ int verbosity;
 
 /* Parses the given file, and returns true on success. */
 static bool read_file(const char* name) {
-    yyin = fopen(name, "r");
-    if (yyin == 0) {
+    ppddl_in = fopen(name, "r");
+    if (ppddl_in == 0) {
         std::cerr << "mdpclient:" << name << ": " << strerror(errno)
                   << std::endl;
         return false;
     } else {
         current_file = name;
-        bool success = (yyparse() == 0);
-        fclose(yyin);
+        bool success = (ppddl_parse() == 0);
+        fclose(ppddl_in);
         return success;
     }
 }
