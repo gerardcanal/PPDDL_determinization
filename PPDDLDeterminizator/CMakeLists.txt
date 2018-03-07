@@ -20,7 +20,7 @@ endif()
 ########################################################################################################################
 ####### ADD CMAKE TO COMPILE THE PARSER ################################################################################
 ########################################################################################################################
-include(${CMAKE_CURRENT_SOURCE_DIR}/PPDDLParser/CMakeLists.txt)
+include(${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLParser/CMakeLists.txt)
 #set_source_files_properties(${FLEX_BISON_OUTPUTS} PROPERTIES GENERATED TRUE)
 
 
@@ -28,7 +28,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/PPDDLParser/CMakeLists.txt)
 ### LOCATE VAL FILES AND SET VARIABLES #################################################################################
 ########################################################################################################################
 if (NOT DEFINED VAL_DIR)    # Force the user to tell us which OpenCV they want (otherwise find_package can find the wrong one, cache it and changes to OpenCV_DIR are ignored)
-    #set(VAL_DIR /home/gcanal/iri-lab/ROSPlan/src/rosplan/rosplan_planning_system/src/VALfiles)
     execute_process(COMMAND rospack find rosplan_planning_system OUTPUT_VARIABLE VAL_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(VAL_DIR ${VAL_DIR}/src/VALfiles)
 endif(NOT DEFINED VAL_DIR )
@@ -73,27 +72,27 @@ set(VAL_SOURCES
         Utils.cpp)
 
 foreach(ITEM ${VAL_SOURCES})
-    get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${VAL_DIR}")
-    set(VAL_ABSOLUTE_SOURCES ${VAL_ABSOLUTE_SOURCES} ${VAL_ABSOLUTE_SOURCE})
+get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${VAL_DIR}")
+set(VAL_ABSOLUTE_SOURCES ${VAL_ABSOLUTE_SOURCES} ${VAL_ABSOLUTE_SOURCE})
 endforeach()
 set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-conversion-null") # Disable auto_ptr warnings in VALfiles
 
-include_directories(${VAL_DIR})
+include_directories(include src ${VAL_DIR}) # We add the src as include because the PPDDLParser headers are there
 
 ########################################################################################################################
 ######## CREATE LIBRARY AND EXECUTABLE #################################################################################
 ########################################################################################################################
 add_library(ppddl_determinization SHARED
-        MLODeterminizator.h MLODeterminizator.cpp
-        PPDDLDeterminizator.h PPDDLDeterminizator.cpp
-        PPDDLParserInterface.cpp PPDDLParserInterface.h
-        PDDLPrinter.cpp PDDLPrinter.h
-        AODeterminizator.cpp AODeterminizator.h
-        TLDeterminizator.h TLDeterminizator.cpp
-        ${VAL_ABSOLUTE_SOURCES}
-        VALConversion.cpp VALConversion.h)
+                include/PPDDLDeterminizator.h src/PPDDLDeterminizator.cpp
+                src/PPDDLParserInterface.cpp include/PPDDLParserInterface.h
+                src/PDDLPrinter.cpp include/PDDLPrinter.h
+                src/VALConversion.cpp include/VALConversion.h
+                ${VAL_ABSOLUTE_SOURCES}
+                ${PPDDL_PARSER_ALL}
+                src/Strategies/MLODeterminizator.cpp include/Strategies/MLODeterminizator.h
+                src/Strategies/AODeterminizator.cpp include/Strategies/AODeterminizator.h
+                src/Strategies/TLDeterminizator.cpp include/Strategies/TLDeterminizator.h)
 
 
-add_executable(ppddl_determinizer ${PPDDL_PARSER_ALL}
-        ppddl_determinizer_main.cpp)
+add_executable(ppddl_determinizer src/ppddl_determinizer_main.cpp)
 target_link_libraries(ppddl_determinizer ppddl_determinization)

@@ -1,8 +1,8 @@
 #include <iostream>
 #include "PPDDLParserInterface.h"
-#include "MLODeterminizator.h"
-#include "AODeterminizator.h"
-#include "TLDeterminizator.h"
+#include "Strategies/MLODeterminizator.h"
+#include "Strategies/AODeterminizator.h"
+#include "Strategies/TLDeterminizator.h"
 
 void usage() {
     std::cout << "Usage: ./ppddl_determinizer <strategy> <st_parameter1> <st_parameter2> <domain_file> <problem_files> <output_folder>.\n where:" << std::endl;

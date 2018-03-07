@@ -2,7 +2,7 @@
 // Created by gcanal on 8/02/18.
 //
 
-#include "TLDeterminizator.h"
+#include "Strategies/TLDeterminizator.h"
 
 PPDDLInterface::EffectPtr
 TLDeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {

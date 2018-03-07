@@ -17,10 +17,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "MLODeterminizator.h"
+#include "Strategies/MLODeterminizator.h"
 #include "PPDDLParserInterface.h"
-#include "AODeterminizator.h"
-#include "TLDeterminizator.h"
+#include "Strategies/AODeterminizator.h"
+#include "Strategies/TLDeterminizator.h"
 
 //using namespace PPDDLInterface;
 

@@ -2,7 +2,7 @@
 // Created by gcanal on 8/02/18.
 //
 
-#include "AODeterminizator.h"
+#include "Strategies/AODeterminizator.h"
 
 PPDDLInterface::EffectPtr
 AODeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
