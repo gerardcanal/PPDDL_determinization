@@ -87,11 +87,11 @@ add_library(ppddl_determinization SHARED
                 src/PPDDLParserInterface.cpp include/PPDDLParserInterface.h
                 src/PDDLPrinter.cpp include/PDDLPrinter.h
                 src/VALConversion.cpp include/VALConversion.h
-                ${VAL_ABSOLUTE_SOURCES}
                 ${PPDDL_PARSER_ALL}
                 src/Strategies/MLODeterminizator.cpp include/Strategies/MLODeterminizator.h
                 src/Strategies/AODeterminizator.cpp include/Strategies/AODeterminizator.h
                 src/Strategies/TLDeterminizator.cpp include/Strategies/TLDeterminizator.h)
+target_sources(ppddl_determinization INTERFACE ${VAL_ABSOLUTE_SOURCES})
 
 
 add_executable(ppddl_determinizer src/ppddl_determinizer_main.cpp)

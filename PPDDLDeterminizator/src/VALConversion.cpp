@@ -90,7 +90,7 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
     names = dom->functions().names();
     std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
     for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
-        if (*it == "total-time") continue;
+        if (*it == "total-time" or *it == "goal-achieved") continue;
         VAL::func_symbol* fs = new VAL::func_symbol(*it);
         _domain_wrapper->func_tab.insert(std::make_pair(*it, fs));
         VAL::var_symbol_list* sl = new VAL::var_symbol_list;
@@ -329,15 +329,15 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
                                                  std::shared_ptr<VALWrapper> valwrap) {
     const ppddl_parser::Value* v = dynamic_cast<const ppddl_parser::Value*>(exp);
-    if (v != 0) {
+    if (v != nullptr) {
         return new VAL::float_expression(v->value().double_value());
     }
 
     const ppddl_parser::Fluent* f = dynamic_cast<const ppddl_parser::Fluent*>(exp);
-    if (f != 0) {
+    if (f != nullptr) {
         // ppddl_parser::TermList tll = f->terms(); // FIXME  Not sure what are these or if I should use them
 
-        VAL::func_symbol* fs = valwrap->func_tab.find(dom->functions().name(f->function()))->second; // FIXME? new VAL::func_symbol(dom->functions().name(f->function()));
+        VAL::func_symbol* fs = valwrap->func_tab.find(dom->functions().name(f->function()))->second;
         VAL::parameter_symbol_list* sl = new VAL::parameter_symbol_list();
         ppddl_parser::TypeList tl = dom->functions().parameters(f->function());
         for (auto it = tl.begin(); it != tl.end(); ++it ) {
@@ -537,6 +537,7 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
     std::vector<std::string> names = p->domain().functions().names();
     std::set<std::string> unique_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
     for (auto it = unique_names.begin(); it != unique_names.end(); ++it) {
+        if (*it == "total-time" or *it == "goal-achieved") continue;
         VAL::func_symbol *fs = new VAL::func_symbol(*it);
         ret->func_tab.insert(std::make_pair(*it, fs));
     }
@@ -548,8 +549,9 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
 
     map<std::string, int> var_name_ctr; // Not used but needed in the VALConversion methods
     std::map<ppddl_parser::Term, std::string> const_obj_decl;
-    std::vector<std::string> obj_names = p->terms().names();
-    for (auto oit = obj_names.begin(); oit != obj_names.end(); ++oit) {
+    names = p->terms().names();
+    std::set<std::string> unique_obj_names(names.begin(), names.end()); // Some times names() has duplicated function names, I make them unique by inserting to the set.
+    for (auto oit = unique_obj_names.begin(); oit != unique_obj_names.end(); ++oit) {
         const ppddl_parser::Object* obj = p->terms().find_object(*oit);
         if (obj != nullptr) {
             const_obj_decl[*obj] = *oit;
@@ -572,7 +574,7 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
-            if (tlit->object()) sl->push_back(ret->const_tab.find(const_obj_decl[*tlit])->second);//FIXME? sl->push_back(new VAL::const_symbol(const_obj_decl[*tlit]));
+            if (tlit->object()) sl->push_back(ret->const_tab.find(const_obj_decl[*tlit])->second);
             else {
                 VAL::var_symbol* varsym = new VAL::var_symbol(const_obj_decl[*tlit]);
                 sl->push_back(varsym);
@@ -585,6 +587,12 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
 
     // Add the rest
     for (auto eit = p->init_effects().begin(); eit != p->init_effects().end(); ++eit) {
+        // Check if Effect is a planner-made assign
+        const ppddl_parser::UpdateEffect* ue = dynamic_cast<const ppddl_parser::UpdateEffect*>(*eit);
+        if (ue != nullptr) {
+            std::string fluent_name = p->domain().functions().name(ue->update().fluent().function());
+            if (fluent_name == "total-time" or fluent_name == "goal-achieved") continue;
+        }
         VAL::effect_lists* init_eff = toVALEffects(*eit, &p->domain(), var_name_ctr, const_obj_decl, ret);
         problem->initial_state->append_effects(init_eff);
         delete init_eff; // As we appended them to the problem, they were copied and the pointer is lost

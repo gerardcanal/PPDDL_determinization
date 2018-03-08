@@ -117,7 +117,7 @@ namespace ppddl_parser {
     }
 
     void FunctionTable::writePPDDL(std::ostream &o) const {
-        if (functions_.size() <= 3) return; // As it will be either goal-achieved, reward or total-time, which are automaticallya added by the parser
+        if (functions_.size() <= 2) return; // As it will be either goal-achieved, reward or total-time, which are automaticallya added by the parser
         o << "\t(:functions";
         for (std::map<std::string, Function>::const_iterator fi = functions_.begin(); fi != functions_.end(); fi++) {
             const Function &f = (*fi).second;
