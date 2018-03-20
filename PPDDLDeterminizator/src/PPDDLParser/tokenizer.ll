@@ -129,7 +129,7 @@ maximize                        return make_string(yytext, MAXIMIZE);
 static int make_string(const char* s, int token) {
   std::string* result = new std::string();
   for (const char* p = s; *p != '\0'; p++) {
-    *result += *p;//tolower(*p); // FIXME Note: added to avoid lowercasing everything...
+    *result += tolower(*p); // Remove tolower and set it to *p to avoid lowercase predicates
   }
   ppddl_lval.str = result;
   return token;
