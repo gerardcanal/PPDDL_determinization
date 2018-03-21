@@ -18,9 +18,6 @@
 
 
 #include "Strategies/MLODeterminizator.h"
-#include "PPDDLParserInterface.h"
-#include "Strategies/AODeterminizator.h"
-#include "Strategies/TLDeterminizator.h"
 
 //using namespace PPDDLInterface;
 

@@ -90,7 +90,7 @@ add_library(ppddl_determinization SHARED
                 ${PPDDL_PARSER_ALL}
                 src/Strategies/MLODeterminizator.cpp include/Strategies/MLODeterminizator.h
                 src/Strategies/AODeterminizator.cpp include/Strategies/AODeterminizator.h
-                src/Strategies/TLDeterminizator.cpp include/Strategies/TLDeterminizator.h)
+                src/Strategies/TLDeterminizator.cpp include/Strategies/TLDeterminizator.h src/PPDDLDeterminizatorFactory.cpp include/PPDDLDeterminizatorFactory.h)
 target_sources(ppddl_determinization INTERFACE ${VAL_ABSOLUTE_SOURCES})
 
 

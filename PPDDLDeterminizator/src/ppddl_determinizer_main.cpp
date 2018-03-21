@@ -1,4 +1,5 @@
 #include <iostream>
+#include <PPDDLDeterminizatorFactory.h>
 #include "PPDDLParserInterface.h"
 #include "Strategies/MLODeterminizator.h"
 #include "Strategies/AODeterminizator.h"
@@ -47,18 +48,19 @@ int main(int argc, char **argv) {
     bool det_all = false;
     if (strategy == "all") det_all = true;
     if (strategy == "mlo" || det_all) {
-        MLODeterminizator mld;
-        mld.determinize(d).printPDDL(output_path);
+        //MLODeterminizator mld = *;
+        PPDDLDeterminizatorFactory::createStrategy(PPDDLDeterminizatorFactory::MOST_LIKELY_OUTCOME)->determinize(d).printPDDL(output_path);
         wrong_strategy = false;
     }
     if (strategy == "ao" || det_all) {
-        AODeterminizator aod;
-        aod.determinize(d).printPDDL(output_path);
+        //AODeterminizator aod;
+        PPDDLDeterminizatorFactory::createStrategy(PPDDLDeterminizatorFactory::ALL_OUTCOME)->determinize(d).printPDDL(output_path);
         wrong_strategy = false;
     }
     if (strategy == "tl" || det_all) {
-        TLDeterminizator tld(alpha, beta);
-        tld.determinize(d).printPDDL(output_path);
+        //TLDeterminizator tld(alpha, beta);
+        std::unique_ptr<PPDDLDeterminizator> tld = PPDDLDeterminizatorFactory::createStrategy(PPDDLDeterminizatorFactory::TRANSITION_LIKELIHOOD, {alpha, beta});
+        tld->determinize(d).printPDDL(output_path);
         wrong_strategy = false;
     }
 
