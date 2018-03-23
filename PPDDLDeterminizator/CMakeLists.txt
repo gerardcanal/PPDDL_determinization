@@ -27,7 +27,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLParser/CMakeLists.txt)
 ########################################################################################################################
 ### LOCATE VAL FILES AND SET VARIABLES #################################################################################
 ########################################################################################################################
-if (NOT DEFINED VAL_DIR)    # Force the user to tell us which OpenCV they want (otherwise find_package can find the wrong one, cache it and changes to OpenCV_DIR are ignored)
+if (NOT DEFINED VAL_DIR)    # Ask the user to tell us which where is VAL  (otherwise try to get the one from ROSPlan)
     execute_process(COMMAND rospack find rosplan_planning_system OUTPUT_VARIABLE VAL_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(VAL_DIR ${VAL_DIR}/src/VALfiles)
 endif(NOT DEFINED VAL_DIR )

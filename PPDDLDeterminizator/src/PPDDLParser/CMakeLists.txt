@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.11)
-project (PPDDL_PARSER)
+project(PPDDL_PARSER)
 
 # NOTE: Here I use ${CMAKE_CURRENT_LIST_DIR} to obtain the path to this CMakeLists.txt folder, and therefore to be able
 #       to include the file from a top-level CMakeLists.txt as well as to run this CMakeLists.txt by itself to compile
