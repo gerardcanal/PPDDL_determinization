@@ -1,7 +1,14 @@
 cmake_minimum_required (VERSION 2.8.0)
-project(ppddl_determinization)
+#project(ppddl_determinization)
 
 # IF ROSPLAN is not installed, use with cmake -DVAL_DIR=<path_to_VALfiles>
+
+########################################################################################################################
+####### ADD CMAKE TO COMPILE THE PARSER ################################################################################
+########################################################################################################################
+include(${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLParser/CMakeLists.txt)
+project(ppddl_determinization) # To avoid the project inside the PPDDLParser CMakeLists take over
+#set_source_files_properties(${FLEX_BISON_OUTPUTS} PROPERTIES GENERATED TRUE)
 
 ########################################################################################################################
 #### CHECK FOR CXX11 SUPPORT ###########################################################################################
@@ -14,14 +21,6 @@ if(COMPILER_SUPPORTS_CXX11)
 else()
     message("-- c++11 support not found! Not adding the '-std=c++11' compile flag!!")
 endif()
-
-
-
-########################################################################################################################
-####### ADD CMAKE TO COMPILE THE PARSER ################################################################################
-########################################################################################################################
-include(${CMAKE_CURRENT_SOURCE_DIR}/src/PPDDLParser/CMakeLists.txt)
-#set_source_files_properties(${FLEX_BISON_OUTPUTS} PROPERTIES GENERATED TRUE)
 
 
 ########################################################################################################################
