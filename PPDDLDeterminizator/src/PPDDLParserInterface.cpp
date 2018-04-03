@@ -149,6 +149,7 @@ namespace PPDDLInterface {
         val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PDDLPrinter));
 
         std::ofstream o(output_folder_path + "/" + val_d->name + "_domain.pddl");
+        o << "; Do not edit! This file was generated automatically." << std::endl;
         o << *val_d;
         o.close();
 
@@ -157,6 +158,7 @@ namespace PPDDLInterface {
             const std::shared_ptr<VAL::problem> val_p = p->get();
             val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
             o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
+            o << "; Do not edit! This file was generated automatically." << std::endl;
             o << *val_p;
             o.close();
         }
@@ -174,12 +176,14 @@ namespace PPDDLInterface {
 
     void Domain::printPPDDL(const string &output_folder_path) {
         std::ofstream o(output_folder_path + "/" + _dom->name() + "_probabilistic_domain.pddl");
+        o << "; Do not edit! This file was generated automatically." << std::endl;
         _dom->writePPDDL(o);
         o.close();
 
         for (auto prit = ppddl_parser::Problem::begin(); prit != ppddl_parser::Problem::end(); ++prit) {
             o = std::ofstream(output_folder_path + "/" + _dom->name() + "_probabilistic_" + prit->second->name() +
                               "_problem.pddl");
+            o << "; Do not edit! This file was generated automatically." << std::endl;
             prit->second->writePPDDL(o, _dom->name());
             o.close();
         }
