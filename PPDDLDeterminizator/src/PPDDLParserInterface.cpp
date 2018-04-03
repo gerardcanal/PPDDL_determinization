@@ -142,13 +142,14 @@ namespace PPDDLInterface {
         } else throw std::runtime_error("ERROR! Non determinized domain can't be converted to (non-stochastic) PDDL!");
     }
 
-    void Domain::printPDDL(const string &output_folder_path) {
+    void Domain::printPDDL(const string &output_folder_path, string domain_name) {
         //VAL::domain val_d = *getVALDomain().get();
         std::shared_ptr<VALDomain> wrapper = getVALDomain();
         const std::shared_ptr<VAL::domain> val_d = wrapper->get();
         val_d->setWriteController(auto_ptr<VAL::WriteController>(new VAL::PDDLPrinter));
 
-        std::ofstream o(output_folder_path + "/" + val_d->name + "_domain.pddl");
+        if (domain_name.size() == 0) domain_name = val_d->name + "_domain.pddl";
+        std::ofstream o(output_folder_path + "/" + domain_name);
         o << "; Do not edit! This file was generated automatically." << std::endl;
         o << *val_d;
         o.close();
@@ -174,8 +175,9 @@ namespace PPDDLInterface {
         return determ;
     }
 
-    void Domain::printPPDDL(const string &output_folder_path) {
-        std::ofstream o(output_folder_path + "/" + _dom->name() + "_probabilistic_domain.pddl");
+    void Domain::printPPDDL(const string &output_folder_path, std::string domain_name) {
+        if (domain_name.size() == 0) domain_name = _dom->name() + "_probabilistic_domain.pddl";
+        std::ofstream o(output_folder_path + "/" + domain_name);
         o << "; Do not edit! This file was generated automatically." << std::endl;
         _dom->writePPDDL(o);
         o.close();
