@@ -32,8 +32,9 @@ namespace PPDDLInterface {
                 //       preferred to modify as less as possible.
             }
         } else {
-            std::cerr << "There were errors while parsing input file! Finishing the program." << std::endl;
-            exit(-1);
+            std::cerr << "There were errors while parsing input file!" << std::endl;
+            throw(std::runtime_error("There was a Domain parsing error!"));
+            //exit(-1);
         }
 
         for (auto ppath = problem_paths.begin(); ppath != problem_paths.end(); ++ppath) {
