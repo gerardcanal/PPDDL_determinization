@@ -46,7 +46,8 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             bool maximize = metric[0] == '+';
             metric = metric.substr(1);
             double cost = _alpha * a.getCost() - _beta*log(el->getWeight(i));
-            a.setCost(round(cost*100));
+            a.setCost(cost);
+            //a.setCost(round(cost*100));
 
             al.addAction(a);
        }
