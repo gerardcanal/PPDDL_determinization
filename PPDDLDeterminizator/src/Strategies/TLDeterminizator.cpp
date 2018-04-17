@@ -42,16 +42,16 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             PPDDLInterface::Action a(as, "_d"+std::to_string(i+1));
             a.setEffect(*el->getEffect(i)); // TODO use weight!
 
-            std::string metric = PPDDLInterface::Domain::getMetric();
-            bool maximize = metric[0] == '+';
-            metric = metric.substr(1);
+            //std::string metric = PPDDLInterface::Domain::getMetric();
+            //bool maximize = metric[0] == '+';
+            //metric = metric.substr(1);
             double cost = _alpha * a.getCost() - _beta*log(el->getWeight(i));
             a.setCost(cost);
             //a.setCost(round(cost*100));
 
             al.addAction(a);
        }
-        return makePtr(al);
+       return makePtr(al);
     }
     else ret.setEffect(*ep);
     return makePtr(ret);

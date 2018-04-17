@@ -70,6 +70,32 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
+    /*////////////////////// TEST SET PROBABILITY
+    auto actions = d.getActions();
+    for (auto it = actions.begin(); it != actions.end(); ++it) {
+        auto eff = it->getEffect();
+        PPDDLInterface::ConjunctiveEffect *cj = dynamic_cast<PPDDLInterface::ConjunctiveEffect*>(&*eff);
+        PPDDLInterface::ProbabilisticEffect *pe = dynamic_cast<PPDDLInterface::ProbabilisticEffect*>(&*eff);
+        if (cj != nullptr) {
+            for (auto cit = 0; cit != cj->size(); ++cit) {
+                auto conjunct = cj->getConjunct(cit);
+                pe = dynamic_cast<PPDDLInterface::ProbabilisticEffect*>(&*conjunct);
+                if (pe != nullptr) {
+                    auto k = 0;
+                    //for (; k < pe->size(); ++k)
+                        pe->setProbability(0.25, k);
+                    cj->changeConjunct(*conjunct, cit);
+                }
+            }
+        }
+        else if (pe != nullptr)
+            pe->setProbability(0.512,1);
+        it->setEffect(*eff);
+        d.setAction(*it);
+    }
+    d.printPPDDL(output_path);
+    ////////////////////////////////////////////////*/
+
     std::cout << "All the provided domains have been processed." << std::endl;
     return 1;
 }

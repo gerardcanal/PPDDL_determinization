@@ -3,7 +3,7 @@
  * Effects.
  *
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-
+#include <cmath>
 
 /* ====================================================================== */
 /* Update */
@@ -548,6 +548,27 @@ namespace ppddl_parser {
         /* Returns the ith outcome's probability. */
         Rational probability(size_t i) const {
             return Rational(weights_[i], weight_sum_);
+        }
+
+        /* Sets the ith outcome's probability, rescaling the other probabilities to add up to 1. */
+        void probability(Rational prob, size_t i) {
+            weight_sum_ -= weights_[i]; // weight_sum is the sum of the rest of elements
+            double new_weight = prob.numerator()*weight_sum_/double(prob.denominator()-prob.numerator());
+            // This comes from the idea that: weight[i]/(weight_sum[!=i]+weight[i]) = numerator/denominator
+
+            const double limit = 100.0;
+            double f = 1.0;
+            if (new_weight < limit) {
+                // Rescale the weights. This is useful when the new weight is less than 0 or decimal, in which case we
+                //   lose the decimals and round, so doing this we get to keep some more decimals and get a more accurate
+                //   number. Do it only if we have small numbers (to avoid the weights to keep growing)
+                f = limit; // factor to rescale the weights.
+                for (int i = 0; i < weights_.size(); ++i) weights_[i] *= f;
+                weight_sum_ *= f; // Rescale the weight_sum
+            }
+
+            weights_[i] = round(f*new_weight);// Set the new (rescaled) weight
+            weight_sum_ += weights_[i]; // Add the new weight to the sum
         }
 
         /* Returns the ith outcome's effect. */

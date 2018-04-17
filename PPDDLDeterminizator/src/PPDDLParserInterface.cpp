@@ -349,8 +349,7 @@ namespace PPDDLInterface {
 /////////////////////////////////////////////////// Effects ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ProbabilisticEffect::ProbabilisticEffect(const p_ProbabilisticEffect *e) : Effect(
-            e) {
+    ProbabilisticEffect::ProbabilisticEffect(const p_ProbabilisticEffect *e) : Effect(e) {
     }
 
     size_t ProbabilisticEffect::size() const {
@@ -361,6 +360,11 @@ namespace PPDDLInterface {
         return constEffect()->probability(i).double_value();
     }
 
+    void ProbabilisticEffect::setProbability(double p, size_t i) {
+        ppddl_parser::Rational prat(p*100000,100000);
+        modificableEffect()->probability(prat, i);
+    }
+
     Effect ProbabilisticEffect::getEffect(size_t i) const {
         Effect ret(&constEffect()->effect(i).clone());
         RCObject::deref(ret.getEffect()); // As the clone increments the reference and the constructor does too
@@ -369,6 +373,11 @@ namespace PPDDLInterface {
 
     const p_ProbabilisticEffect *ProbabilisticEffect::constEffect() const {
         return static_cast<const p_ProbabilisticEffect *>(_eff);
+    }
+
+    p_ProbabilisticEffect *ProbabilisticEffect::modificableEffect() const {
+        return const_cast<p_ProbabilisticEffect *>(constEffect());
+        // We remove const to be able to successfully modify the effect
     }
 
     ConjunctiveEffect::ConjunctiveEffect(const p_ConjunctiveEffect *e) : Effect(e) {

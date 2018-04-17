@@ -73,9 +73,34 @@ namespace PPDDLInterface {
         */
        static bool determinized(const p_Effect &effect);
 
+       /*!
+        * Returns the cost (value of the fluent) of an update effect of type increase or decrease which modifies the fluent
+        * metric
+        * @param metric name of the fluent to returned.
+        * @return The value of the fluent associated with the effect
+        */
        virtual double getCost(const std::string& metric="reward");
+
+       /*!
+        * Sets the value of the fluent with name metric.
+        * @param cost  Value to be set
+        * @param metric  Name of the fluent that will be modified.
+        */
        virtual void setCost(double cost, const string &metric);
+
+       /*!
+       * Returns the cost (value of the fluent) of an update effect of type increase or decrease which modifies the fluent
+       * metric
+       * @param metric name of the fluent to returned.
+       * @return The value of the fluent associated with the effect
+       */
        static double getCost(const p_Effect &effect, const std::string& metric="reward");
+
+       /*!
+       * Sets the value of the fluent with name metric.
+       * @param cost  Value to be set
+       * @param metric  Name of the fluent that will be modified.
+       */
        static void setCost(const p_Effect &effect, double cost, const string &metric);
    protected:
        const p_Effect* _eff; //!< Wrapped effect
@@ -108,7 +133,7 @@ namespace PPDDLInterface {
         ConjunctiveEffect(const PPDDLInterface::ConjunctiveEffect& e);
 
         size_t size() const; //!< Number of conjuncts of the effect
-        std::shared_ptr<Effect> getConjunct(size_t i) const; //!< Returns the conjunct at the position i
+        std::shared_ptr<Effect> getConjunct(size_t i) const; //!< Returns a copy of the conjunct at the position i
 
         /*!
          * Changes the conjunct at position i by the cjct parameter
@@ -137,9 +162,12 @@ namespace PPDDLInterface {
 
         size_t size() const; //!< Returns the number of probabilistic entries of the effect
         double getProbability(size_t i) const; //!< Returns the probability of the ith effect
+        void setProbability(double p, size_t i); //!< Sets the probability p of the ith effect
         Effect getEffect(size_t i) const; //!< Returns the ith effect
     private:
         inline const p_ProbabilisticEffect* constEffect() const; //!< Returns the unwrapped effect (const*)
+        inline p_ProbabilisticEffect* modificableEffect() const; //!< Returns the unwrapped effect (non-const raw pointer, modifiable).
+
     };
     EffectPtr makePtr(const ProbabilisticEffect& e);
 
