@@ -684,8 +684,9 @@ namespace VAL {
         if (flags & E_EXT_PRECS) result += " :existential-preconditions";
         if (flags & E_UNIV_PRECS) result += " :universal-preconditions";
         if (flags & E_COND_EFFS) result += " :conditional-effects";
-        if (flags & E_NFLUENTS) result += " :number-fluents";
-        if (flags & E_OFLUENTS) result += " :object-fluents";
+        /*if (flags & E_NFLUENTS) result += " :number-fluents"; // FIXME changed to just the :fluents requirement for compatibility
+        if (flags & E_OFLUENTS) result += " :object-fluents";*/
+        if (flags & E_NFLUENTS || flags & E_OFLUENTS) result += " :fluents";
         if (flags & E_ACTIONCOSTS) result += " :action-costs";
         if (flags & E_DURATIVE_ACTIONS) result += " :durative-actions";
         if (flags & E_DURATION_INEQUALITIES) result += " :duration-inequalities";
