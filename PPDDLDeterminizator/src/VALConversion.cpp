@@ -366,15 +366,15 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 
     const ppddl_parser::Multiplication* m = dynamic_cast<const ppddl_parser::Multiplication*>(exp);
     if (m != nullptr) {
-        VAL::expression* a1 = toVALExpression(&s->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&s->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&m->operand1(), dom, valwrap);
+        VAL::expression* a2 = toVALExpression(&m->operand2(), dom, valwrap);
         return new VAL::mul_expression(a1, a2);
     }
 
     const ppddl_parser::Division* d = dynamic_cast<const ppddl_parser::Division*>(exp);
     if (d != nullptr) {
-        VAL::expression* a1 = toVALExpression(&s->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&s->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&d->operand1(), dom, valwrap);
+        VAL::expression* a2 = toVALExpression(&d->operand2(), dom, valwrap);
         return new VAL::div_expression(a1, a2);
     }
     throw std::runtime_error("Error: [toVALExpression] At least one condition should have been satisfied! Unrecognized Expression type.");
