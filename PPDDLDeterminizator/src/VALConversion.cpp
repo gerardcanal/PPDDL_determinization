@@ -459,9 +459,10 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
             var_decl[ppddl_parser::Term(*it)] = new_vname; // Here I set the name to the term to use it accordingly
 
             // Define the type and set object
-            vs->type = new VAL::pddl_type(t_name);
+            vs->type = valwrap->pddl_type_tab.find(t_name)->second;
+            //vs->type = new VAL::pddl_type(t_name);
             sl->push_back(vs);
-            st->insert(std::make_pair(t_name, vs));
+            st->insert(std::make_pair(vs->getName(), vs));
         }
 
         VAL::forall_effect* fae = new VAL::forall_effect(

@@ -238,7 +238,8 @@ namespace VAL {
         showType = true;
         for(var_symbol_list::const_iterator i = p->getVars()->begin();i != p->getVars()->end();++i)
         {
-            o << **i << " ";
+            o << **i;
+            if (i != (--p->getVars()->end())) o << " "; // If not last iteration add a space
         };
         showType = false;
         o << ") " << *(p->getGoal()) << ")";
@@ -350,6 +351,33 @@ namespace VAL {
 
     void PDDLPrinter::write_forall_effect(ostream & o,const forall_effect * p)
     {
+        o << "(forall (";
+        bool tt = (p->getVars()->size() > 1);
+        if(tt) o << "(and ";
+        for(var_symbol_table::const_iterator i = p->getVars()->begin();i != p->getVars()->end(); ++i)
+        {
+            if(i->second->type)
+            {
+                o << "?" << (i->first) << " - " << i->second->type->getName();
+                if (i != (--p->getVars()->end())) o << " "; // If not last iteration add a space
+            }
+            else
+            {
+                o << "(or ";
+                for(pddl_type_list::const_iterator j = i->second->either_types->begin();j != i->second->either_types->end();++j)
+                {
+                    o << " (?" << i->first << " - ";
+                    (*j)->type->symbol::write(o);
+                    o << ")";
+                };
+                o << ") ";
+            };
+        };
+        o << ") "; // Close the type
+        if(tt) o << ") ";
+        o << *(p->getEffects()) << ")";
+        return; // FIXME, I'm not sure why the following lines where used
+
         o << "(forall (";
         for(var_symbol_table::const_iterator i = p->getVars()->begin();i != p->getVars()->end();++i)
         {
