@@ -222,33 +222,33 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
 
     const ppddl_parser::LessThan* cmplt = dynamic_cast<const ppddl_parser::LessThan*>(precondition);
     if (cmplt != nullptr) {
-        return new VAL::comparison(VAL::comparison_op::E_LESS, toVALExpression(&cmplt->expr1(), dom, valwrap),
-                                   toVALExpression(&cmplt->expr2(), dom, valwrap));
+        return new VAL::comparison(VAL::comparison_op::E_LESS, toVALExpression(&cmplt->expr1(), dom, var_decl, valwrap),
+                                   toVALExpression(&cmplt->expr2(), dom, var_decl, valwrap));
     }
 
     const ppddl_parser::LessThanOrEqualTo* cmplte = dynamic_cast<const ppddl_parser::LessThanOrEqualTo*>(precondition);
     if (cmplte != nullptr) {
-        return new VAL::comparison(VAL::comparison_op::E_LESSEQ, toVALExpression(&cmplte->expr1(), dom, valwrap),
-                                   toVALExpression(&cmplte->expr2(), dom, valwrap));
+        return new VAL::comparison(VAL::comparison_op::E_LESSEQ, toVALExpression(&cmplte->expr1(), dom, var_decl, valwrap),
+                                   toVALExpression(&cmplte->expr2(), dom, var_decl, valwrap));
     }
 
     const ppddl_parser::EqualTo* cmpeq = dynamic_cast<const ppddl_parser::EqualTo*>(precondition);
     if (cmpeq != nullptr) {
-        return new VAL::comparison(VAL::comparison_op::E_EQUALS, toVALExpression(&cmpeq->expr1(), dom, valwrap),
-                                   toVALExpression(&cmpeq->expr2(), dom, valwrap));
+        return new VAL::comparison(VAL::comparison_op::E_EQUALS, toVALExpression(&cmpeq->expr1(), dom, var_decl, valwrap),
+                                   toVALExpression(&cmpeq->expr2(), dom, var_decl, valwrap));
     }
 
     const ppddl_parser::GreaterThanOrEqualTo* cmpgte = dynamic_cast<const ppddl_parser::GreaterThanOrEqualTo*>(precondition);
     if (cmpgte != nullptr) {
         return new VAL::comparison(VAL::comparison_op::E_GREATEQ,
-                                   toVALExpression(&cmpgte->expr1(), dom, valwrap),
-                                   toVALExpression(&cmpgte->expr2(), dom, valwrap));
+                                   toVALExpression(&cmpgte->expr1(), dom, var_decl, valwrap),
+                                   toVALExpression(&cmpgte->expr2(), dom, var_decl, valwrap));
     }
 
     const ppddl_parser::GreaterThan* cmpgt = dynamic_cast<const ppddl_parser::GreaterThan*>(precondition);
     if (cmpgt != nullptr) {
-        return new VAL::comparison(VAL::comparison_op::E_GREATER, toVALExpression(&cmpgt->expr1(), dom, valwrap),
-                                   toVALExpression(&cmpgt->expr2(), dom, valwrap));
+        return new VAL::comparison(VAL::comparison_op::E_GREATER, toVALExpression(&cmpgt->expr1(), dom, var_decl, valwrap),
+                                   toVALExpression(&cmpgt->expr2(), dom, var_decl, valwrap));
     }
 
     const ppddl_parser::Negation* n = dynamic_cast<const ppddl_parser::Negation*>(precondition);
@@ -330,6 +330,7 @@ VAL::goal* VALConversion::toVALCondition(const ppddl_parser::StateFormula *preco
 }
 
 VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
+                                                 std::map<ppddl_parser::Term, std::string> &var_decl,
                                                  std::shared_ptr<VALWrapper> valwrap) {
     const ppddl_parser::Value* v = dynamic_cast<const ppddl_parser::Value*>(exp);
     if (v != nullptr) {
@@ -338,13 +339,15 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 
     const ppddl_parser::Fluent* f = dynamic_cast<const ppddl_parser::Fluent*>(exp);
     if (f != nullptr) {
-        // ppddl_parser::TermList tll = f->terms(); // FIXME  Not sure what are these or if I should use them
-
         VAL::func_symbol* fs = valwrap->func_tab.find(dom->functions().name(f->function()))->second;
         VAL::parameter_symbol_list* sl = new VAL::parameter_symbol_list();
-        ppddl_parser::TypeList tl = dom->functions().parameters(f->function());
+        ppddl_parser::TermList tl = f->terms();
         for (auto it = tl.begin(); it != tl.end(); ++it ) {
-            sl->push_back(new VAL::parameter_symbol(dom->types().typestring(*it)));
+            if (it->object()) {
+                std::string termname = dom->terms().get_name(*it);
+                sl->push_back(valwrap->const_tab[termname]);
+            }
+            else sl->push_back(new VAL::var_symbol(var_decl[*it]));
         }
 
         return new VAL::func_term(fs, sl);
@@ -352,29 +355,29 @@ VAL::expression * VALConversion::toVALExpression(const ppddl_parser::Expression 
 
     const ppddl_parser::Addition* c = dynamic_cast<const ppddl_parser::Addition*>(exp);
     if (c != nullptr) {
-        VAL::expression* a1 = toVALExpression(&c->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&c->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&c->operand1(), dom, var_decl, valwrap);
+        VAL::expression* a2 = toVALExpression(&c->operand2(), dom, var_decl, valwrap);
         return new VAL::plus_expression(a1, a2);
     }
 
     const ppddl_parser::Subtraction* s = dynamic_cast<const ppddl_parser::Subtraction*>(exp);
     if (s != nullptr) {
-        VAL::expression* a1 = toVALExpression(&s->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&s->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&s->operand1(), dom, var_decl, valwrap);
+        VAL::expression* a2 = toVALExpression(&s->operand2(), dom, var_decl, valwrap);
         return new VAL::minus_expression(a1, a2);
     }
 
     const ppddl_parser::Multiplication* m = dynamic_cast<const ppddl_parser::Multiplication*>(exp);
     if (m != nullptr) {
-        VAL::expression* a1 = toVALExpression(&m->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&m->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&m->operand1(), dom, var_decl, valwrap);
+        VAL::expression* a2 = toVALExpression(&m->operand2(), dom, var_decl, valwrap);
         return new VAL::mul_expression(a1, a2);
     }
 
     const ppddl_parser::Division* d = dynamic_cast<const ppddl_parser::Division*>(exp);
     if (d != nullptr) {
-        VAL::expression* a1 = toVALExpression(&d->operand1(), dom, valwrap);
-        VAL::expression* a2 = toVALExpression(&d->operand2(), dom, valwrap);
+        VAL::expression* a1 = toVALExpression(&d->operand1(), dom, var_decl, valwrap);
+        VAL::expression* a2 = toVALExpression(&d->operand2(), dom, var_decl, valwrap);
         return new VAL::div_expression(a1, a2);
     }
     throw std::runtime_error("Error: [toVALExpression] At least one condition should have been satisfied! Unrecognized Expression type.");
@@ -417,7 +420,7 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
 
     const ppddl_parser::UpdateEffect* ue = dynamic_cast<const ppddl_parser::UpdateEffect*>(e); // ie decrease / increase
     if (ue != nullptr) {
-        VAL::assignment* ass = toVALUpdate(&ue->update(), dom, valwrap);
+        VAL::assignment* ass = toVALUpdate(&ue->update(), dom, var_decl, valwrap);
         ef->assign_effects.push_back(ass);
         return ef;
     }
@@ -479,10 +482,11 @@ VAL::effect_lists *VALConversion::toVALEffects(const ppddl_parser::Effect *e, co
 }
 
 VAL::assignment *VALConversion::toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom,
+                                            std::map<ppddl_parser::Term, std::string> &var_decl,
                                             std::shared_ptr<VALWrapper> valwrap) {
 
-    VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom, valwrap)); // As we pass a Fluent, it will return the correct func_term
-    VAL::expression* exp = toVALExpression(&up->expression(), dom, valwrap);
+    VAL::func_term* ft = dynamic_cast<VAL::func_term*>(toVALExpression(&up->fluent(), dom, var_decl, valwrap)); // As we pass a Fluent, it will return the correct func_term
+    VAL::expression* exp = toVALExpression(&up->expression(), dom, var_decl, valwrap);
     VAL::assign_op op;
 
     if (dynamic_cast<const ppddl_parser::Assign*>(up) != nullptr) {
@@ -645,7 +649,8 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
         }
 
     }
-    problem->metric = new VAL::metric_spec(op, toVALExpression(metric, &p->domain(), ret)); // metric_spec*
+    std::map<ppddl_parser::Term, std::string> var_decl; // Not used in he problem as there are n variables, leave it empty
+    problem->metric = new VAL::metric_spec(op, toVALExpression(metric, &p->domain(), var_decl, ret)); // metric_spec*
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // LENGTH

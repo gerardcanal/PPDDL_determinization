@@ -104,6 +104,7 @@ private:
                                      std::map<ppddl_parser::Term, std::string> &var_decl,
                                      std::shared_ptr<VALWrapper> valwrap);
     static VAL::expression *toVALExpression(const ppddl_parser::Expression *exp, const ppddl_parser::Domain *dom,
+                                            std::map<ppddl_parser::Term, std::string> &var_decl,
                                             std::shared_ptr<VALWrapper> valwrap);
     static VAL::effect_lists *toVALEffects(const ppddl_parser::Effect *e, const ppddl_parser::Domain *dom,
                                            std::map<std::string, int> &var_name_ctr,
@@ -111,7 +112,8 @@ private:
                                            std::shared_ptr<VALWrapper> valwrap);
 
     static VAL::assignment *
-    toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom, std::shared_ptr<VALWrapper> valwrap);
+    toVALUpdate(const ppddl_parser::Update *up, const ppddl_parser::Domain *dom,
+                std::map<ppddl_parser::Term, std::string> &var_decl,std::shared_ptr<VALWrapper> valwrap);
 
     static VAL::pddl_req_flag toVALRequirements(const ppddl_parser::Requirements *req);
 };
