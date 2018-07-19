@@ -578,7 +578,6 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
     problem->initial_state = new VAL::effect_lists; /*effect_lists*/
     for (auto it = p->init_atoms().begin(); it != p->init_atoms().end();++it) {
         const ppddl_parser::Atom *a = *it;
-        VAL::pred_symbol *h = new VAL::pred_symbol(ppddl_parser::PredicateTable::name(a->predicate()));
         VAL::parameter_symbol_list *sl = new VAL::parameter_symbol_list;
         ppddl_parser::TermList tl = a->terms();
         for (auto tlit = tl.begin(); tlit != tl.end(); ++tlit) {
@@ -589,8 +588,15 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
                 ret->var_list.push_back(varsym);
             }
         }
+
+        std::string predicate_name = ppddl_parser::PredicateTable::name(a->predicate());
+        VAL::pred_symbol *h;
+        if (ret->pred_tab.find(predicate_name) != ret->pred_tab.end()) h = ret->pred_tab[predicate_name];
+        else {
+            h = new VAL::pred_symbol(predicate_name);
+            ret->pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
+        }
         problem->initial_state->add_effects.push_back(new VAL::simple_effect(new VAL::proposition(h, sl)));
-        ret->pred_tab.insert(std::make_pair(ppddl_parser::PredicateTable::name(a->predicate()), h));
     }
 
     // Add the rest
