@@ -172,4 +172,8 @@ namespace ppddl_parser {
             o << " - " << TermTable::type(obj);
         }
     }
+
+    const std::string TermTable::get_name(const Term &o) const {
+        return names_[o.index_];
+    }
 }

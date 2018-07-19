@@ -203,9 +203,11 @@ namespace ppddl_parser {
            type. */
         const ObjectList &compatible_objects(const Type &type) const;
 
-        /* Returns the names a list with the names of the types */
+        /* Returns the a list with the names of the types */
         const std::vector<std::string> names() const { return names_; }
 
+        /* Returns the name of the specified object */
+        const std::string get_name(const Term &o) const;
 
         /* Writes the PPDDL to the output stream */
         void writePPDDL(std::ostream& o) const;

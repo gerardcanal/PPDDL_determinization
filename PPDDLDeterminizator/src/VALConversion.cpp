@@ -602,6 +602,26 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
         delete init_eff; // As we appended them to the problem, they were copied and the pointer is lost
     }
 
+    // Add the initial fluent values
+    // ValueMap ppddl_parser::Problem::init_values() // It is not being used!
+    for (auto ivit = p->init_values().begin(); ivit != p->init_values().end(); ++ivit) {
+        std::string fluent_name = p->domain().functions().name(ivit->first->function());
+        VAL::parameter_symbol_list *param_list = new VAL::parameter_symbol_list();
+        for (auto tit = ivit->first->terms().begin(); tit != ivit->first->terms().end(); ++tit) {
+            if (!tit->object()) std::cerr << "Error! Expected object term in fluent " << fluent_name << std::endl;
+            else {
+                std::string termname = p->domain().terms().get_name(*tit);
+                param_list->push_back(ret->const_tab[termname]);
+            }
+        }
+        VAL::assignment* initial_val = new VAL::assignment(new VAL::func_term(ret->func_tab[fluent_name], param_list),
+                                                           VAL::E_ASSIGN,
+                                                           new VAL::float_expression(ivit->second.double_value()));
+        problem->initial_state->assign_effects.push_back(initial_val);
+    }
+
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // GOAL
     problem->the_goal = toVALCondition(&p->goal(), &p->domain(), var_name_ctr, const_obj_decl, ret); // goal*
@@ -631,7 +651,6 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
     // LENGTH
     // problem->length; //length_spec* // Not available in ppddl_parser
 
-    // ValueMap ppddl_parser::Problem::init_values() // It is not being used!
     // const Update *goal_reward_;
     return ret;
 }
