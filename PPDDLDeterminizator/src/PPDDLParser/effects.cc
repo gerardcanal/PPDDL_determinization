@@ -837,6 +837,7 @@ namespace ppddl_parser {
 
     const Effect &QuantifiedEffect::clone() const {
         QuantifiedEffect *cpy = new QuantifiedEffect(parameters_, effect_->clone());
+        destructive_deref(cpy->effect_); // As both clone and the constructor QuantifiedEffect increments ref!
         ref(cpy);
         return *cpy;
     }
