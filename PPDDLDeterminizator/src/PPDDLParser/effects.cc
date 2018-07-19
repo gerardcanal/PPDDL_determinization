@@ -1,6 +1,6 @@
 /*
  * Copyright 2003-2005 Carnegie Mellon University and Rutgers University
- * Copyright 2007 Håkan Younes
+ * Copyright 2007 Hï¿½kan Younes
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -857,6 +857,7 @@ namespace ppddl_parser {
                 Type t = TermTable::type(parameters()[i]);
                 arguments[i] = &terms.compatible_objects(t);
                 if (arguments[i]->empty()) {
+                    for (int i = 0; i < n; i++) delete arguments[i]; // Fix memory leak! Objectlists were never deleted
                     return EMPTY;
                 }
                 next_arg.push_back(arguments[i]->begin());
@@ -900,6 +901,7 @@ namespace ppddl_parser {
                 destructive_deref(conjuncts.top());
                 conjuncts.pop();
             }
+            for (int i = 0; i < n; i++) delete arguments[i]; // Fix memory leak! Objectlists were never deleted
             return *conj;
         }
     }
