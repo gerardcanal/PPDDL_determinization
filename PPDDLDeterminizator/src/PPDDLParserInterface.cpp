@@ -530,6 +530,34 @@ namespace PPDDLInterface {
         return 0;
     }
 
+    const p_Update * Effect::getCostFunction(const p_Effect &effect, const std::string &metric) {
+        const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect*>(&effect);
+        if (pe != nullptr) { // TODO return list of effects?
+            for (size_t i = 0; i != pe->size(); ++i) {
+                const p_Update * ue = getCostFunction(pe->effect(i), metric);
+                if (ue != nullptr) return ue;
+            }
+        }
+
+        const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect *>(&effect);
+        if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+
+            for (auto it = ce->conjuncts().begin(); it != ce->conjuncts().end(); ++it) {
+                const p_Update * ue = getCostFunction(**it, metric);
+                if (ue != nullptr) return ue;
+            }
+        }
+
+        const ppddl_parser::UpdateEffect *ue = dynamic_cast<const ppddl_parser::UpdateEffect *>(&effect);
+        if (ue != nullptr) {
+            std::string metric_name = ppddl_parser::FunctionTable::name(ue->update().fluent().function());
+            if (metric == metric_name) {
+                return &ue->update();
+            }
+        }
+        return nullptr;
+    }
+
 
     void Effect::setCost(const p_Effect &effect, double cost, const string &metric) {
         const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect*>(&effect);
@@ -578,6 +606,59 @@ namespace PPDDLInterface {
                 RCObject::ref(&new_update->expression()); // As the delete will destroy one reference
                 RCObject::ref(&new_update->fluent()); // As the delete will destroy one reference
                 delete new_update; // As its value has been copied, free the pointer
+            }
+        }
+    }
+
+
+    void Effect::setCostFunction(const p_Effect &effect, const p_Update * costfunc, const string &metric) {
+        const p_ProbabilisticEffect *pe = dynamic_cast<const p_ProbabilisticEffect*>(&effect);
+        if (pe != nullptr) {
+            for (size_t i = 0; i != pe->size(); ++i) {
+                setCostFunction(pe->effect(i), costfunc, metric);
+            }
+        }
+
+        const p_ConjunctiveEffect *ce = dynamic_cast<const p_ConjunctiveEffect *>(&effect);
+        if (ce != nullptr) { // Anidate ifs to avoid unneeded dynamic casts.
+
+            for (auto it = ce->conjuncts().begin(); it != ce->conjuncts().end(); ++it) {
+                setCostFunction(**it, costfunc, metric);
+            }
+        }
+
+        const ppddl_parser::UpdateEffect *ue = dynamic_cast<const ppddl_parser::UpdateEffect *>(&effect);
+        if (ue != nullptr) {
+            // TODO
+            std::string metric_name = ppddl_parser::FunctionTable::name(ue->update().fluent().function());
+            if (metric == metric_name) {
+                /*// Rational value
+                int multiplier = 1000000;
+                //ppddl_parser::Value* new_cost_val = new ppddl_parser::Value(ppddl_parser::Rational(cost * multiplier, multiplier));
+
+                ppddl_parser::Update* new_update; // Updated update
+                const ppddl_parser::Increase* inc = dynamic_cast<const ppddl_parser::Increase*>(&ue->update());
+                const ppddl_parser::Decrease* dec = dynamic_cast<const ppddl_parser::Decrease*>(&ue->update());
+                if (inc != nullptr) {
+                    new_update = new ppddl_parser::Increase(ue->update().fluent(), *new_cost_val);
+                    RCObject::destructive_deref(&ue->update().expression());
+                }
+                else if (dec != nullptr) {
+                    new_update = new ppddl_parser::Decrease(ue->update().fluent(), *new_cost_val);
+                    RCObject::destructive_deref(&ue->update().expression());
+                }
+                else throw std::runtime_error("Error: Only updates of type increase/decrease value can be modified.");
+
+                // Modify the update. To do so, I get the editable pointer to the update and override it.
+                // references are updated accordingly, deleting those that will not be used anymore and updating the new
+                // ones.
+                ppddl_parser::Update* edit_upd = const_cast<ppddl_parser::Update*>(&ue->update());
+                RCObject::destructive_deref(&edit_upd->fluent());
+                //RCObject::destructive_deref(&edit_upd->expression()); // This one is not needed.
+                *edit_upd = *new_update; // (Safe) Const cast again to be able to modify it...
+                RCObject::ref(&new_update->expression()); // As the delete will destroy one reference
+                RCObject::ref(&new_update->fluent()); // As the delete will destroy one reference
+                delete new_update; // As its value has been copied, free the pointer*/
             }
         }
     }

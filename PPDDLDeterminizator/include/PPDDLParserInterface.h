@@ -26,6 +26,8 @@ namespace PPDDLInterface {
     typedef ppddl_parser::Effect p_Effect;
     typedef ppddl_parser::ConjunctiveEffect p_ConjunctiveEffect;
     typedef ppddl_parser::ProbabilisticEffect p_ProbabilisticEffect;
+    typedef ppddl_parser::UpdateEffect p_UpdateEffect;
+    typedef ppddl_parser::Update p_Update;
     typedef ppddl_parser::ActionSchema p_actionSchema;
     typedef ppddl_parser::RCObject RCObject;
     typedef ppddl_parser::EffectList p_EffectList;
@@ -89,12 +91,27 @@ namespace PPDDLInterface {
        virtual void setCost(double cost, const string &metric);
 
        /*!
+        * Sets the value of the fluent with name metric.
+        * @param cost  Value to be set
+        * @param metric  Name of the fluent that will be modified.
+        */
+       //virtual void setCostFunction(const p_Update * costfun, const string &metric);
+
+       /*!
        * Returns the cost (value of the fluent) of an update effect of type increase or decrease which modifies the fluent
        * metric
        * @param metric name of the fluent to returned.
        * @return The value of the fluent associated with the effect
        */
-       static double getCost(const p_Effect &effect, const std::string& metric="reward");
+       static double getCost(const p_Effect &effect, const std::string& metric);
+
+       /*!
+        * Returns the cost (value of the fluent) of an update effect of type increase or decrease which modifies the fluent
+        * metric
+        * @param metric name of the fluent to returned.
+        * @return The value of the fluent associated with the effect
+        */
+       static const p_Update* getCostFunction(const p_Effect &effect, const std::string& metric);
 
        /*!
        * Sets the value of the fluent with name metric.
@@ -102,6 +119,13 @@ namespace PPDDLInterface {
        * @param metric  Name of the fluent that will be modified.
        */
        static void setCost(const p_Effect &effect, double cost, const string &metric);
+
+       /*!
+       * Sets the value of the fluent with name metric.
+       * @param cost  Value to be set
+       * @param metric  Name of the fluent that will be modified.
+       */
+       static void setCostFunction(const p_Effect &effect, const p_Update* costfun, const string &metric);
    protected:
        const p_Effect* _eff; //!< Wrapped effect
        bool _delete_ptr; //!< if true, the pointer will be deleted.
@@ -189,7 +213,7 @@ namespace PPDDLInterface {
         /*!
          * Adds an effect
          * @param e Effect to be added
-         * @param w Weight of the effect
+         * @param w Weight of the effect (probability)
          */
         void addEffect(const Effect& e, double w=1.0);
 
@@ -238,7 +262,7 @@ namespace PPDDLInterface {
         std::string getName() const; //!< Returns the name of the action
         Action & operator= (const Action & other);
 
-        double getCost(const std::string& metric="reward");
+        double getCost(const std::string& metric);
         void setCost(double cost, const string &metric="reward");
     protected:
         p_actionSchema* _as; // Wrapped actionSchema
