@@ -47,6 +47,8 @@ namespace ppddl_parser {
         /* Returns the expression of this update. */
         const Expression &expression() const { return *expr_; }
 
+        void setExpression(const Expression *expr_);
+
         /* Changes the given state according to this update. */
         virtual void affect(ValueMap &values) const = 0;
 

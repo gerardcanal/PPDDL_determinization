@@ -91,6 +91,21 @@ namespace PPDDLInterface {
        virtual void setCost(double cost, const string &metric);
 
        /*!
+        * Returns the cost (value of the fluent) of an update effect of type increase or decrease which modifies the fluent
+        * metric
+        * @param metric name of the fluent to returned.
+        * @return The value of the fluent associated with the effect
+        */
+       virtual p_Update* getCostFunction(const std::string& metric="reward");
+
+       /*!
+        * Sets the value of the fluent with name metric.
+        * @param cost  Value to be set
+        * @param metric  Name of the fluent that will be modified.
+        */
+       virtual void setCostFunction(const p_Update* up, const string &metric);
+
+       /*!
         * Sets the value of the fluent with name metric.
         * @param cost  Value to be set
         * @param metric  Name of the fluent that will be modified.
@@ -111,7 +126,7 @@ namespace PPDDLInterface {
         * @param metric name of the fluent to returned.
         * @return The value of the fluent associated with the effect
         */
-       static const p_Update* getCostFunction(const p_Effect &effect, const std::string& metric);
+       static p_Update* getCostFunction(const p_Effect &effect, const std::string& metric);
 
        /*!
        * Sets the value of the fluent with name metric.
@@ -263,7 +278,10 @@ namespace PPDDLInterface {
         Action & operator= (const Action & other);
 
         double getCost(const std::string& metric);
-        void setCost(double cost, const string &metric="reward");
+        void setCost(double cost, const string &metric);
+
+        p_Update* getCostFunction(const std::string& metric);
+        void setCostFunction(const p_Update* up, const string &metric);
     protected:
         p_actionSchema* _as; // Wrapped actionSchema
         bool _delete_actionschema; //!< True if the pointer needs to be deleted, false otherwise

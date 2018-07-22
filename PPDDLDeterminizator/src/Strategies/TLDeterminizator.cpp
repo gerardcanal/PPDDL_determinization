@@ -3,6 +3,7 @@
 //
 
 #include "Strategies/TLDeterminizator.h"
+#include <exception>
 
 PPDDLInterface::EffectPtr
 TLDeterminizator::determinize(const PPDDLInterface::ConjunctiveEffect &ce) {
@@ -45,8 +46,23 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             std::string metric = PPDDLInterface::Domain::getMetric();
             bool maximize = metric[0] == '+';
             metric = metric.substr(1);
-            double cost = _alpha * a.getCost(metric) - _beta*log(el->getWeight(i));
-            a.setCost(cost);
+
+            try {
+                double cost = _alpha * a.getCost(metric) - _beta * log(el->getWeight(i));
+                a.setCost(cost, metric);
+            }
+            catch (std::exception& e) {
+                // TODO move this to interface -> create update interface!
+                PPDDLInterface::p_Update *u = a.getCostFunction(metric);
+
+                const int multiplier = 1000000;
+                ppddl_parser::Value* alpha = new ppddl_parser::Value(ppddl_parser::Rational(_alpha*multiplier, multiplier));
+                const ppddl_parser::Expression* timesalpha = &ppddl_parser::Multiplication::make(*alpha, u->expression());
+                ppddl_parser::Value *betaprob = new ppddl_parser::Value(ppddl_parser::Rational(-_beta*log(el->getWeight(i))*multiplier, multiplier));
+                const ppddl_parser::Expression* newcost = &ppddl_parser::Addition::make(*timesalpha, *betaprob);
+                u->setExpression(newcost);
+                a.setCostFunction(u, metric);
+            }
             //a.setCost(round(cost*100));
 
             al.addAction(a);

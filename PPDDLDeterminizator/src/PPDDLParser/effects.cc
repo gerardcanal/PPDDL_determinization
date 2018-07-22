@@ -46,6 +46,12 @@ namespace ppddl_parser {
         return os;
     }
 
+    void Update::setExpression(const Expression *expr) {
+        RCObject::destructive_deref(expr_);
+        RCObject::ref(expr);
+        expr_ = expr;
+    }
+
 
 
 /* ====================================================================== */
