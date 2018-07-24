@@ -395,6 +395,8 @@ namespace PPDDLInterface {
 
             std::string getName();
 
+            std::shared_ptr<p_Domain> _getWrappedDomain() { return _dom; }
+
     private:
             std::shared_ptr<p_Domain> _dom; //!> Pointer to the domain element.
             bool determinized(); //!> Returns true it the domain is determinized

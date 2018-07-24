@@ -400,7 +400,7 @@ namespace PPDDLInterface {
         return constEffect()->conjuncts().size();
     }
 
-    std::shared_ptr<Effect> ConjunctiveEffect::getConjunct(size_t i) const {
+    EffectPtr ConjunctiveEffect::getConjunct(size_t i) const {
         const p_Effect *cjt = &constEffect()->conjuncts()[i]->clone();
         RCObject::deref(cjt); // Decrement the reference as the constructor for Effect will increase it
 
