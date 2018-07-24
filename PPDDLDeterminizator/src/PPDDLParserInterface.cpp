@@ -658,6 +658,14 @@ namespace PPDDLInterface {
         }
     }
 
+    bool Effect::probabilitic() {
+        return dynamic_cast<const p_ProbabilisticEffect*>(_eff) != nullptr;
+    }
+
+    bool Effect::conjunctive() {
+        return dynamic_cast<const p_ConjunctiveEffect*>(_eff) != nullptr;
+    }
+
     EffectList::EffectList() : Effect(nullptr) {
     }
 

@@ -47,11 +47,11 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             bool maximize = metric[0] == '+';
             metric = metric.substr(1);
 
-            try {
+            try { // It fails if it is not a simple increase by value
                 double cost = _alpha * a.getCost(metric) - _beta * log(el->getWeight(i));
                 a.setCost(cost, metric);
             }
-            catch (std::exception& e) {
+            catch (std::exception& e) { // Weight a cist function
                 PPDDLInterface::p_Update *u = a.getCostFunction(metric);
                 const int multiplier = 1000000;
                 ppddl_parser::Value* alpha = new ppddl_parser::Value(ppddl_parser::Rational(_alpha*multiplier, multiplier));

@@ -141,6 +141,9 @@ namespace PPDDLInterface {
        * @param metric  Name of the fluent that will be modified.
        */
        static void setCostFunction(const p_Effect &effect, const p_Update* costfun, const string &metric);
+
+       bool probabilitic();
+       bool conjunctive();
    protected:
        const p_Effect* _eff; //!< Wrapped effect
        bool _delete_ptr; //!< if true, the pointer will be deleted.
@@ -285,7 +288,7 @@ namespace PPDDLInterface {
     protected:
         p_actionSchema* _as; // Wrapped actionSchema
         bool _delete_actionschema; //!< True if the pointer needs to be deleted, false otherwise
-        std::shared_ptr<PPDDLInterface::Effect> _action_effect; //!< Effect of the _as actionSchema.
+        PPDDLInterface::EffectPtr _action_effect; //!< Effect of the _as actionSchema.
                                                 // Stored as a pointer to the wrapper to ease the getEffect action.
         void setRawEffectPtr(const p_Effect *e);
         void releasePtr(); //!< Releases the pointer - sets the delete to false.

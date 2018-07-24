@@ -37,7 +37,7 @@ PPDDLInterface::ActionPtr PPDDLDeterminizator::determinize(const PPDDLInterface:
         for (size_t i = 0 ; i < el->size(); ++i) {
             // create new action
             PPDDLInterface::Action a(as, "_d"+std::to_string(i+1));
-            a.setEffect(*el->getEffect(i)); // TODO use weight!
+            a.setEffect(*el->getEffect(i));
             al.addAction(a);
         }
         return makePtr(al);
