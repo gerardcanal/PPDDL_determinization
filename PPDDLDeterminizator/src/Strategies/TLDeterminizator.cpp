@@ -44,8 +44,15 @@ PPDDLInterface::ActionPtr TLDeterminizator::determinize(const PPDDLInterface::Ac
             a.setEffect(*el->getEffect(i)); // TODO use weight!
 
             std::string metric = PPDDLInterface::Domain::getMetric();
-            bool maximize = metric[0] == '+';
-            metric = metric.substr(1);
+            bool maximize;
+            if (metric == "") {
+                maximize = false;
+                metric = "total-cost"; // Default metric
+            }
+            else {
+                maximize = metric[0] == '+';
+                metric = metric.substr(1);
+            }
 
             try { // It fails if it is not a simple increase by value
                 double cost = _alpha * a.getCost(metric) - _beta * log(el->getWeight(i));
