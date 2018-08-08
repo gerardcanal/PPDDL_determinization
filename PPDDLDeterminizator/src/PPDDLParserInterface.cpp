@@ -143,7 +143,7 @@ namespace PPDDLInterface {
         } else throw std::runtime_error("ERROR! Non determinized domain can't be converted to (non-stochastic) PDDL!");
     }
 
-    void Domain::printPDDL(const string &output_folder_path, string domain_name) {
+    void Domain::printPDDL(const string &output_folder_path, string domain_name, string problem_name) {
         //VAL::domain val_d = *getVALDomain().get();
         std::shared_ptr<VALDomain> wrapper = getVALDomain();
         const std::shared_ptr<VAL::domain> val_d = wrapper->get();
@@ -155,14 +155,22 @@ namespace PPDDLInterface {
         o << *val_d;
         o.close();
 
+        int i = 0;
+        string pre_path_problem = output_folder_path + "/";
         for (auto prit = ppddl_parser::Problem::begin(); prit != ppddl_parser::Problem::end(); ++prit) {
             std::shared_ptr<VALProblem> p = VALConversion::toVALProblem(prit->second, wrapper);
             const std::shared_ptr<VAL::problem> val_p = p->get();
             val_p->setWriteController(auto_ptr<VAL::WriteController>(val_d->recoverWriteController()));
-            o = std::ofstream(output_folder_path + "/" + val_d->name + "_" + val_p->name + "_problem.pddl");
+
+            string current_problem_name = pre_path_problem + problem_name + (i > 0? std::to_string(i): "")+ ".pddl";
+            if (problem_name.size() == 0)
+                current_problem_name = pre_path_problem + val_d->name + "_" + val_p->name + "_problem.pddl";
+            o = std::ofstream(current_problem_name);
+
             o << "; Do not edit! This file was generated automatically." << std::endl;
             o << *val_p;
             o.close();
+            ++i;
         }
     }
 

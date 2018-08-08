@@ -375,7 +375,7 @@ namespace PPDDLInterface {
              * Prints the domain in PDDL. It must be determinized (i.e. can't contain proabilistic actions) before calling it.
              * @param output_folder_path Folder in which the domain and problem files will be written.
              */
-            void printPDDL(const string &output_folder_path, string domain_name="");
+            void printPDDL(const string &output_folder_path, string domain_name="", string problem_name="");
 
 
             /*!
