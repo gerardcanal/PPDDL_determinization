@@ -22,6 +22,10 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
         d->types->push_back(t);
         _domain_wrapper->pddl_type_tab.insert(std::make_pair(*it, t));
     }
+    // Add object type FIXME should be always included?
+    VAL::pddl_type* t = new VAL::pddl_type("object");
+    d->types->push_back(t);
+    _domain_wrapper->pddl_type_tab.insert(std::make_pair("object", t));
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // CONSTANTS -- aka terms()
@@ -102,13 +106,20 @@ std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain
         for (auto fparamit = fparam.begin(); fparamit != fparam.end(); ++fparamit) {
             // get type name if type is not object (type 0)
             std::string t_name;
-            if (*fparamit != ppddl_parser::TypeTable::OBJECT) t_name = dom->types().typestring(*fparamit);
-            else t_name.push_back(char('x'+nvars++%3)); // Objects var will be x y z x1 y1 z1 x2 y2 z2...
+            std::string vname;
+            if (*fparamit != ppddl_parser::TypeTable::OBJECT) {
+                t_name = dom->types().typestring(*fparamit);
+                vname = t_name.substr(0,1);
+            }
+            else {
+                t_name = "object";
+                vname = char('x'+nvars++%3); // Objects var will be x y z x1 y1 z1 x2 y2 z2...
+            }
 
             // Define variable name: first letter of the type. If more than one object of the same type, it will be i.e. f, f1, f2, f3...
-            std::string vname = t_name.substr(0,1);
             if (var_names.find(vname) == var_names.end()) var_names[vname] = 0;
             VAL::var_symbol* vs = new VAL::var_symbol(vname + ((var_names[vname] == 0)? "" : std::to_string(var_names[vname])));
+            vs->type = _domain_wrapper->pddl_type_tab.find(t_name)->second; // Types were already defined
             ++var_names[vname];
 
             sl->push_back(vs);
