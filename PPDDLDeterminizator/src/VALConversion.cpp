@@ -568,7 +568,9 @@ std::shared_ptr<VALProblem> VALConversion::toVALProblem(const ppddl_parser::Prob
             if (_symit != ret->const_tab.end()) sym = _symit->second;
             else sym = new VAL::const_symbol(*oit);
             sym->type =  ret->pddl_type_tab.find(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))))->second; // FIXME? new VAL::pddl_type(ttable.typestring(p->terms().type(ppddl_parser::Term(*obj))));
-            problem->objects->push_back(sym);
+            if (domainwrap->const_tab.find(*oit) == domainwrap->const_tab.end()) { // Don't add domain constants to objects!
+                problem->objects->push_back(sym);
+            }
             ret->const_tab.insert(std::make_pair(*oit, sym));
         }
     }
