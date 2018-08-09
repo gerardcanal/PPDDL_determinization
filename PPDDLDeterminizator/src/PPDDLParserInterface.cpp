@@ -146,7 +146,7 @@ namespace PPDDLInterface {
     void Domain::printPDDL(const string &output_folder_path, string domain_name, string problem_name) {
         // Check pddl extension... Remove it for problem names, add it for domain names
         size_t pos = problem_name.find(".pddl");
-        if (pos != string::npos) problem_name.substr(0, pos);
+        if (pos != string::npos) problem_name = problem_name.substr(0, pos);
         pos = domain_name.find(".pddl");
         if (domain_name.size() > 0 and pos == string::npos) domain_name += ".pddl";
 
