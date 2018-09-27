@@ -45,7 +45,7 @@ namespace PPDDLInterface {
    class Effect {
        friend class Action;
        friend class ConjunctiveEffect;
-       friend class ProabbilisticEffect;
+       friend class ProbabilisticEffect;
    public:
         /*!
          * Creates an Effect wrapper from a ppddl_parser::Effect
