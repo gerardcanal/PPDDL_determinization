@@ -27,8 +27,8 @@ endif()
 ### LOCATE VAL FILES AND SET VARIABLES #################################################################################
 ########################################################################################################################
 if (NOT DEFINED VAL_DIR)    # Ask the user to tell us which where is VAL  (otherwise try to get the one from ROSPlan)
-    execute_process(COMMAND rospack find rosplan_planning_system OUTPUT_VARIABLE VAL_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(VAL_DIR ${VAL_DIR}/src/VALfiles)
+    execute_process(COMMAND rospack find rosplan_dependencies OUTPUT_VARIABLE VAL_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(VAL_DIR ${VAL_DIR}/VAL)
 endif(NOT DEFINED VAL_DIR )
 
 IF(NOT EXISTS ${VAL_DIR})
@@ -47,7 +47,6 @@ set(VAL_SOURCES
         TimSupport.cpp
         ToFunction.cpp
         TypedAnalyser.cpp
-        ValidatorAPI.cpp
         instantiation.cpp
         pddl+.cpp
         ptree.cpp
@@ -71,12 +70,12 @@ set(VAL_SOURCES
         Utils.cpp)
 
 foreach(ITEM ${VAL_SOURCES})
-get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${VAL_DIR}")
+get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${VAL_DIR}/src")
 set(VAL_ABSOLUTE_SOURCES ${VAL_ABSOLUTE_SOURCES} ${VAL_ABSOLUTE_SOURCE})
 endforeach()
-set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-conversion-null") # Disable auto_ptr warnings in VALfiles
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-conversion-null") # Disable auto_ptr warnings in VALfiles
 
-include_directories(include src ${VAL_DIR}) # We add the src as include because the PPDDLParser headers are there
+include_directories(include src ${VAL_DIR}/include) # We add the src as include because the PPDDLParser headers are there
 
 ########################################################################################################################
 ######## CREATE LIBRARY AND EXECUTABLE #################################################################################

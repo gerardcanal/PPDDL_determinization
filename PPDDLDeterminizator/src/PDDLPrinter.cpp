@@ -659,7 +659,8 @@ namespace VAL {
     void PDDLPrinter::write_metric_spec(ostream & o,const metric_spec * p)
     {
 // FIXME why was this commented?
-        switch(p->opt)
+        if (p->opt.size() == 0) return;
+        switch(*p->opt.begin())
         {
             case E_MAXIMIZE:
                 o << "\t(:metric maximize ";

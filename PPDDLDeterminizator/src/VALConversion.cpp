@@ -5,6 +5,20 @@
 #include <cstring>
 #include "VALConversion.h"
 
+// Needed declarations for VAL
+namespace VAL {
+    extern parse_category *top_thing;
+    analysis an_analysis;
+    extern analysis *current_analysis;
+    extern bool Verbose;
+    bool ContinueAnyway;
+    bool ErrorReport;
+    bool InvariantWarnings;
+    bool LaTeX;
+    extern ostream *report;
+    bool makespanDefault;
+}
+
 std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     VAL::domain* d = new VAL::domain(new VAL::structure_store()); // The pointer is deleted inside the constructor
     std::shared_ptr<VALDomain> _domain_wrapper(new VALDomain(d));
