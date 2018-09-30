@@ -42,7 +42,7 @@ namespace PPDDLInterface {
                 std::cout << "Problem file " << *ppath << " parsed correctly." << std::endl;
             } else {
                 std::cerr << "There were errors while parsing input file! Finishing the program." << std::endl;
-                exit(-1);
+                throw(std::runtime_error("There was a Problem parsing error!"));
             }
         }
     }
