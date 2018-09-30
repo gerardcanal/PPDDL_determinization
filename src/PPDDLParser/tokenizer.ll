@@ -35,7 +35,7 @@
 
 #define YY_DECL extern "C" int ppddl_lex()
 
-#include "parser.tab.hh"
+#include "ppddl_parser.tab.hh"
 
 using namespace ppddl_parser;
 
