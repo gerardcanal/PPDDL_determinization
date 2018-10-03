@@ -41,33 +41,14 @@ endif(NOT EXISTS ${VAL_DIR})
 set(VAL_SOURCES
         DebugWriteController.cpp
         FuncAnalysis.cpp
-        SASActions.cpp
-        SimpleEval.cpp
         TIM.cpp
         TimSupport.cpp
-        ToFunction.cpp
         TypedAnalyser.cpp
-        instantiation.cpp
         pddl+.cpp
         ptree.cpp
         typecheck.cpp
-        Validator.cpp
-        Action.cpp
-        Proposition.cpp
-        FuncExp.cpp
-        RepairAdvice.cpp
-        State.cpp
-        Plan.cpp
-        Ownership.cpp
-        Environment.cpp
-        Events.cpp
-        Polynomial.cpp
-        TrajectoryConstraints.cpp
-        RobustAnalyse.cpp
         PrettyPrinter.cpp
-        random.cpp
-        LaTeXSupport.cpp
-        Utils.cpp)
+        )
 
 foreach(ITEM ${VAL_SOURCES})
 get_filename_component(VAL_ABSOLUTE_SOURCE "${ITEM}" REALPATH BASE_DIR "${VAL_DIR}/src")
