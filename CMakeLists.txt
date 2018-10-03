@@ -40,13 +40,8 @@ endif(NOT EXISTS ${VAL_DIR})
 # Get VALfiles absolute paths
 set(VAL_SOURCES
         DebugWriteController.cpp
-        FuncAnalysis.cpp
-        TIM.cpp
-        TimSupport.cpp
-        TypedAnalyser.cpp
         pddl+.cpp
         ptree.cpp
-        typecheck.cpp
         PrettyPrinter.cpp
         )
 

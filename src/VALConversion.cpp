@@ -4,13 +4,14 @@
 
 #include <cstring>
 #include "VALConversion.h"
+#include "FlexLexer.h"
 
 // Needed declarations for VAL
 namespace VAL {
-    extern parse_category *top_thing;
-    analysis an_analysis;
-    extern analysis *current_analysis;
-    extern bool Verbose;
+    parse_category *top_thing;
+    analysis *current_analysis;
+    yyFlexLexer* yfl;
+    bool Verbose;
     bool ContinueAnyway;
     bool ErrorReport;
     bool InvariantWarnings;
@@ -18,6 +19,7 @@ namespace VAL {
     extern ostream *report;
     bool makespanDefault;
 }
+char * current_filename;
 
 std::shared_ptr<VALDomain> VALConversion::toVALDomain(const ppddl_parser::Domain* dom) {
     VAL::domain* d = new VAL::domain(new VAL::structure_store()); // The pointer is deleted inside the constructor
