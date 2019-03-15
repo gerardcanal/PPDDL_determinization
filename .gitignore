@@ -29,9 +29,6 @@
 #gedit
 *~
 
-# MongoDB database files
-/rosplan_knowledge_base/common/mongoDB
-
 # Jetbrains IDE folder
 .idea
 cmake-build-debug
